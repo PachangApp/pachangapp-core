@@ -259,12 +259,3 @@ Ya tenéis la base instalada. Para poder guiaros en la **primera funcionalidad r
 
 
 
-git add .
-
-git commit -m "Primera version: Estructura base conectada Front+Back" -m "Co-authored-by: Nombre Del Compañero <correo@ejemplo.com>"
-
-git branch -M main
-
-git remote add origin https://github.com/PachangApp/pachangapp-core.git
-
-git push -u origin main
