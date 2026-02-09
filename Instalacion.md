@@ -247,7 +247,7 @@ Antes de seguir tirando código, parad y definid visualmente qué vais a hacer.
 
 Ya tenéis la base instalada. Para poder guiaros en la **primera funcionalidad real**, necesito que me confirmes un par de cosas:
 
-1. **Base de Datos:** ¿Sabéis usar Docker? Si no, os recomiendo usar **SQLite** para empezar (es un archivo simple) y luego pasamos a PostgreSQL en la nube, para no complicaros la instalación ahora mismo.
+1. **Base de Datos:**  ¿Sabéis usar Docker? Si no, os recomiendo usar **SQLite** para empezar (es un archivo simple) y luego pasamos a PostgreSQL en la nube, para no complicaros la instalación ahora mismo.
 2. **Antigravity:** ¿Qué es exactamente lo que mencionabas con "vs code y antigravity"? Necesito aclararlo para ver si afecta al entorno.
 3. **Bot IA:** ¿Queréis que el bot sea un chatbot de soporte o algo que sugiera partidos?
 
