@@ -1,17 +1,16 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
-const Register = () => {
+const Login = () => {
   const [formData, setFormData] = useState({
-    username: "",
     email: "",
     password: "",
-    confirmPassword: "",
   });
 
   const [message, setMessage] = useState("");
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -21,20 +20,13 @@ const Register = () => {
     e.preventDefault();
     setMessage("");
     setError(false);
-
-    if (formData.password !== formData.confirmPassword) {
-      setError(true);
-      setMessage("Las contraseñas no coinciden.");
-      return;
-    }
-
     setLoading(true);
+
     try {
-      const response = await fetch("http://localhost:8080/api/users/register", {
+      const response = await fetch("http://localhost:8080/api/users/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          username: formData.username,
           email: formData.email,
           password: formData.password,
         }),
@@ -42,11 +34,16 @@ const Register = () => {
 
       if (response.ok) {
         setError(false);
-        setMessage("¡Usuario registrado con éxito! Ya puedes iniciar sesión.");
+        const dataText = await response.text();
+        setMessage(dataText || "¡Inicio de sesión exitoso!");
+        // Redirigir al inicio después de un corto retraso para mostrar el mensaje
+        setTimeout(() => {
+          navigate("/");
+        }, 1500);
       } else {
         const errorData = await response.text();
         setError(true);
-        setMessage(errorData || "Error al registrar el usuario.");
+        setMessage(errorData || "Error al iniciar sesión.");
       }
     } catch (err) {
       setError(true);
@@ -77,17 +74,17 @@ const Register = () => {
 
         <div>
           <h2 className="text-white text-4xl font-bold leading-tight mb-4">
-            El deporte que te gusta, <br />
-            <span style={{ color: "#6ee7b7" }}>siempre cerca.</span>
+            Bienvenido de nuevo, <br />
+            <span style={{ color: "#6ee7b7" }}>¡A jugar!</span>
           </h2>
           <p className="text-emerald-100 text-base leading-relaxed opacity-90">
-            Únete a miles de jugadores. Encuentra partidas, organiza equipos y disfruta del juego.
+            Accede a tu cuenta para organizar tus partidos, unirte a equipos y disfrutar de la comunidad.
           </p>
 
           {/* Dots decorativos */}
           <div className="flex gap-2 mt-10">
-            <span className="w-8 h-1 rounded-full bg-white"></span>
             <span className="w-2 h-1 rounded-full bg-emerald-300 opacity-60"></span>
+            <span className="w-8 h-1 rounded-full bg-white"></span>
             <span className="w-2 h-1 rounded-full bg-emerald-300 opacity-60"></span>
           </div>
         </div>
@@ -108,12 +105,12 @@ const Register = () => {
           </div>
 
           <h1 className="text-3xl font-extrabold text-gray-900 mb-1">
-            Crear una cuenta
+            Iniciar sesión
           </h1>
           <p className="text-gray-500 text-sm mb-8">
-            ¿Ya tienes cuenta?{" "}
-            <Link to="/login" className="text-emerald-600 font-semibold hover:underline">
-              Inicia sesión
+            ¿No tienes cuenta?{" "}
+            <Link to="/register" className="text-emerald-600 font-semibold hover:underline">
+              Regístrate aquí
             </Link>
           </p>
 
@@ -132,21 +129,6 @@ const Register = () => {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Campo Usuario */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                Nombre de usuario
-              </label>
-              <input
-                type="text"
-                name="username"
-                placeholder="ej: anonimo123"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white transition-all duration-200"
-                onChange={handleChange}
-                required
-              />
-            </div>
-
             {/* Campo Email */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1.5">
@@ -158,45 +140,37 @@ const Register = () => {
                 placeholder="ej: anonimo@email.com"
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white transition-all duration-200"
                 onChange={handleChange}
+                value={formData.email}
                 required
               />
             </div>
 
             {/* Campo Contraseña */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                Contraseña
-              </label>
+              <div className="flex justify-between items-center mb-1.5">
+                <label className="block text-sm font-semibold text-gray-700">
+                  Contraseña
+                </label>
+                <a href="#" className="text-xs text-emerald-600 hover:underline font-medium">
+                  ¿Olvidaste tu contraseña?
+                </a>
+              </div>
               <input
                 type="password"
                 name="password"
-                placeholder="Mínimo 8 caracteres"
+                placeholder="Tu contraseña secreta"
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white transition-all duration-200"
                 onChange={handleChange}
+                value={formData.password}
                 required
               />
             </div>
 
-            {/* Campo Confirmar Contraseña */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-                Confirmar contraseña
-              </label>
-              <input
-                type="password"
-                name="confirmPassword"
-                placeholder="Repite tu contraseña"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-900 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white transition-all duration-200"
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            {/* Botón de registro */}
+            {/* Botón de login */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 rounded-xl text-white text-sm font-bold tracking-wide transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
+              className="w-full py-3.5 rounded-xl text-white text-sm font-bold tracking-wide transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed mt-2"
               style={{
                 background: loading
                   ? "#6ee7b7"
@@ -210,21 +184,14 @@ const Register = () => {
                 e.target.style.transform = "translateY(0)";
               }}
             >
-              {loading ? "Creando cuenta..." : "Crear cuenta →"}
+              {loading ? "Iniciando sesión..." : "Entrar →"}
             </button>
           </form>
 
-          {/* Footer */}
-          <p className="text-center text-xs text-gray-400 mt-8">
-            Al registrarte aceptas los{" "}
-            <a href="#" className="text-emerald-600 hover:underline">Términos de uso</a>{" "}
-            y la{" "}
-            <a href="#" className="text-emerald-600 hover:underline">Política de privacidad</a>.
-          </p>
         </div>
       </div>
     </div>
   );
 };
 
-export default Register;
+export default Login;

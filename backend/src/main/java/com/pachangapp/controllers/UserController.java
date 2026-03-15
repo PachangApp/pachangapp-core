@@ -28,13 +28,13 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public String loginUser(@RequestBody User loginData) {
+    public org.springframework.http.ResponseEntity<String> loginUser(@RequestBody User loginData) {
         // Todo: Mejorar esta lógica básica de autenticación (Implementar JWT o
         // manejador de sesión robusto).
         User user = userRepository.findByEmail(loginData.getEmail()).orElse(null);
         if (user != null && user.getPassword().equals(loginData.getPassword())) {
-            return "Login exitoso. Bienvenido " + user.getEmail();
+            return org.springframework.http.ResponseEntity.ok("Login exitoso. Bienvenido " + user.getEmail());
         }
-        return "Credenciales inválidas";
+        return org.springframework.http.ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED).body("Credenciales inválidas");
     }
 }
