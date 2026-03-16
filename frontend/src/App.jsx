@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import Home from "./pages/Home";
 import Inicio from "./pages/Inicio";
 import Perfil from "./pages/Perfil";
+import BuscarPartidos from "./pages/BuscarPartidos";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/inicio" element={<Inicio />} />
         <Route path="/perfil" element={<Perfil />} />
+        <Route path="/partidos" element={<BuscarPartidos />} />
       </Routes>
     </Router>
   );
