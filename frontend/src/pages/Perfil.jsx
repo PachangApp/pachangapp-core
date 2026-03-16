@@ -1,21 +1,79 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import StatCard from "../components/StatCard";
+import defaultAvatar from "../assets/campos/perfil.png";
 
 const Perfil = () => {
-  // Datos hardcoded provisionales para la demo
-  const user = {
-    username: "Chakr",
-    email: "usuario@ejemplo.com",
-    joined: "Marzo 2024",
-    nivel: "Amateur",
-    avatar: null, // Placeholder para imagen
-    stats: {
-      partidos: 12,
-      victorias: 8,
-      goles: 15
-    }
-  };
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        setLoading(true);
+        // Obtener el usuario del localStorage
+        const storedUser = localStorage.getItem("user");
+        if (!storedUser) {
+          throw new Error("No hay sesión activa. Por favor, inicia sesión.");
+        }
+
+        const { id } = JSON.parse(storedUser);
+        
+        // Llamada al backend por ID
+        const response = await fetch(`http://localhost:8091/api/users/${id}`);
+        if (!response.ok) {
+          throw new Error("No se pudo obtener la información del perfil.");
+        }
+
+        const userData = await response.json();
+        
+        // Combinar con datos estáticos (por ahora) para estadísticas
+        setUser({
+          ...userData,
+          joined: "Marzo 2024", // Provisional hasta tenerlo en DB
+          nivel: "Amateur",
+          avatar: null,
+          stats: {
+            partidos: 12,
+            victorias: 8,
+            goles: 15
+          }
+        });
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <Navbar />
+        <div className="grow flex items-center justify-center">
+          <div className="w-12 h-12 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !user) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <Navbar />
+        <div className="grow flex flex-col items-center justify-center p-6 text-center">
+          <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-4 text-2xl">⚠️</div>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Error de Perfil</h2>
+          <p className="text-gray-500 mb-6">{error}</p>
+          <a href="/login" className="bg-emerald-600 text-white px-6 py-2 rounded-xl font-bold shadow-lg">Ir al Login</a>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
@@ -28,13 +86,15 @@ const Perfil = () => {
             {/* Foto de Perfil */}
             <div className="relative group">
               <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-emerald-100 border-4 border-white shadow-xl flex items-center justify-center overflow-hidden">
-                {user.avatar ? (
-                  <img src={user.avatar} alt="Perfil" className="w-full h-full object-cover" />
-                ) : (
-                  <svg className="w-20 h-20 text-emerald-600 opacity-80" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                  </svg>
-                )}
+                <img 
+                  src={user.avatar || defaultAvatar} 
+                  alt="Perfil" 
+                  className="w-full h-full object-cover" 
+                  onError={(e) => {
+                    e.target.onerror = null; 
+                    e.target.src = "https://ui-avatars.com/api/?name=" + user.username + "&background=random";
+                  }}
+                />
               </div>
               <button className="absolute bottom-1 right-1 bg-white p-2 rounded-full shadow-lg border border-gray-100 text-gray-600 hover:text-emerald-600 transition-all">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -50,7 +50,7 @@ const Register = () => {
       }
     } catch (err) {
       setError(true);
-      setMessage("No se pudo conectar con el servidor.", err);
+      setMessage("No se pudo conectar con el servidor.");
     } finally {
       setLoading(false);
     }

@@ -36,12 +36,19 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public org.springframework.http.ResponseEntity<String> loginUser(@RequestBody User loginData) {
+    public org.springframework.http.ResponseEntity<?> loginUser(@RequestBody User loginData) {
         User user = userRepository.findByEmail(loginData.getEmail()).orElse(null);
         
         if (user != null && passwordEncoder.matches(loginData.getPassword(), user.getPassword())) {
-            return org.springframework.http.ResponseEntity.ok("Login exitoso. Bienvenido " + (user.getUsername() != null ? user.getUsername() : user.getEmail()));
+            return org.springframework.http.ResponseEntity.ok(user);
         }
         return org.springframework.http.ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED).body("Credenciales inválidas");
+    }
+
+    @GetMapping("/{id}")
+    public org.springframework.http.ResponseEntity<User> getUserById(@PathVariable Long id) {
+        return userRepository.findById(id)
+                .map(org.springframework.http.ResponseEntity::ok)
+                .orElse(org.springframework.http.ResponseEntity.notFound().build());
     }
 }

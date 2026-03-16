@@ -34,8 +34,9 @@ const Login = () => {
 
       if (response.ok) {
         setError(false);
-        const dataText = await response.text();
-        setMessage(dataText || "¡Inicio de sesión exitoso!");
+        const userData = await response.json();
+        localStorage.setItem("user", JSON.stringify(userData));
+        setMessage("¡Inicio de sesión exitoso! Bienvenido " + (userData.username || userData.email));
         // Redirigir al inicio después de un corto retraso para mostrar el mensaje
         setTimeout(() => {
           navigate("/inicio");
@@ -47,7 +48,7 @@ const Login = () => {
       }
     } catch (err) {
       setError(true);
-      setMessage("No se pudo conectar con el servidor.", err);
+      setMessage("No se pudo conectar con el servidor.");
     } finally {
       setLoading(false);
     }

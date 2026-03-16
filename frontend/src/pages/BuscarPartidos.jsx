@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import Navbar from "../components/Navbar";
 import MatchCard from "../components/MatchCard";
-
+import CreateMatchModal from "../components/CreateMatchModal";
 
 
 const BuscarPartidos = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [filters, setFilters] = useState({
     search: "",
     date: "",
@@ -16,7 +17,7 @@ const BuscarPartidos = () => {
     {
       id: 1,
       title: "Fútbol 7 Amistoso",
-      location: "Campo Universitario, Madrid",
+      location: "Campo Universitario Cartuja",
       time: "16:00",
       players: 8,
       maxPlayers: 14,
@@ -97,16 +98,16 @@ const BuscarPartidos = () => {
 
             {/* Selector Deporte */}
             <div className="w-full md:w-60">
-              <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Deporte</label>
+              <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Modalidad</label>
               <select 
                 name="category"
                 className="w-full px-4 py-3.5 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-emerald-500 transition-all font-bold text-gray-700 appearance-none"
                 onChange={handleFilterChange}
               >
                 <option>Todos</option>
-                <option>Fútbol</option>
-                <option>Padel</option>
-                <option>Baloncesto</option>
+                <option>Fútbol 7</option>
+                <option>Fútbol 11</option>
+                <option>Fútbol Sala</option>
               </select>
             </div>
 
@@ -153,6 +154,22 @@ const BuscarPartidos = () => {
             <p className="text-gray-500">Prueba ajustando los filtros de búsqueda o volviendo más tarde.</p>
           </div>
         )}
+
+        {/* Modal de Creación */}
+        <CreateMatchModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+
+        {/* Botón Flotante para Crear (Inspirado en imagen) */}
+        <div className="fixed bottom-10 right-10 z-60">
+            <button 
+                onClick={() => setIsModalOpen(true)}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-4 px-8 rounded-2xl shadow-2xl shadow-emerald-200 transform hover:-translate-y-2 transition-all flex items-center gap-3 active:scale-95 group"
+            >
+                <div className="w-6 h-6 bg-white/20 rounded-lg flex items-center justify-center group-hover:rotate-90 transition-transform">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4" /></svg>
+                </div>
+                Crear Partida
+            </button>
+        </div>
       </main>
     </div>
   );
