@@ -1,54 +1,10 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import Navbar from "../components/Navbar";
 
 const Inicio = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-      {/* Navbar Provisional */}
-      <nav className="bg-white border-b border-gray-100 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            {/* Logo */}
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-black text-sm">P</span>
-              </div>
-              <span className="text-gray-900 font-bold text-xl tracking-tight hidden sm:block">
-                PachangApp
-              </span>
-            </div>
-
-            {/* Links */}
-            <div className="hidden md:flex items-center gap-8">
-              <Link to="/" className="text-emerald-600 font-semibold text-sm">
-                Inicio
-              </Link>
-              <Link to="/partidos" className="text-gray-500 hover:text-emerald-600 font-medium text-sm transition-colors">
-                Buscar partidos
-              </Link>
-              <Link to="/perfil" className="text-gray-500 hover:text-emerald-600 font-medium text-sm transition-colors">
-                Perfil
-              </Link>
-              <Link to="/conocenos" className="text-gray-500 hover:text-emerald-600 font-medium text-sm transition-colors">
-                Conócenos
-              </Link>
-              <Link to="/campos" className="text-gray-500 hover:text-emerald-600 font-medium text-sm transition-colors">
-                Campos disponibles
-              </Link>
-            </div>
-
-            {/* Botón Acción (provisional) */}
-            <div className="flex items-center gap-3">
-              <Link to="/login" className="text-gray-600 text-sm font-semibold hover:text-emerald-600 px-3 py-2 transition-colors">
-                Iniciar sesión
-              </Link>
-              <Link to="/register" className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold py-2 px-5 rounded-xl transition-all shadow-md shadow-emerald-200">
-                Unirse
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* Hero Section / Bienvenida */}
       <main className="grow flex items-center justify-center p-6 text-center">
