@@ -38,7 +38,7 @@ const Login = () => {
         setMessage(dataText || "¡Inicio de sesión exitoso!");
         // Redirigir al inicio después de un corto retraso para mostrar el mensaje
         setTimeout(() => {
-          navigate("/");
+          navigate("/inicio");
         }, 1500);
       } else {
         const errorData = await response.text();
