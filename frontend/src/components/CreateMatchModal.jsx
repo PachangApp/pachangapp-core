@@ -1,140 +1,234 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const CreateMatchModal = ({ isOpen, onClose }) => {
+  const [campos, setCampos] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [selectedZona, setSelectedZona] = useState("");
+  const [selectedDeporte, setSelectedDeporte] = useState("");
   const [formData, setFormData] = useState({
-    deporte: "Fútbol 7",
-    ubicacion: "",
-    fecha: "",
-    hora: "",
-    jugadores: 10
+    campoId: "",
+    fecha: new Date().toISOString().split('T')[0],
+    hora: "18:00",
+    maxJugadores: 10
   });
+  const [message, setMessage] = useState({ text: "", type: "" });
+
+  const timeSlots = [
+    "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00",
+    "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00"
+  ];
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchCampos();
+    }
+  }, [isOpen]);
+
+  const fetchCampos = async () => {
+    try {
+      const response = await fetch("http://localhost:8091/api/campos");
+      if (response.ok) {
+        const data = await response.json();
+        setCampos(data);
+        if (data.length > 0) {
+           const firstZona = data[0].zona;
+           setSelectedZona(firstZona);
+           const firstDeporte = data.find(c => c.zona === firstZona).deporte;
+           setSelectedDeporte(firstDeporte);
+           const firstCampoId = data.find(c => c.zona === firstZona && c.deporte === firstDeporte).id;
+           setFormData(prev => ({ ...prev, campoId: firstCampoId }));
+        }
+      }
+    } catch (err) {
+      console.error("Error al cargar campos:", err);
+    }
+  };
+
+  // Zonas únicas
+  const zonas = [...new Set(campos.map(c => c.zona))];
+  
+  // Deportes disponibles en la zona seleccionada
+  const deportesEnZona = [...new Set(campos.filter(c => c.zona === selectedZona).map(c => c.deporte))];
+
+  useEffect(() => {
+    if (selectedZona && selectedDeporte) {
+      const matchingCampo = campos.find(c => c.zona === selectedZona && c.deporte === selectedDeporte);
+      if (matchingCampo) {
+        setFormData(prev => ({ ...prev, campoId: matchingCampo.id }));
+      }
+    }
+  }, [selectedZona, selectedDeporte, campos]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const storedUser = localStorage.getItem("user");
+    if (!storedUser) {
+      setMessage({ text: "Debes iniciar sesión para crear un partido.", type: "error" });
+      return;
+    }
+    const { id: userId } = JSON.parse(storedUser);
+    setLoading(true);
+
+    try {
+      const response = await fetch("http://localhost:8091/api/partidos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          userId: userId
+        })
+      });
+
+      if (response.ok) {
+        setMessage({ text: "¡Partido creado con éxito!", type: "success" });
+        setTimeout(() => {
+          onClose();
+          window.location.reload(); 
+        }, 1500);
+      } else {
+        const error = await response.text();
+        setMessage({ text: error, type: "error" });
+      }
+    } catch (err) {
+      console.error("Error al crear partido:", err);
+      setMessage({ text: "Error de red al crear el partido", type: "error" });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
-      {/* Overlay con desenfoque */}
-      <div 
-        className="absolute inset-0 bg-black/40 backdrop-blur-md transition-opacity"
-        onClick={onClose}
-      ></div>
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose}></div>
 
-      {/* Contenido del Modal */}
       <div className="relative bg-white w-full max-w-4xl rounded-4xl shadow-2xl overflow-hidden flex flex-col md:flex-row animate-in fade-in zoom-in duration-300">
-        
-        {/* Lado Izquierdo: Formulario */}
         <div className="flex-1 p-8 md:p-12">
           <header className="mb-8">
-            <h2 className="text-3xl font-black text-gray-900 mb-2">Crear Partida</h2>
-            <p className="text-gray-500 font-medium text-sm">Organiza tu propio encuentro en segundos.</p>
+            <h2 className="text-3xl font-black text-gray-900 mb-2 font-sans tracking-tight">Crear <span className="text-emerald-600">Partida</span></h2>
+            <p className="text-gray-500 font-medium text-sm">Organiza un partido público en tu zona favorita.</p>
           </header>
 
-          <form className="space-y-6">
-            {/* Selección de Deporte */}
-            <div className="grid grid-cols-3 gap-3">
-              {["Fútbol 7", "Fútbol 11", "Fútbol Sala"].map((tipo) => (
-                <button
-                  key={tipo}
-                  type="button"
-                  onClick={() => setFormData({ ...formData, deporte: tipo })}
-                  className={`py-3 px-2 rounded-2xl text-[10px] sm:text-xs font-black uppercase tracking-widest border-2 transition-all ${
-                    formData.deporte === tipo
-                      ? "bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-200"
-                      : "bg-gray-50 border-gray-100 text-gray-400 hover:border-emerald-200"
-                  }`}
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Selección de Ubicación */}
+              <div>
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">¿Dónde quieres jugar?</label>
+                <select 
+                  className="w-full px-4 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-emerald-500 font-bold text-gray-700 appearance-none"
+                  value={selectedZona}
+                  onChange={(e) => {
+                    setSelectedZona(e.target.value);
+                    const firstDep = campos.find(c => c.zona === e.target.value).deporte;
+                    setSelectedDeporte(firstDep);
+                  }}
                 >
-                  {tipo}
-                </button>
-              ))}
-            </div>
+                  {zonas.map(z => <option key={z} value={z}>{z}</option>)}
+                </select>
+              </div>
 
-            {/* Ubicación */}
-            <div>
-              <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Ubicación</label>
-              <div className="relative">
-                <input 
-                  type="text" 
-                  placeholder="¿Dónde se juega?" 
-                  className="w-full pl-12 pr-4 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-emerald-500 transition-all font-medium text-gray-900"
-                  value={formData.ubicacion}
-                  onChange={(e) => setFormData({ ...formData, ubicacion: e.target.value })}
-                />
-                <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17.657 16.657L13.414 20.828a2 2 0 01-2.828 0L6.586 16.657M12 14a3 3 0 110-6 3 3 0 010 6z" />
-                </svg>
+              {/* Selección de Modalidad */}
+              <div>
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">¿Qué modalidad?</label>
+                <select 
+                  className="w-full px-4 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-emerald-500 font-bold text-gray-700 appearance-none"
+                  value={selectedDeporte}
+                  onChange={(e) => {
+                    setSelectedDeporte(e.target.value);
+                  }}
+                >
+                  {deportesEnZona.map(d => <option key={d} value={d}>{d}</option>)}
+                </select>
               </div>
             </div>
 
-            {/* Fecha y Hora */}
+            {/* Selección de Pista (Solo si hay más de una) */}
+            {campos.filter(c => c.zona === selectedZona && c.deporte === selectedDeporte).length > 1 && (
+              <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Selecciona la Pista específica</label>
+                <div className="grid grid-cols-2 gap-3">
+                  {campos.filter(c => c.zona === selectedZona && c.deporte === selectedDeporte).map(pista => (
+                    <button
+                      key={pista.id}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, campoId: pista.id })}
+                      className={`py-3 px-4 rounded-xl text-xs font-black transition-all border-2 ${
+                        formData.campoId.toString() === pista.id.toString()
+                          ? "bg-emerald-600 border-emerald-600 text-white shadow-md shadow-emerald-200"
+                          : "bg-gray-50 border-gray-200 text-gray-500 hover:border-emerald-200"
+                      }`}
+                    >
+                      {pista.nombre.split(' - ').pop()}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Fecha</label>
                 <input 
                   type="date" 
-                  className="w-full px-4 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-emerald-500 transition-all font-bold text-gray-700"
+                  min={new Date().toISOString().split('T')[0]}
+                  max={new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
+                  className="w-full px-4 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-emerald-500 font-bold text-gray-700"
+                  value={formData.fecha}
                   onChange={(e) => setFormData({ ...formData, fecha: e.target.value })}
                 />
               </div>
               <div>
                 <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Hora</label>
-                <input 
-                  type="time" 
-                  className="w-full px-4 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-emerald-500 transition-all font-bold text-gray-700"
+                <select 
+                  className="w-full px-4 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-emerald-500 font-bold text-gray-700 appearance-none"
+                  value={formData.hora}
                   onChange={(e) => setFormData({ ...formData, hora: e.target.value })}
-                />
+                >
+                   {timeSlots.map(h => (
+                     <option key={h} value={h}>{h}</option>
+                   ))}
+                </select>
               </div>
             </div>
 
-            {/* Jugadores */}
             <div>
-              <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Número de Jugadores</label>
-              <div className="flex items-center gap-4">
-                <input 
-                  type="range" 
-                  min="2" 
-                  max="22" 
-                  className="grow accent-emerald-600"
-                  value={formData.jugadores}
-                  onChange={(e) => setFormData({ ...formData, jugadores: e.target.value })}
-                />
-                <span className="w-12 h-12 flex items-center justify-center bg-emerald-50 text-emerald-700 font-black rounded-xl border border-emerald-100">
-                  {formData.jugadores}
-                </span>
-              </div>
+              <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Jugadores necesarios ({formData.maxJugadores})</label>
+              <input 
+                type="range" 
+                min="2" 
+                max="22" 
+                className="w-full accent-emerald-600"
+                value={formData.maxJugadores}
+                onChange={(e) => setFormData({ ...formData, maxJugadores: e.target.value })}
+              />
             </div>
 
-            {/* Botón */}
+            {message.text && (
+               <div className={`p-4 rounded-2xl text-xs font-bold ${message.type === 'success' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
+                  {message.text}
+               </div>
+            )}
+
             <button 
-              type="button"
-              className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-2xl transition-all shadow-xl shadow-emerald-200 transform hover:-translate-y-1 active:scale-[0.98]"
+              type="submit"
+              disabled={loading}
+              className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-2xl transition-all shadow-xl shadow-emerald-200 disabled:opacity-50"
             >
-              ¡Crear Partida!
+              {loading ? "Creando..." : "¡Abrir Partido Público!"}
             </button>
           </form>
         </div>
 
-        {/* Lado Derecho: Mapa Decorativo (inspirado en imagen) */}
-        <div className="hidden md:flex w-80 bg-gray-50 border-l border-gray-100 flex-col items-center justify-center p-8 relative overflow-hidden">
-             {/* Simulación de mapa */}
-             <div className="w-full h-full bg-gray-200 rounded-3xl overflow-hidden relative shadow-inner border-4 border-white">
-                <div className="absolute inset-0 bg-[url('https://maps.googleapis.com/maps/api/staticmap?center=40.4168,-3.7038&zoom=13&size=400x800&key=YOUR_API_KEY_HERE')] bg-cover opacity-50 grayscale"></div>
-                
-                {/* Pin decorativo */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                    <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center shadow-lg animate-bounce">
-                        <div className="w-4 h-4 bg-white rounded-full"></div>
-                    </div>
-                    <div className="w-10 h-3 bg-black/10 rounded-full blur-sm mx-auto -mt-1"></div>
+        <div className="hidden md:flex w-80 bg-gray-50 border-l border-gray-100 flex-col items-center justify-center p-8 relative">
+             <div className="text-center">
+                <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4 text-emerald-600">
+                   <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
                 </div>
-
-                {/* Info flotante */}
-                <div className="absolute bottom-6 left-6 right-6 bg-white/80 backdrop-blur-md p-4 rounded-2xl shadow-lg border border-white">
-                    <p className="text-[10px] font-black text-gray-400 uppercase mb-1">Previsualización</p>
-                    <p className="text-sm font-bold text-gray-900">Selecciona el campo en el mapa</p>
-                </div>
+                <h4 className="font-black text-gray-900 uppercase text-xs tracking-widest">Crear Comunidad</h4>
+                <p className="text-gray-400 text-[10px] mt-2 font-medium">Al crear un partido público, otros usuarios podrán verte en la lista y apuntarse.</p>
              </div>
-             
-             {/* Botón cerrar modal */}
+
              <button 
                 onClick={onClose}
                 className="absolute top-6 right-6 p-2 bg-white rounded-full shadow-md text-gray-400 hover:text-red-500 transition-colors border border-gray-100"

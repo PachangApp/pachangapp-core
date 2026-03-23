@@ -16,6 +16,7 @@ public class Campo {
     private double precioPorHora;
     private boolean disponible;
     private String imagenUrl; // Será "" por ahora
+    private Long parentCampoId; // ID del campo de F11 que contiene este F7 (si aplica)
 
     public Campo() {}
 
@@ -27,6 +28,9 @@ public class Campo {
         this.disponible = disponible;
         this.imagenUrl = imagenUrl;
     }
+
+    public Long getParentCampoId() { return parentCampoId; }
+    public void setParentCampoId(Long parentCampoId) { this.parentCampoId = parentCampoId; }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

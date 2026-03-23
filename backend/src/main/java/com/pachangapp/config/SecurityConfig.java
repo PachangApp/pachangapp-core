@@ -28,7 +28,8 @@ public class SecurityConfig {
             .cors(Customizer.withDefaults()) // Habilitar CORS con configuración por defecto (el bean de abajo)
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/users/**").permitAll()
+                .requestMatchers("/", "/index.html", "/static/**", "/assets/**", "/*.svg").permitAll()
+                .requestMatchers("/api/users/**", "/api/campos/**", "/api/reservas/**", "/api/partidos/**").permitAll()
                 .anyRequest().authenticated()
             );
         return http.build();

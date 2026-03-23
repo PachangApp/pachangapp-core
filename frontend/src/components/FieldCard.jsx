@@ -1,15 +1,17 @@
 import React from "react";
+import { getFieldImage } from "../utils/fieldMapping";
 
-const FieldCard = ({ campo }) => {
+const FieldCard = ({ campo, onBook }) => {
   const { nombre, zona, deporte, precioPorHora, disponible, imagenUrl } = campo;
+  const localImage = getFieldImage(nombre);
+
 
   return (
     <div className="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 group">
-      {/* Container para Imagen (Placeholder) */}
       <div className="relative h-48 bg-gray-100 flex items-center justify-center p-4">
-        {imagenUrl ? (
+        {(imagenUrl || localImage) ? (
           <img 
-            src={imagenUrl} 
+            src={imagenUrl || localImage} 
             alt={nombre} 
             className="w-full h-full object-cover rounded-2xl"
           />
@@ -59,14 +61,10 @@ const FieldCard = ({ campo }) => {
             <span className="text-lg font-black text-gray-900">{precioPorHora}€<span className="text-xs text-gray-400 font-bold">/h</span></span>
           </div>
           <button 
-            disabled={!disponible}
-            className={`px-6 py-2.5 rounded-2xl font-bold text-sm transition-all duration-200 ${
-              disponible 
-                ? "bg-emerald-600 text-white hover:bg-emerald-700 shadow-lg shadow-emerald-200 transform hover:-translate-y-0.5" 
-                : "bg-gray-100 text-gray-400 cursor-not-allowed"
-            }`}
+            onClick={() => onBook(campo)}
+            className="px-6 py-2.5 bg-emerald-600 text-white hover:bg-emerald-700 rounded-2xl font-bold text-sm transition-all duration-200 shadow-lg shadow-emerald-200 transform hover:-translate-y-0.5"
           >
-            Alquilar
+            Reservar Hora
           </button>
         </div>
       </div>

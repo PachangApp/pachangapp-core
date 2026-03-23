@@ -6,6 +6,7 @@ import Inicio from "./pages/Inicio";
 import Perfil from "./pages/Perfil";
 import BuscarPartidos from "./pages/BuscarPartidos";
 import CamposDisponibles from "./pages/CamposDisponibles";
+import CrearPartido from "./pages/CrearPartido";
 
 function App() {
   return (
@@ -16,11 +17,12 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/inicio" element={<Inicio />} />
         <Route path="/perfil" element={<Perfil />} />
-        <Route path="/partidos" element={<BuscarPartidos />} />
-        <Route path="/campos" element={<CamposDisponibles />} />
+        <Route path="/buscar-partidos" element={<BuscarPartidos />} />
+        <Route path="/crear-partido" element={<CrearPartido />} />
+        <Route path="/campos-disponibles" element={<CamposDisponibles />} />
       </Routes>
     </Router>
   );
 }
 
-export default App;
+export default App;

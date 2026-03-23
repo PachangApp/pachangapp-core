@@ -10,7 +10,7 @@ const Inicio = () => {
       <main className="grow flex items-center justify-center p-6 text-center">
         <div className="max-w-3xl animate-in fade-in slide-in-from-bottom-4 duration-700">
           <div className="inline-block px-4 py-1.5 mb-6 text-emerald-700 bg-emerald-50 rounded-full text-xs font-bold uppercase tracking-wider">
-            ¡Tu comunidad deportiva!
+             Es tu página pablo borra todo y pon lo que quieras
           </div>
           <h1 className="text-5xl md:text-6xl font-extrabold text-gray-900 mb-6 leading-tight">
             Bienvenido a <span className="text-emerald-600">PachangApp</span>

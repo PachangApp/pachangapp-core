@@ -6,10 +6,10 @@ const Navbar = () => {
 
   const navLinks = [
     { name: "Inicio", path: "/inicio" },
-    { name: "Buscar partidos", path: "/partidos" },
     { name: "Perfil", path: "/perfil" },
+    { name: "Buscar partidos", path: "/buscar-partidos" },
+    { name: "Crear partido", path: "/crear-partido" },
     { name: "Conócenos", path: "/conocenos" },
-    { name: "Campos disponibles", path: "/campos" },
   ];
 
   const isActive = (path) => location.pathname === path;

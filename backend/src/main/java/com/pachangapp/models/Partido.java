@@ -1,0 +1,66 @@
+package com.pachangapp.models;
+
+import jakarta.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
+
+@Entity
+@Table(name = "partidos")
+public class Partido {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "reserva_id", referencedColumnName = "id")
+    private Reserva reserva;
+
+    @ManyToOne
+    @JoinColumn(name = "organizador_id", nullable = false)
+    private User organizador;
+
+    @ManyToMany
+    @JoinTable(
+        name = "partido_jugadores",
+        joinColumns = @JoinColumn(name = "partido_id"),
+        inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<User> jugadores = new HashSet<>();
+
+    private int maxJugadores;
+    private String deporte;
+    private String estado = "ABIERTO"; // ABIERTO, LLENO, FINALIZADO
+
+    public Partido() {}
+
+    public Partido(Reserva reserva, User organizador, int maxJugadores) {
+        this.reserva = reserva;
+        this.organizador = organizador;
+        this.maxJugadores = maxJugadores;
+        this.deporte = reserva.getCampo().getDeporte();
+        this.jugadores.add(organizador); // El creador se une automáticamente
+    }
+
+    // Getters y Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public Reserva getReserva() { return reserva; }
+    public void setReserva(Reserva reserva) { this.reserva = reserva; }
+
+    public User getOrganizador() { return organizador; }
+    public void setOrganizador(User organizador) { this.organizador = organizador; }
+
+    public Set<User> getJugadores() { return jugadores; }
+    public void setJugadores(Set<User> jugadores) { this.jugadores = jugadores; }
+
+    public int getMaxJugadores() { return maxJugadores; }
+    public void setMaxJugadores(int maxJugadores) { this.maxJugadores = maxJugadores; }
+
+    public String getDeporte() { return deporte; }
+    public void setDeporte(String deporte) { this.deporte = deporte; }
+
+    public String getEstado() { return estado; }
+    public void setEstado(String estado) { this.estado = estado; }
+}

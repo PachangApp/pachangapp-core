@@ -10,4 +10,5 @@ import java.util.List;
 public interface CampoRepository extends JpaRepository<Campo, Long> {
     List<Campo> findByZonaContainingIgnoreCase(String zona);
     List<Campo> findByDisponibleTrue();
+    List<Campo> findByParentCampoId(Long parentCampoId);
 }

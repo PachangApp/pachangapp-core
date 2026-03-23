@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import FieldCard from "../components/FieldCard";
+import BookingModal from "../components/BookingModal";
 
 const CamposDisponibles = () => {
   const [campos, setCampos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedCampo, setSelectedCampo] = useState(null);
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [filters, setFilters] = useState({
     search: "",
     deporte: "Todos",
@@ -28,6 +31,11 @@ const CamposDisponibles = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleBook = (campo) => {
+    setSelectedCampo(campo);
+    setIsBookingOpen(true);
   };
 
   const handleFilterChange = (e) => {
@@ -67,7 +75,7 @@ const CamposDisponibles = () => {
                 <input 
                   type="text" 
                   name="search"
-                  placeholder="ej: Móstoles, El Soto..." 
+                  placeholder="¿Dónde quieres jugar? (ej: Cartuja, Fuentenueva...)" 
                   className="w-full pl-12 pr-4 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-emerald-500 transition-all font-medium text-gray-900"
                   onChange={handleFilterChange}
                 />
@@ -85,9 +93,9 @@ const CamposDisponibles = () => {
                 onChange={handleFilterChange}
               >
                 <option>Todos</option>
-                <option>Fútbol</option>
-                <option>Padel</option>
-                <option>Baloncesto</option>
+                <option>Fútbol 7</option>
+                <option>Fútbol 11</option>
+                <option>Fútbol Sala</option>
               </select>
             </div>
 
@@ -106,7 +114,7 @@ const CamposDisponibles = () => {
           </div>
         </section>
 
-        {/* Resultados */}
+        {/* Resultados Agrupados por Zona */}
         {loading ? (
           <div className="text-center py-20">
             <div className="inline-block w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin mb-4"></div>
@@ -118,9 +126,21 @@ const CamposDisponibles = () => {
             <p className="text-sm opacity-80">{error}</p>
           </div>
         ) : filteredCampos.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredCampos.map(campo => (
-              <FieldCard key={campo.id} campo={campo} />
+          <div className="space-y-16">
+            {[...new Set(filteredCampos.map(c => c.zona))].map(zona => (
+              <div key={zona} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="flex items-center gap-4 mb-8">
+                  <h2 className="text-2xl font-black text-gray-900 tracking-tight capitalize">{zona}</h2>
+                  <div className="h-px bg-gray-200 grow mt-1"></div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {filteredCampos
+                    .filter(c => c.zona === zona)
+                    .map(campo => (
+                      <FieldCard key={campo.id} campo={campo} onBook={handleBook} />
+                    ))}
+                </div>
+              </div>
             ))}
           </div>
         ) : (
@@ -133,6 +153,15 @@ const CamposDisponibles = () => {
             <h3 className="text-2xl font-black text-gray-900 mb-2">No hay campos disponibles</h3>
             <p className="text-gray-500">Prueba ajustando la zona o el deporte en los filtros superiores.</p>
           </div>
+        )}
+
+        {/* Modal de Reserva */}
+        {selectedCampo && (
+          <BookingModal 
+            isOpen={isBookingOpen} 
+            onClose={() => setIsBookingOpen(false)} 
+            campo={selectedCampo}
+          />
         )}
       </main>
     </div>
