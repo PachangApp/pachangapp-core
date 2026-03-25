@@ -39,9 +39,18 @@ public class PartidoController {
     private com.pachangapp.services.ReservaService reservaService;
 
     @GetMapping
-
     public Page<Partido> getPartidos(@RequestParam(defaultValue = "0") int page) {
         return partidoRepository.findByEstadoOrderByReservaFechaAsc("ABIERTO", PageRequest.of(page, 4));
+    }
+
+    @GetMapping("/mis-partidos")
+    public ResponseEntity<?> getMisPartidos(@RequestParam Long userId, @RequestParam(defaultValue = "0") int page) {
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            return ResponseEntity.badRequest().body("Usuario no encontrado");
+        }
+        Page<Partido> partidos = partidoRepository.findProximosPartidosUsuario(userId, PageRequest.of(page, 4));
+        return ResponseEntity.ok(partidos);
     }
 
     @PostMapping
