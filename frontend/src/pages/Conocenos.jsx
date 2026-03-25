@@ -205,7 +205,7 @@ const Conocenos = () => {
       {/* Footer minimalista */}
       <footer className="bg-gray-50 border-t border-gray-100 py-8 text-center px-4">
         <p className="text-gray-400 text-sm font-medium">
-          Hecho con pasión por Ibrahim y Pablo · © 2025 PachangApp
+          Hecho con pasión por Ibrahim y Pablo · © 2026 PachangApp
         </p>
       </footer>
 
