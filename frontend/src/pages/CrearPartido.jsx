@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../apiConfig";
 import Navbar from "../components/Navbar";
 import FieldCard from "../components/FieldCard";
+import Dropdown from "../components/Dropdown";
 import { getFieldImage } from "../utils/fieldMapping";
 
 const SubPistaGrid = ({ campoId, fecha, onSelect, timeSlots, submitting }) => {
@@ -177,10 +179,11 @@ const CrearPartido = () => {
       });
 
       if (response.ok) {
-        setMessage({ text: "¡Partido creado con éxito! Redirigiendo...", type: "success" });
+        const data = await response.json();
+        setMessage({ text: "¡Partido creado con éxito! Entrando al partido...", type: "success" });
         setTimeout(() => {
-          navigate("/buscar-partidos");
-        }, 2000);
+          navigate(`/partido/${data.id}`);
+        }, 1500);
       } else {
         const errorText = await response.text();
         setMessage({ text: errorText, type: "error" });
@@ -208,11 +211,16 @@ const CrearPartido = () => {
 
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans">
+    <div className="min-h-screen bg-gray-50 font-sans pb-32 md:pb-0">
       <Navbar />
 
       <main className="max-w-7xl mx-auto px-4 py-12">
-        <header className="mb-12 text-center">
+        <motion.header 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="mb-12 text-center"
+        >
           <div className="inline-block px-4 py-1.5 mb-4 bg-emerald-100 text-emerald-700 text-[10px] font-black uppercase tracking-widest rounded-full shadow-sm">
             Paso {step} de 3
           </div>
@@ -224,31 +232,45 @@ const CrearPartido = () => {
             {step === 2 && "Elige la pista que más te guste de las disponibles en tu zona."}
             {step === 3 && "Selecciona la hora y ajusta los detalles finales de tu partido."}
           </p>
-        </header>
+        </motion.header>
 
-        {/* Barra de Progreso */}
+        {/* Barra de Progreso Animada */}
         <div className="max-w-2xl mx-auto mb-16 relative">
           <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -translate-y-1/2 rounded-full"></div>
-          <div 
-            className="absolute top-1/2 left-0 h-1 bg-emerald-500 -translate-y-1/2 rounded-full transition-all duration-500"
-            style={{ width: `${((step - 1) / 2) * 100}%` }}
-          ></div>
+          <motion.div 
+            initial={{ width: 0 }}
+            animate={{ width: `${((step - 1) / 2) * 100}%` }}
+            transition={{ type: "spring", stiffness: 100, damping: 20 }}
+            className="absolute top-1/2 left-0 h-1 bg-emerald-500 -translate-y-1/2 rounded-full"
+          ></motion.div>
           <div className="relative flex justify-between">
             {[1, 2, 3].map((s) => (
-              <div 
+              <motion.div 
                 key={s}
-                className={`w-10 h-10 rounded-full flex items-center justify-center font-black transition-all duration-300 border-4 ${
-                  s <= step ? "bg-emerald-600 border-emerald-100 text-white" : "bg-white border-gray-100 text-gray-300"
-                }`}
+                animate={{ 
+                  scale: s === step ? 1.2 : 1,
+                  backgroundColor: s <= step ? "#059669" : "#ffffff",
+                  borderColor: s <= step ? "#ecfdf5" : "#f3f4f6",
+                  color: s <= step ? "#ffffff" : "#d1d5db"
+                }}
+                className={`w-10 h-10 rounded-full flex items-center justify-center font-black transition-all duration-300 border-4`}
               >
                 {s}
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
 
-        {/* Contenido Dinámico */}
-        <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
+        {/* Contenido Dinámico con AnimatePresence */}
+        <div className="min-h-[500px] relative">
+          <AnimatePresence mode="wait">
+            <motion.div 
+              key={step}
+              initial={{ opacity: 0, x: 40 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -40 }}
+              transition={{ duration: 0.6, ease: "easeInOut" }}
+            >
           
           {/* PASO 1: FILTROS */}
           {step === 1 && (
@@ -256,14 +278,12 @@ const CrearPartido = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                 <div className="space-y-6">
                   <div>
-                    <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">¿En qué zona?</label>
-                    <select 
+                    <Dropdown
+                      label="¿En qué zona?"
+                      options={zonas}
                       value={filters.zona}
-                      onChange={(e) => setFilters({...filters, zona: e.target.value})}
-                      className="w-full px-6 py-5 bg-gray-50 border-none rounded-3xl focus:ring-4 focus:ring-emerald-500/20 font-bold text-gray-700 transition-all text-lg"
-                    >
-                      {zonas.map(z => <option key={z} value={z}>{z}</option>)}
-                    </select>
+                      onChange={(val) => setFilters({...filters, zona: val})}
+                    />
                   </div>
                   <div>
                     <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">Modalidad Deportiva</label>
@@ -501,6 +521,8 @@ const CrearPartido = () => {
           )}
 
 
+            </motion.div>
+          </AnimatePresence>
         </div>
       </main>
     </div>

@@ -27,7 +27,7 @@ const TrendingMatches = ({ matches = [] }) => {
           <div key={match.id} className="min-w-[280px] sm:min-w-0 shrink-0 snap-center relative">
             {/* FOMO Badge */}
             <div className="absolute -top-3 left-4 z-10 bg-red-500 text-white text-[11px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow-md animate-pulse">
-              ¡Faltan {match.maxJugadores - match.jugadores.length} plazas!
+              ¡Faltan {match.maxJugadores - (match.participaciones?.length || 0)} plazas!
             </div>
             {/* The existing MatchCard */}
             <div className="pt-2"> 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-
 import { API_BASE_URL } from "../apiConfig";
+import Dropdown from "./Dropdown";
 
 const CreateMatchModal = ({ isOpen, onClose }) => {
   const [campos, setCampos] = useState([]);
@@ -82,10 +82,11 @@ const CreateMatchModal = ({ isOpen, onClose }) => {
       });
 
       if (response.ok) {
-        setMessage({ text: "¡Partido creado con éxito!", type: "success" });
+        const data = await response.json();
+        setMessage({ text: "¡Partido creado con éxito! Entrando...", type: "success" });
         setTimeout(() => {
           onClose();
-          window.location.reload(); 
+          window.location.href = `/partido/${data.id}`;
         }, 1500);
       } else {
         const error = await response.text();
@@ -114,35 +115,25 @@ const CreateMatchModal = ({ isOpen, onClose }) => {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Selección de Ubicación */}
-              <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">¿Dónde quieres jugar?</label>
-                <select 
-                  className="w-full px-4 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-emerald-500 font-bold text-gray-700 appearance-none"
-                  value={selectedZona}
-                  onChange={(e) => {
-                    setSelectedZona(e.target.value);
-                    const firstDep = campos.find(c => c.zona === e.target.value).deporte;
-                    setSelectedDeporte(firstDep);
-                  }}
-                >
-                  {zonas.map(z => <option key={z} value={z}>{z}</option>)}
-                </select>
-              </div>
+              {/* Selección de Ubicación (Modern Dropdown) */}
+              <Dropdown
+                label="¿Dónde quieres jugar?"
+                options={zonas}
+                value={selectedZona}
+                onChange={(val) => {
+                  setSelectedZona(val);
+                  const firstDep = campos.find(c => c.zona === val).deporte;
+                  setSelectedDeporte(firstDep);
+                }}
+              />
 
-              {/* Selección de Modalidad */}
-              <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">¿Qué modalidad?</label>
-                <select 
-                  className="w-full px-4 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-emerald-500 font-bold text-gray-700 appearance-none"
-                  value={selectedDeporte}
-                  onChange={(e) => {
-                    setSelectedDeporte(e.target.value);
-                  }}
-                >
-                  {deportesEnZona.map(d => <option key={d} value={d}>{d}</option>)}
-                </select>
-              </div>
+              {/* Selección de Modalidad (Modern Dropdown) */}
+              <Dropdown
+                label="¿Qué modalidad?"
+                options={deportesEnZona}
+                value={selectedDeporte}
+                onChange={(val) => setSelectedDeporte(val)}
+              />
             </div>
 
             {/* Selección de Pista (Solo si hay más de una) */}
@@ -180,18 +171,13 @@ const CreateMatchModal = ({ isOpen, onClose }) => {
                   onChange={(e) => setFormData({ ...formData, fecha: e.target.value })}
                 />
               </div>
-              <div>
-                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Hora</label>
-                <select 
-                  className="w-full px-4 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-emerald-500 font-bold text-gray-700 appearance-none"
-                  value={formData.hora}
-                  onChange={(e) => setFormData({ ...formData, hora: e.target.value })}
-                >
-                   {timeSlots.map(h => (
-                     <option key={h} value={h}>{h}</option>
-                   ))}
-                </select>
-              </div>
+              {/* Hora (Modern Dropdown) */}
+              <Dropdown
+                label="Hora"
+                options={timeSlots}
+                value={formData.hora}
+                onChange={(val) => setFormData({ ...formData, hora: val })}
+              />
             </div>
 
             <div>
