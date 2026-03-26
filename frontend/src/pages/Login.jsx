@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
+import { API_BASE_URL } from "../apiConfig";
+
+
 const Login = () => {
   const [formData, setFormData] = useState({
     email: "",
@@ -23,7 +26,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8091/api/users/login", {
+      const response = await fetch(`${API_BASE_URL}/users/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -47,6 +50,7 @@ const Login = () => {
         setMessage(errorData || "Error al iniciar sesión.");
       }
     } catch (err) {
+      console.error("Error detallado de conexión:", err);
       setError(true);
       setMessage("No se pudo conectar con el servidor.");
     } finally {

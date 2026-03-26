@@ -1,0 +1,14 @@
+{
+  "appId": "com.pachangapp.app",
+  "appName": "PachangApp",
+  "webDir": "dist",
+  "server": {
+    "cleartext": true,
+    "allowMixedContent": true
+  },
+  "android": {
+    "allowMixedContent": true
+  }
+}
+
+

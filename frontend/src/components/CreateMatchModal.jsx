@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 
+import { API_BASE_URL } from "../apiConfig";
+
 const CreateMatchModal = ({ isOpen, onClose }) => {
   const [campos, setCampos] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -26,7 +28,7 @@ const CreateMatchModal = ({ isOpen, onClose }) => {
 
   const fetchCampos = async () => {
     try {
-      const response = await fetch("http://localhost:8091/api/campos");
+      const response = await fetch(`${API_BASE_URL}/campos`);
       if (response.ok) {
         const data = await response.json();
         setCampos(data);
@@ -70,7 +72,7 @@ const CreateMatchModal = ({ isOpen, onClose }) => {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8091/api/partidos", {
+      const response = await fetch(`${API_BASE_URL}/partidos`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

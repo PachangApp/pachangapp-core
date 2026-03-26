@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { API_BASE_URL } from "../apiConfig";
 
 const BookingModal = ({ isOpen, onClose, campo }) => {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
@@ -17,7 +18,7 @@ const BookingModal = ({ isOpen, onClose, campo }) => {
   const fetchDisponibilidad = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:8091/api/reservas/disponibilidad?campoId=${campo.id}&fecha=${selectedDate}`);
+      const response = await fetch(`${API_BASE_URL}/reservas/disponibilidad?campoId=${campo.id}&fecha=${selectedDate}`);
       if (response.ok) {
         const data = await response.json();
         setBookedSlots(data);
@@ -46,7 +47,7 @@ const BookingModal = ({ isOpen, onClose, campo }) => {
     setBookingLoading(hora);
     
     try {
-      const endpoint = isPublic ? "http://localhost:8091/api/partidos" : "http://localhost:8091/api/reservas";
+      const endpoint = isPublic ? `${API_BASE_URL}/partidos` : `${API_BASE_URL}/reservas`;
       const payload = isPublic 
         ? { campoId: campo.id, userId: userId, fecha: selectedDate, hora: hora, maxJugadores: maxJugadores }
         : { campoId: campo.id, userId: userId, fecha: selectedDate, hora: hora };

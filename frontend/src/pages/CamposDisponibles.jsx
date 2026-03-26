@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { API_BASE_URL } from "../apiConfig";
+
 import Navbar from "../components/Navbar";
 import FieldCard from "../components/FieldCard";
 import BookingModal from "../components/BookingModal";
@@ -22,7 +24,7 @@ const CamposDisponibles = () => {
   const fetchCampos = async () => {
     try {
       setLoading(true);
-      const response = await fetch("http://localhost:8091/api/campos");
+      const response = await fetch(`${API_BASE_URL}/campos`);
       if (!response.ok) throw new Error("Error al obtener los campos");
       const data = await response.json();
       setCampos(data);

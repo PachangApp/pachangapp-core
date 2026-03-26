@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { API_BASE_URL } from "../apiConfig";
 import Navbar from "../components/Navbar";
 import StatCard from "../components/StatCard";
 import defaultAvatar from "../assets/campos/perfil.png";
@@ -20,8 +21,12 @@ const Perfil = () => {
 
         const { id } = JSON.parse(storedUser);
         
-        // Llamada al backend por ID
-        const response = await fetch(`http://localhost:8091/api/users/${id}`);
+        // Llamada al backend por ID (Corregido: era /users/${id} en el controller)
+        const response = await fetch(`${API_BASE_URL}/users/${id}`, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
         if (!response.ok) {
           throw new Error("No se pudo obtener la información del perfil.");
         }

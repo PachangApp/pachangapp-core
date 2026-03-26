@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../apiConfig";
 import Navbar from "../components/Navbar";
 import FieldCard from "../components/FieldCard";
 import { getFieldImage } from "../utils/fieldMapping";
@@ -13,7 +14,7 @@ const SubPistaGrid = ({ campoId, fecha, onSelect, timeSlots, submitting }) => {
       console.log(`SubPistaGrid [${campoId}]: Consultando para ${fecha}`);
       setLoading(true);
       try {
-        const response = await fetch(`http://localhost:8091/api/reservas/disponibilidad?campoId=${campoId}&fecha=${fecha}`);
+        const response = await fetch(`${API_BASE_URL}/reservas/disponibilidad?campoId=${campoId}&fecha=${fecha}`);
         if (response.ok) {
           const data = await response.json();
           console.log(`SubPistaGrid [${campoId}] resultado:`, data);
@@ -93,7 +94,7 @@ const CrearPartido = () => {
 
   const fetchCampos = async () => {
     try {
-      const response = await fetch("http://localhost:8091/api/campos");
+      const response = await fetch(`${API_BASE_URL}/campos`);
       if (response.ok) {
         const data = await response.json();
         console.log("Campos cargados de la API:", data);
@@ -111,7 +112,7 @@ const CrearPartido = () => {
   const fetchDisponibilidad = useCallback(async (campoId, fecha) => {
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:8091/api/reservas/disponibilidad?campoId=${campoId}&fecha=${fecha}`);
+      const response = await fetch(`${API_BASE_URL}/reservas/disponibilidad?campoId=${campoId}&fecha=${fecha}`);
       if (response.ok) {
         const data = await response.json();
         setBookedSlots(data);
@@ -163,7 +164,7 @@ const CrearPartido = () => {
     setSubmitting(true);
     
     try {
-      const response = await fetch("http://localhost:8091/api/partidos", {
+      const response = await fetch(`${API_BASE_URL}/partidos`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

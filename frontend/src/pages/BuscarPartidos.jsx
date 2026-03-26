@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { API_BASE_URL } from "../apiConfig";
 import Navbar from "../components/Navbar";
 import MatchCard from "../components/MatchCard";
 
@@ -20,7 +21,7 @@ const BuscarPartidos = () => {
   const fetchMatches = useCallback(async (pageNum = 0, isAppend = false) => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:8091/api/partidos?page=${pageNum}`);
+      const response = await fetch(`${API_BASE_URL}/partidos?page=${pageNum}`);
       if (!response.ok) throw new Error("Error al obtener partidos");
       const data = await response.json();
       
@@ -39,7 +40,7 @@ const BuscarPartidos = () => {
 
   const fetchAllCampos = async () => {
     try {
-      const response = await fetch("http://localhost:8091/api/campos");
+      const response = await fetch(`${API_BASE_URL}/campos`);
       if (response.ok) {
         const data = await response.json();
         setAllCampos(data);
@@ -71,7 +72,7 @@ const BuscarPartidos = () => {
     const { id: userId } = JSON.parse(storedUser);
 
     try {
-      const response = await fetch(`http://localhost:8091/api/partidos/${partidoId}/unirse?userId=${userId}`, {
+      const response = await fetch(`${API_BASE_URL}/partidos/${partidoId}/unirse?userId=${userId}`, {
         method: "POST"
       });
       if (response.ok) {

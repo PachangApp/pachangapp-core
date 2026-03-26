@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">PachangApp</string>
+    <string name="title_activity_main">PachangApp</string>
+    <string name="package_name">com.pachangapp.app</string>
+    <string name="custom_url_scheme">com.pachangapp.app</string>
+</resources>

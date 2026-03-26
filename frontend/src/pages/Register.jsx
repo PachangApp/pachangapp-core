@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
+import { API_BASE_URL } from "../apiConfig";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -30,7 +31,7 @@ const Register = () => {
 
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:8091/api/users/register", {
+      const response = await fetch(`${API_BASE_URL}/users/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -48,7 +49,7 @@ const Register = () => {
         setError(true);
         setMessage(errorData || "Error al registrar el usuario.");
       }
-    } catch (err) {
+    } catch {
       setError(true);
       setMessage("No se pudo conectar con el servidor.");
     } finally {
