@@ -6,10 +6,10 @@ Este documento es una guía paso a paso para cumplir con todos los requisitos de
 - [ ] **Explicación y objetivo del sitio**: Crear una landing page o sección "Sobre Nosotros" que explique claramente cómo PachangApp soluciona el problema de buscar pistas centralizando la oferta de todos los proveedores.
 - [ ] **Arquitectura de la aplicación**: Redactar un documento con un diagrama de la arquitectura (Frontend, Backend, Base de Datos, n8n, API externas).
 - [ ] **Diseño visual y Mapa de navegación**: Elaborar en Figma un diagrama de navegación y asegurar que los componentes visuales sean homogéneos.
-- [ ] **Valor añadido (Versión Móvil - Capacitor)**:
-  - Implementar la versión móvil utilizando **Capacitor** para reutilizar el 100% del código React/Vite.
+- [x] **Valor añadido (Versión Móvil - Capacitor)**:
+  - Implementar la versión móvil utilizando **Capacitor** para reutilizar el 100% del código React/Vite. *(Logrado sincronizando Capacitor y Android Studio para generar el entorno móvil nativo).*
   - Sincronizar con **Android Studio** para generar el APK nativo.
-  - Desarrollar componentes "Mobile-First" asegurando que el diseño de DaisyUI se vea perfecto en pantallas pequeñas.
+  - Desarrollar componentes "Mobile-First" asegurando que el diseño de Tailwind se vea perfecto en pantallas pequeñas. *(Se han usado utilidades de respuesta de Tailwind CSS para un diseño 100% adaptable).*
 
 - [ ] **Documentación completa**: Recopilar y unificar manuales, memoria del proyecto y guías en un solo formato, libres de errores ortográficos.
 
@@ -31,12 +31,12 @@ Este documento es una guía paso a paso para cumplir con todos los requisitos de
 *Maquetación y estilo visual (UI/UX).*
 - [ ] **Prototipo y Guía de Estilos**: Documentar los colores, tipografías, estados de botones y componentes de la web.
 - [ ] **Maquetación con Flexbox, Grid y BEM**: Construir los componentes (ej. listado de pistas) combinando Grid (para la estructura general) y Flexbox (para alinear contenidos interiores), usando la metodología BEM para nombrar clases si se usa CSS puro o SCSS.
-- [ ] **Framework CSS y Efectos**: Utilizar Bootstrap o Tailwind e incorporar interactividad: transiciones al hacer hover en pistas, animaciones de carga, clip-paths decorativos.
-- [ ] **Diseño Responsive**: Asegurar que la experiencia sea perfecta tanto en la aplicación web de escritorio, como en tablets y en el navegador del móvil.
+- [x] **Framework CSS y Efectos**: Utilizar Bootstrap o Tailwind e incorporar interactividad: transiciones al hacer hover en pistas, animaciones de carga, clip-paths decorativos. *(Uso intensivo de Tailwind CSS para el estilo y Framer Motion para animaciones premium: entrada de tarjetas, transiciones de pasos y efectos dinámicos en botones).*
+- [x] **Diseño Responsive**: Asegurar que la experiencia sea perfecta tanto en la aplicación web de escritorio, como en tablets y en el navegador del móvil. *(Interfaz adaptada a todos los tamaños de pantalla mediante contenedores flexibles y rejillas dinámicas).*
 
 ## 4. Desarrollo de Agentes IA para Web
 *Dotando de "inteligencia" a la app centralizadora.*
-- [ ] **Chatbot Asistente (Interacción)**: Integrar un widget en la interfaz donde un agente de IA atienda al usuario, usando lenguaje natural, para ayudarle a encontrar pistas disponibles o resolver dudas.
+- [ ] **Chatbot Asistente (Interacción)**: Integrar un widget en la interfaz donde un agente de IA atienda al usuario, usando lenguaje natural, para ayudarle a encontrar pistas disponibles o resolver dudas.(falta el n8n para que sea inteligente)
 - [ ] **Integración de Modelos IA**: Procesar el input del usuario en el chatbot usando APIs como OpenAI para extraer variables clave (fecha, hora, deporte buscado).
 - [ ] **Automatización con n8n (Workflows)**: 
   - Crear un flujo en **n8n** que se dispare cuando el usuario o la IA solicitan una reserva. Este workflow se conectará automáticamente con la web/API del proveedor original de la pista, realizará la reserva en la plataforma externa en segundo plano y devolverá el estado del proceso a la PachangApp.
@@ -50,11 +50,11 @@ Este documento es una guía paso a paso para cumplir con todos los requisitos de
 
 ## 6. Desarrollo en Entorno Cliente
 *El frontend interactivo (ej. Angular, React, Vue).*
-- [ ] **Uso de un framework web SPA**: Montar la aplicación bajo el paradigma Single Page Application.
-- [ ] **Enrutamiento (Routing)**: Implementar navegación fluida sin recarga de página (Home, Buscador, Pista, Login, Dashboard).
-- [ ] **Reutilización de componentes**: Diseñar la interfaz basada en componentes modulares independientes (Cards de pistas, Modales de reserva, Filtros de búsqueda).
-- [ ] **Consumo de APIs**: Integrarse al backend a través de peticiones asíncronas (Axios, Fetch, HttpClient) manejando correctamente estados de carga o errores.
-- [ ] **Uso de Formularios Reactivos e Interactivos**: Formularios de login y búsqueda con validación en tiempo real.
+- [x] **Uso de un framework web SPA**: Montar la aplicación bajo el paradigma Single Page Application. *(Implementado con React y Vite, permitiendo una carga de página única y navegación instantánea).*
+- [x] **Enrutamiento (Routing)**: Implementar navegación fluida sin recarga de página (Home, Buscador, Pista, Login, Dashboard). *(Navegación centralizada en App.jsx usando react-router-dom).*
+- [x] **Reutilización de componentes**: Diseñar la interfaz basada en componentes modulares independientes (Cards de pistas, Modales de reserva, Filtros de búsqueda). *(Componentes como MatchCard, Navbar, Dropdown y Modal son totalmente reutilizables en toda la aplicación).*
+- [x] **Consumo de APIs**: Integrarse al backend a través de peticiones asíncronas (Axios, Fetch, HttpClient) manejando correctamente estados de cada o errores. *(Utilización de Fetch con async/await, incluyendo gestión de estados de carga y manejo de errores del backend).*
+- [x] **Uso de Formularios Reactivos e Interactivos**: Formularios de login y búsqueda con validación en tiempo real. *(Formulario de Auth.jsx con validaciones integradas y búsqueda dinámica con filtros reactivos).*
 
 ## 7. Inglés
 *Internacionalización y enfoque e-commerce en otros idiomas.*
