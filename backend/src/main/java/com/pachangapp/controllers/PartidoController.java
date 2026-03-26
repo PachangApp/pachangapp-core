@@ -1,6 +1,7 @@
 package com.pachangapp.controllers;
 
 import com.pachangapp.models.Partido;
+import com.pachangapp.models.Participacion;
 import com.pachangapp.models.Reserva;
 import com.pachangapp.models.User;
 import com.pachangapp.models.Campo;
@@ -37,9 +38,19 @@ public class PartidoController {
     @Autowired
     private com.pachangapp.services.ReservaService reservaService;
 
+    @Autowired
+    private com.pachangapp.repositories.ParticipacionRepository participacionRepository;
+
     @GetMapping
     public Page<Partido> getPartidos(@RequestParam(defaultValue = "0") int page) {
         return partidoRepository.findByEstadoOrderByReservaFechaAsc("ABIERTO", PageRequest.of(page, 4));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Partido> getPartidoById(@PathVariable Long id) {
+        return partidoRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/mis-partidos")
@@ -82,6 +93,10 @@ public class PartidoController {
             Partido partido = new Partido(reserva, user, maxJugadores);
             partidoRepository.save(partido);
 
+            // 3. Crear Participación inicial del organizador
+            com.pachangapp.models.Participacion p = new com.pachangapp.models.Participacion(user, partido);
+            participacionRepository.save(p);
+
             return ResponseEntity.ok(partido);
 
         } catch (Exception e) {
@@ -98,20 +113,95 @@ public class PartidoController {
             return ResponseEntity.badRequest().body("Partido o Usuario no encontrado");
         }
 
-        if (partido.getJugadores().size() >= partido.getMaxJugadores()) {
+        if (partido.getParticipaciones().size() >= partido.getMaxJugadores()) {
             return ResponseEntity.badRequest().body("El partido está lleno");
         }
 
-        if (partido.getJugadores().contains(user)) {
+        boolean yaInscrito = participacionRepository.findByUserIdAndPartidoId(userId, id).isPresent();
+        if (yaInscrito) {
             return ResponseEntity.badRequest().body("Ya estás en este partido");
         }
 
-        partido.getJugadores().add(user);
-        if (partido.getJugadores().size() == partido.getMaxJugadores()) {
+        com.pachangapp.models.Participacion p = new com.pachangapp.models.Participacion(user, partido);
+        participacionRepository.save(p);
+        
+        // Recargar partido para ver cambios en participaciones
+        partido = partidoRepository.findById(id).get();
+
+        if (partido.getParticipaciones().size() == partido.getMaxJugadores()) {
             partido.setEstado("LLENO");
+            partidoRepository.save(partido);
         }
         
-        partidoRepository.save(partido);
         return ResponseEntity.ok(partido);
+    }
+
+    @PostMapping("/{id}/asignar-equipo")
+    public ResponseEntity<?> asignarEquipo(@PathVariable Long id, @RequestParam Long userId, @RequestParam String equipo, @RequestParam(required = false) String colorRgb) {
+        Participacion participacion = participacionRepository.findByUserIdAndPartidoId(userId, id).orElse(null);
+        if (participacion == null) {
+            return ResponseEntity.badRequest().body("El usuario no está inscrito en este partido");
+        }
+        participacion.setEquipo(equipo); // NEGRO, BLANCO, NINGUNO
+        if (colorRgb != null) {
+            participacion.setColorRgb(colorRgb);
+        }
+        participacionRepository.save(participacion);
+        return ResponseEntity.ok("Equipo asignado");
+    }
+
+    @PostMapping("/{id}/finalizar")
+    public ResponseEntity<?> finalizarPartido(@PathVariable Long id, @RequestParam int marcadorA, @RequestParam int marcadorB) {
+        Partido partido = partidoRepository.findById(id).orElse(null);
+        if (partido == null) return ResponseEntity.badRequest().body("Partido no encontrado");
+        
+        if ("FINALIZADO".equals(partido.getEstado())) {
+            return ResponseEntity.badRequest().body("El partido ya está finalizado");
+        }
+
+        partido.setMarcadorA(marcadorA);
+        partido.setMarcadorB(marcadorB);
+        partido.setEstado("FINALIZADO");
+
+        // Lógica de ELO y Estadísticas
+        String equipoGanador = "EMPATE";
+        if (marcadorA > marcadorB) equipoGanador = "BLANCO";
+        else if (marcadorB > marcadorA) equipoGanador = "NEGRO";
+
+        for (com.pachangapp.models.Participacion p : partido.getParticipaciones()) {
+            User user = p.getUser();
+            user.setPartidosJugados(user.getPartidosJugados() + 1);
+
+            if (!"EMPATE".equals(equipoGanador)) {
+                if (p.getEquipo().equals(equipoGanador)) {
+                    user.setVictorias(user.getVictorias() + 1);
+                    user.setRanking(user.getRanking() + 15);
+                } else if (!p.getEquipo().equals("NINGUNO")) {
+                    user.setDerrotas(user.getDerrotas() + 1);
+                    user.setRanking(Math.max(0, user.getRanking() - 10));
+                }
+            } else {
+                // Empate: pequeño ajuste o nada
+                user.setRanking(user.getRanking() + 2);
+            }
+            userRepository.save(user);
+        }
+
+        partidoRepository.save(partido);
+        return ResponseEntity.ok("Partido finalizado y estadísticas actualizadas");
+    }
+
+    @PostMapping("/{id}/cambiar-color")
+    public ResponseEntity<?> cambiarColor(@PathVariable Long id, @RequestParam String equipo, @RequestParam String color) {
+        Partido partido = partidoRepository.findById(id).orElse(null);
+        if (partido == null) return ResponseEntity.notFound().build();
+        
+        for (Participacion p : partido.getParticipaciones()) {
+            if (p.getEquipo().equalsIgnoreCase(equipo)) {
+                p.setColorRgb(color);
+                participacionRepository.save(p);
+            }
+        }
+        return ResponseEntity.ok().build();
     }
 }

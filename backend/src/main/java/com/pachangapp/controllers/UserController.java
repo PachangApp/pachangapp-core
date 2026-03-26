@@ -50,4 +50,30 @@ public class UserController {
                 .map(org.springframework.http.ResponseEntity::ok)
                 .orElse(org.springframework.http.ResponseEntity.notFound().build());
     }
+
+    @PutMapping("/{id}/preferencias")
+    public org.springframework.http.ResponseEntity<?> updatePreferences(@PathVariable Long id, @RequestBody java.util.Map<String, String> prefs) {
+        User user = userRepository.findById(id).orElse(null);
+        if (user == null) return org.springframework.http.ResponseEntity.notFound().build();
+
+        if (prefs.containsKey("posicion1")) user.setPosicion1(prefs.get("posicion1"));
+        if (prefs.containsKey("posicion2")) user.setPosicion2(prefs.get("posicion2"));
+        if (prefs.containsKey("posicion3")) user.setPosicion3(prefs.get("posicion3"));
+
+        userRepository.save(user);
+        return org.springframework.http.ResponseEntity.ok(user);
+    }
+
+    @PutMapping("/{id}/avatar")
+    public org.springframework.http.ResponseEntity<?> updateAvatar(@PathVariable Long id, @RequestBody java.util.Map<String, String> payload) {
+        User user = userRepository.findById(id).orElse(null);
+        if (user == null) return org.springframework.http.ResponseEntity.notFound().build();
+
+        if (payload.containsKey("avatarBase64")) {
+            user.setAvatar(payload.get("avatarBase64"));
+            userRepository.save(user);
+            return org.springframework.http.ResponseEntity.ok(user);
+        }
+        return org.springframework.http.ResponseEntity.badRequest().body("No se proporcionó la imagen");
+    }
 }

@@ -20,17 +20,15 @@ public class Partido {
     @JoinColumn(name = "organizador_id", nullable = false)
     private User organizador;
 
-    @ManyToMany
-    @JoinTable(
-        name = "partido_jugadores",
-        joinColumns = @JoinColumn(name = "partido_id"),
-        inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    private Set<User> jugadores = new HashSet<>();
+    @OneToMany(mappedBy = "partido", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Participacion> participaciones = new HashSet<>();
 
     private int maxJugadores;
     private String deporte;
     private String estado = "ABIERTO"; // ABIERTO, LLENO, FINALIZADO
+
+    private Integer marcadorA;
+    private Integer marcadorB;
 
     public Partido() {}
 
@@ -38,8 +36,8 @@ public class Partido {
         this.reserva = reserva;
         this.organizador = organizador;
         this.maxJugadores = maxJugadores;
-        this.deporte = reserva.getCampo().getDeporte();
-        this.jugadores.add(organizador); // El creador se une automáticamente
+        this.deporte = (reserva.getCampo() != null) ? reserva.getCampo().getDeporte() : "Desconocido";
+        // La participación del organizador se crea en el controlador para evitar problemas de persistencia circular
     }
 
     // Getters y Setters
@@ -52,8 +50,8 @@ public class Partido {
     public User getOrganizador() { return organizador; }
     public void setOrganizador(User organizador) { this.organizador = organizador; }
 
-    public Set<User> getJugadores() { return jugadores; }
-    public void setJugadores(Set<User> jugadores) { this.jugadores = jugadores; }
+    public Set<Participacion> getParticipaciones() { return participaciones; }
+    public void setParticipaciones(Set<Participacion> participaciones) { this.participaciones = participaciones; }
 
     public int getMaxJugadores() { return maxJugadores; }
     public void setMaxJugadores(int maxJugadores) { this.maxJugadores = maxJugadores; }
@@ -63,4 +61,10 @@ public class Partido {
 
     public String getEstado() { return estado; }
     public void setEstado(String estado) { this.estado = estado; }
+
+    public Integer getMarcadorA() { return marcadorA; }
+    public void setMarcadorA(Integer marcadorA) { this.marcadorA = marcadorA; }
+
+    public Integer getMarcadorB() { return marcadorB; }
+    public void setMarcadorB(Integer marcadorB) { this.marcadorB = marcadorB; }
 }

@@ -14,6 +14,14 @@ public class User {
     private String email;
     private String password;
     private String avatar;
+    
+    private int partidosJugados = 0;
+    private int victorias = 0;
+    private int derrotas = 0;
+    private int ranking = 1000;
+    private String posicion1;
+    private String posicion2;
+    private String posicion3;
 
     public User() {
     }
@@ -57,4 +65,25 @@ public class User {
     public void setAvatar(String avatar) {
         this.avatar = avatar;
     }
+
+    public int getPartidosJugados() { return partidosJugados; }
+    public void setPartidosJugados(int partidosJugados) { this.partidosJugados = partidosJugados; }
+
+    public int getVictorias() { return victorias; }
+    public void setVictorias(int victorias) { this.victorias = victorias; }
+
+    public int getDerrotas() { return derrotas; }
+    public void setDerrotas(int derrotas) { this.derrotas = derrotas; }
+
+    public int getRanking() { return ranking; }
+    public void setRanking(int ranking) { this.ranking = ranking; }
+
+    public String getPosicion1() { return posicion1; }
+    public void setPosicion1(String posicion1) { this.posicion1 = posicion1; }
+
+    public String getPosicion2() { return posicion2; }
+    public void setPosicion2(String posicion2) { this.posicion2 = posicion2; }
+
+    public String getPosicion3() { return posicion3; }
+    public void setPosicion3(String posicion3) { this.posicion3 = posicion3; }
 }
