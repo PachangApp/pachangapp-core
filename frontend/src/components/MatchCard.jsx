@@ -1,11 +1,16 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { getFieldImage } from "../utils/fieldMapping";
 
 const MatchCard = ({ match, onJoin }) => {
-  const { reserva, jugadores, maxJugadores, deporte, id } = match;
-  const { campo, horaInicio, fecha } = reserva;
+  const { reserva, participaciones = [], maxJugadores, deporte, id } = match;
+  const campo = reserva?.campo || {};
+  const horaInicio = reserva?.horaInicio || "00:00:00";
+  const fecha = reserva?.fecha || "Fecha";
 
-  const localImage = getFieldImage(campo.nombre);
+  const localImage = campo.nombre ? getFieldImage(campo.nombre) : null;
+  const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+  const isJoined = participaciones.some(p => p.user?.id === currentUser?.id);
 
   return (
     <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 group">
@@ -17,7 +22,6 @@ const MatchCard = ({ match, onJoin }) => {
             alt={campo.nombre} 
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
-
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center text-gray-300">
              <svg className="w-12 h-12 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -28,10 +32,15 @@ const MatchCard = ({ match, onJoin }) => {
         )}
         
         {/* Overlay con tags */}
-        <div className="absolute top-4 left-4">
+        <div className="absolute top-4 left-4 flex gap-2">
           <span className="px-3 py-1 bg-white/90 backdrop-blur-sm text-emerald-700 text-[10px] font-bold uppercase tracking-wider rounded-full shadow-sm">
             {deporte}
           </span>
+          {match.estado === 'FINALIZADO' && (
+            <span className="px-3 py-1 bg-red-600 text-white text-[10px] font-black uppercase tracking-wider rounded-full shadow-sm">
+              FINALIZADO
+            </span>
+          )}
         </div>
         
         {/* Hora y Plazas */}
@@ -40,9 +49,8 @@ const MatchCard = ({ match, onJoin }) => {
                 {fecha} • {horaInicio.substring(0, 5)}
             </span>
             <span className="bg-black/40 backdrop-blur-md px-3 py-1 rounded-lg text-xs font-bold">
-                {jugadores.length}/{maxJugadores}
+                {participaciones.length}/{maxJugadores}
             </span>
-
         </div>
       </div>
 
@@ -58,12 +66,21 @@ const MatchCard = ({ match, onJoin }) => {
           {campo.zona}
         </div>
 
-        <button 
-          onClick={() => onJoin(id)}
-          className="w-full py-2.5 bg-gray-50 hover:bg-emerald-600 hover:text-white text-emerald-600 font-bold text-sm rounded-xl transition-all duration-200 border border-emerald-100 hover:border-transparent"
-        >
-          Unirse al partido
-        </button>
+        {isJoined || match.estado === 'FINALIZADO' ? (
+          <Link 
+            to={`/partido/${id}`}
+            className="block w-full text-center py-2.5 bg-emerald-600 text-white font-bold text-sm rounded-xl transition-all duration-200 shadow-lg shadow-emerald-100"
+          >
+            {match.estado === 'FINALIZADO' ? "Ver Resultado" : "Entrar al Partido"}
+          </Link>
+        ) : (
+          <button 
+            onClick={() => onJoin(id)}
+            className="w-full py-2.5 bg-gray-50 hover:bg-emerald-600 hover:text-white text-emerald-600 font-bold text-sm rounded-xl transition-all duration-200 border border-emerald-100 hover:border-transparent"
+          >
+            Unirse al partido
+          </button>
+        )}
       </div>
     </div>
   );

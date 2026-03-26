@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { API_BASE_URL } from "../apiConfig";
 import Navbar from "../components/Navbar";
 import ActivityWidget from "../components/home/ActivityWidget";
 import QuickFilters from "../components/home/QuickFilters";
 import TrendingMatches from "../components/home/TrendingMatches";
 import CamposDestacados from "../components/home/CamposDestacados";
-import BottomNav from "../components/home/BottomNav";
 
 const Inicio = () => {
   const [userMatches, setUserMatches] = useState([]);
@@ -28,7 +28,7 @@ const Inicio = () => {
 
         // Fetch 1: El próximo partido del usuario (si está logueado)
         if (userId) {
-          const uRes = await fetch(`http://localhost:8091/api/partidos/mis-partidos?userId=${userId}`);
+          const uRes = await fetch(`${API_BASE_URL}/partidos/mis-partidos?userId=${userId}`);
           if (uRes.ok) {
             const data = await uRes.json();
             setUserMatches(data.content || []);
@@ -36,12 +36,12 @@ const Inicio = () => {
         }
 
         // Fetch 2: Partidos trending (todos los abiertos)
-        const tRes = await fetch("http://localhost:8091/api/partidos?page=0");
+        const tRes = await fetch(`${API_BASE_URL}/partidos?page=0`);
         if (tRes.ok) {
           const tData = await tRes.json();
           // Ordenamos un poco para simular "Trending" (los que tienen más jugadores)
           // Esto asume que tData.content es un array
-          const sorted = (tData.content || []).sort((a,b) => b.jugadores.length - a.jugadores.length);
+          const sorted = (tData.content || []).sort((a,b) => (b.participaciones?.length || 0) - (a.participaciones?.length || 0));
           setTrendingMatches(sorted);
         }
 
@@ -58,38 +58,22 @@ const Inicio = () => {
   // Preparar el objeto para ActivityWidget
   // Tomamos el primer partido del usuario cuya fecha sea más cercana (Backend ya lo ordena ASC por fecha)
   let upcomingMatchData = null;
-  if (userMatches.length > 0) {
+  if (userMatches && userMatches.length > 0) {
     const next = userMatches[0];
-    upcomingMatchData = {
-      type: next.deporte,
-      location: next.reserva.campo.nombre,
-      dateFormatted: next.reserva.fecha + " " + next.reserva.horaInicio.substring(0,5),
-      weather: "15ºC", // Simulado
-      timeUntil: "Pronto" // Podría calcularse usando Date.now()
-    };
+    if (next && next.reserva) {
+      upcomingMatchData = {
+        type: next.deporte || "Deporte",
+        location: next.reserva.campo?.nombre || "Campo por definir",
+        dateFormatted: (next.reserva.fecha || "Fecha") + " " + (next.reserva.horaInicio ? next.reserva.horaInicio.substring(0,5) : "Hora"),
+        weather: "15ºC", // Simulado
+        timeUntil: "Pronto" // Podría calcularse usando Date.now()
+      };
+    }
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex flex-col font-sans pb-24 md:pb-0">
-      {/* Desktop Navbar */}
-      <div className="hidden md:block sticky top-0 z-50">
-         <Navbar />
-      </div>
-      
-      {/* Mobile Top Header */}
-      <header className="md:hidden flex justify-between items-center p-4 bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 transition-all">
-        <div>
-          <h1 className="text-xl font-black text-emerald-600 tracking-tight">PachangApp ⚽</h1>
-          <p className="text-[11px] text-gray-500 font-bold uppercase tracking-wider mt-0.5">
-            {user ? `¡Hola ${user.username}!` : "Bienvenido"}
-          </p>
-        </div>
-        <button className="relative p-2.5 bg-gray-50 rounded-full hover:bg-emerald-50 text-gray-700 hover:text-emerald-600 transition-all active:scale-90">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
-          <span className="absolute top-2 right-2.5 h-2.5 w-2.5 bg-red-500 rounded-full border-2 border-white animate-ping"></span>
-          <span className="absolute top-2 right-2.5 h-2.5 w-2.5 bg-red-500 rounded-full border-2 border-white"></span>
-        </button>
-      </header>
+    <div className="min-h-screen bg-[#F8FAFC] flex flex-col font-sans pb-32 md:pb-0">
+      <Navbar />
 
       {/* Main Content Dashboard */}
       <main className="grow max-w-7xl mx-auto w-full p-4 lg:p-8 space-y-10 overflow-x-hidden relative">
@@ -144,9 +128,6 @@ const Inicio = () => {
           </>
         )}
       </main>
-
-      {/* Bottom Navigation for Mobile */}
-      <BottomNav />
     </div>
   );
 };

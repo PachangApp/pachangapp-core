@@ -4,6 +4,7 @@ import { API_BASE_URL } from "../apiConfig";
 import Navbar from "../components/Navbar";
 import FieldCard from "../components/FieldCard";
 import BookingModal from "../components/BookingModal";
+import Dropdown from "../components/Dropdown";
 
 const CamposDisponibles = () => {
   const [campos, setCampos] = useState([]);
@@ -55,7 +56,7 @@ const CamposDisponibles = () => {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans">
+    <div className="min-h-screen bg-gray-50 font-sans pb-32 md:pb-0">
       <Navbar />
 
       <main className="max-w-7xl mx-auto px-4 py-12">
@@ -87,19 +88,12 @@ const CamposDisponibles = () => {
               </div>
             </div>
 
-            <div>
-              <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 ml-1">Modalidad</label>
-              <select 
-                name="deporte"
-                className="w-full px-4 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-emerald-500 transition-all font-bold text-gray-700 appearance-none"
-                onChange={handleFilterChange}
-              >
-                <option>Todos</option>
-                <option>Fútbol 7</option>
-                <option>Fútbol 11</option>
-                <option>Fútbol Sala</option>
-              </select>
-            </div>
+            <Dropdown 
+              label="Modalidad"
+              options={["Todos", "Fútbol 7", "Fútbol 11", "Fútbol Sala"]}
+              value={filters.deporte}
+              onChange={(val) => setFilters({ ...filters, deporte: val })}
+            />
 
             <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-2xl cursor-pointer">
               <input 

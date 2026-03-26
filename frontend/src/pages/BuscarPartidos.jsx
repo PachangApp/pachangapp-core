@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, Link } from "react-router-dom";
 import { API_BASE_URL } from "../apiConfig";
 import Navbar from "../components/Navbar";
 import MatchCard from "../components/MatchCard";
+import Dropdown from "../components/Dropdown";
 
 const BuscarPartidos = () => {
   const navigate = useNavigate();
@@ -94,71 +96,62 @@ const BuscarPartidos = () => {
   };
 
   const filteredMatches = matches.filter(match => {
-    // Filtrar por Campo
+    // 0. Ocultar si el usuario ya está unido (según petición del usuario)
+    const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+    const isJoined = match.participaciones?.some(p => p.user.id === currentUser.id);
+    if (isJoined) return false;
+
+    // 1. Filtrar por Campo
     const matchesCampo = filters.campo === "Todos" || match.reserva.campo.nombre === filters.campo;
     
-    // Filtrar por Modalidad (Deporte)
+    // 2. Filtrar por Modalidad (Deporte)
     const matchesCat = filters.category === "Todos" || match.deporte === filters.category;
     
-    // Filtrar por Fecha
+    // 3. Filtrar por Fecha
     const matchesDate = !filters.date || match.reserva.fecha === filters.date;
 
     return matchesCampo && matchesCat && matchesDate;
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans">
+    <div className="min-h-screen bg-[#F8FAFC] font-sans pb-32 md:pb-0">
       <Navbar />
 
       <main className="max-w-7xl mx-auto px-4 py-12">
         {/* Header y Filtros */}
         <section className="mb-12">
-          <h1 className="text-4xl font-black text-gray-900 mb-8 tracking-tight">
+          <motion.h1 
+            initial={{ opacity: 0, x: -40 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-4xl font-black text-gray-900 mb-8 tracking-tight"
+          >
             Encuentra tu próximo <span className="text-emerald-600">partido</span>
-          </h1>
+          </motion.h1>
 
-          <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col md:flex-row gap-6">
-            {/* Buscador de campo (Dropdown) */}
-            <div className="grow">
-              <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Campo</label>
-              <div className="relative">
-                <select 
-                  name="campo"
-                  className="w-full px-4 py-3.5 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-emerald-500 transition-all font-bold text-gray-700 appearance-none"
-                  value={filters.campo}
-                  onChange={handleFilterChange}
-                >
-                  <option value="Todos">Todos los campos</option>
-                  {[...new Set(allCampos.map(c => c.nombre))].sort().map(nombre => (
-                    <option key={nombre} value={nombre}>{nombre}</option>
-                  ))}
-                </select>
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" /></svg>
-                </div>
-              </div>
-            </div>
+          <motion.div 
+            initial={{ opacity: 0, x: -40 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col md:flex-row gap-6"
+          >
+            {/* Buscador de campo (Modern Dropdown) */}
+            <Dropdown
+              label="Campo"
+              options={["Todos", ...[...new Set(allCampos.map(c => c.nombre))].sort()]}
+              value={filters.campo}
+              onChange={(val) => setFilters({ ...filters, campo: val })}
+              className="grow"
+            />
 
-            {/* Selector Deporte */}
-            <div className="w-full md:w-60">
-              <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Modalidad</label>
-              <div className="relative">
-                <select 
-                  name="category"
-                  className="w-full px-4 py-3.5 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-emerald-500 transition-all font-bold text-gray-700 appearance-none"
-                  value={filters.category}
-                  onChange={handleFilterChange}
-                >
-                  <option>Todos</option>
-                  <option>Fútbol 7</option>
-                  <option>Fútbol 11</option>
-                  <option>Fútbol Sala</option>
-                </select>
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" /></svg>
-                </div>
-              </div>
-            </div>
+            {/* Selector Deporte (Modern Dropdown) */}
+            <Dropdown
+              label="Modalidad"
+              options={["Todos", "Fútbol 7", "Fútbol 11", "Fútbol Sala"]}
+              value={filters.category}
+              onChange={(val) => setFilters({ ...filters, category: val })}
+              className="w-full md:w-60"
+            />
 
             {/* Fecha */}
             <div className="w-full md:w-60">
@@ -173,7 +166,7 @@ const BuscarPartidos = () => {
                 />
               </div>
             </div>
-          </div>
+          </motion.div>
         </section>
 
 
@@ -186,16 +179,38 @@ const BuscarPartidos = () => {
 
         {loading && matches.length === 0 ? (
           <div className="text-center py-20">
-            <div className="inline-block w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+            <motion.div 
+              animate={{ rotate: 360 }}
+              transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+              className="inline-block w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full mb-4"
+            ></motion.div>
             <p className="text-gray-500 font-bold">Buscando pachangas cerca de ti...</p>
           </div>
         ) : filteredMatches.length > 0 ? (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-              {filteredMatches.map(match => (
-                <MatchCard key={match.id} match={match} onJoin={handleJoin} />
-              ))}
-            </div>
+            <motion.div 
+              layout
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
+            >
+              <AnimatePresence mode="popLayout">
+                {filteredMatches.map((match, index) => (
+                  <motion.div
+                    key={match.id}
+                    layout
+                    initial={{ opacity: 0, y: 50 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ 
+                      duration: 0.8, 
+                      delay: Math.min(index * 0.1, 0.8),
+                      ease: [0.21, 1.11, 0.81, 0.99] // Efecto de frenado suave
+                    }}
+                  >
+                    <MatchCard match={match} onJoin={handleJoin} />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </motion.div>
 
             {page + 1 < totalPages && (
               <div className="mt-12 text-center">
@@ -220,16 +235,16 @@ const BuscarPartidos = () => {
           </div>
         )}
 
-        {/* Botón Flotante para Crear (Inspirado en imagen) */}
-        <div className="fixed bottom-10 right-10 z-60">
+        {/* Botón Flotante para Crear (A la izquierda del ChatBot) */}
+        <div className="fixed bottom-6 right-24 md:right-32 z-40 transition-all">
             <button 
                 onClick={() => navigate("/crear-partido")}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-4 px-8 rounded-2xl shadow-2xl shadow-emerald-200 transform hover:-translate-y-2 transition-all flex items-center gap-3 active:scale-95 group"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white font-black p-4 sm:py-4 sm:px-8 rounded-2xl shadow-2xl shadow-emerald-200 transform hover:-translate-y-2 transition-all flex items-center gap-3 active:scale-95 group"
             >
-                <div className="w-6 h-6 bg-white/20 rounded-lg flex items-center justify-center group-hover:rotate-90 transition-transform">
+                <div className="w-6 h-6 bg-white/20 rounded-lg flex items-center justify-center group-hover:rotate-90 transition-transform shrink-0">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4" /></svg>
                 </div>
-                Crear Partido
+                <span className="hidden sm:inline whitespace-nowrap">Crear Partido</span>
             </button>
         </div>
       </main>
