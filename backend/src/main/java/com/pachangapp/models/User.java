@@ -23,6 +23,12 @@ public class User {
     private String posicion2;
     private String posicion3;
 
+    @Enumerated(EnumType.STRING)
+    private Role role = Role.USER;
+
+    private boolean enabled = false;
+    private String verificationToken;
+
     public User() {
     }
 
@@ -86,4 +92,13 @@ public class User {
 
     public String getPosicion3() { return posicion3; }
     public void setPosicion3(String posicion3) { this.posicion3 = posicion3; }
+
+    public Role getRole() { return role; }
+    public void setRole(Role role) { this.role = role; }
+
+    public boolean isEnabled() { return enabled; }
+    public void setEnabled(boolean enabled) { this.enabled = enabled; }
+
+    public String getVerificationToken() { return verificationToken; }
+    public void setVerificationToken(String verificationToken) { this.verificationToken = verificationToken; }
 }

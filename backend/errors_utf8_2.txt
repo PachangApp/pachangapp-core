@@ -1,0 +1,15 @@
+﻿[INFO] Scanning for projects...
+[INFO] 
+[INFO] -----------------------< com.pachangapp:backend >-----------------------
+[INFO] Building backend 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-cli) @ backend ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  0.925 s
+[INFO] Finished at: 2026-03-27T09:42:03+01:00
+[INFO] ------------------------------------------------------------------------

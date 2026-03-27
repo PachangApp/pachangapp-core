@@ -2,7 +2,9 @@ package com.pachangapp.controllers;
 
 import com.pachangapp.models.User;
 import com.pachangapp.repositories.UserRepository;
+import com.pachangapp.security.jwt.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,6 +19,18 @@ public class UserController {
     @Autowired
     private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private JwtUtils jwtUtils;
+
+    @Autowired
+    private com.pachangapp.services.EmailService emailService;
+
+    @Autowired
+    private com.pachangapp.services.FileService fileService;
+
     @GetMapping
     public List<User> getAllUsers() {
         return userRepository.findAll();
@@ -28,20 +42,54 @@ public class UserController {
             return org.springframework.http.ResponseEntity.badRequest().body("El correo electrónico ya está registrado.");
         }
         
-        // Encriptar la contraseña antes de guardar
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRole(com.pachangapp.models.Role.USER);
+        user.setEnabled(false);
+        user.setVerificationToken(java.util.UUID.randomUUID().toString());
+        
         User savedUser = userRepository.save(user);
-        return org.springframework.http.ResponseEntity.ok(savedUser);
+        emailService.sendVerificationEmail(savedUser.getEmail(), savedUser.getVerificationToken());
+        
+        return org.springframework.http.ResponseEntity.ok("Usuario registrado. Por favor, verifica tu correo electrónico para activar tu cuenta.");
+    }
+
+    @GetMapping("/verify")
+    public org.springframework.http.ResponseEntity<?> verifyUser(@RequestParam String token) {
+        return userRepository.findByVerificationToken(token).map(user -> {
+            user.setEnabled(true);
+            user.setVerificationToken(null);
+            userRepository.save(user);
+            return org.springframework.http.ResponseEntity.ok("Cuenta activada correctamente. Ya puedes iniciar sesión.");
+        }).orElse(org.springframework.http.ResponseEntity.badRequest().body("Token de verificación inválido."));
     }
 
     @PostMapping("/login")
     public org.springframework.http.ResponseEntity<?> loginUser(@RequestBody User loginData) {
-        User user = userRepository.findByEmail(loginData.getEmail()).orElse(null);
-        
-        if (user != null && passwordEncoder.matches(loginData.getPassword(), user.getPassword())) {
-            return org.springframework.http.ResponseEntity.ok(user);
+        try {
+            User user = userRepository.findByEmail(loginData.getEmail()).orElse(null);
+            if (user != null && !user.isEnabled()) {
+                return org.springframework.http.ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN).body("Tu cuenta no está activada. Revisa tu correo.");
+            }
+
+            org.springframework.security.core.Authentication authentication = authenticationManager.authenticate(
+                    new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(loginData.getEmail(), loginData.getPassword()));
+
+            org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(authentication);
+            String jwt = jwtUtils.generateJwtToken(authentication);
+            
+            com.pachangapp.security.services.UserDetailsImpl userDetails = (com.pachangapp.security.services.UserDetailsImpl) authentication.getPrincipal();
+
+            java.util.Map<String, Object> response = new java.util.HashMap<>();
+            response.put("token", jwt);
+            response.put("id", userDetails.getId());
+            response.put("username", userDetails.getUsername());
+            response.put("email", userDetails.getEmail());
+            response.put("role", userDetails.getAuthorities().iterator().next().getAuthority());
+
+            return org.springframework.http.ResponseEntity.ok(response);
+        } catch (org.springframework.security.core.AuthenticationException e) {
+            return org.springframework.http.ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED).body("Credenciales inválidas");
         }
-        return org.springframework.http.ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED).body("Credenciales inválidas");
     }
 
     @GetMapping("/{id}")
@@ -65,15 +113,17 @@ public class UserController {
     }
 
     @PutMapping("/{id}/avatar")
-    public org.springframework.http.ResponseEntity<?> updateAvatar(@PathVariable Long id, @RequestBody java.util.Map<String, String> payload) {
+    public org.springframework.http.ResponseEntity<?> updateAvatar(@PathVariable Long id, @RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
         User user = userRepository.findById(id).orElse(null);
         if (user == null) return org.springframework.http.ResponseEntity.notFound().build();
 
-        if (payload.containsKey("avatarBase64")) {
-            user.setAvatar(payload.get("avatarBase64"));
+        try {
+            String fileUrl = fileService.saveFile(file);
+            user.setAvatar(fileUrl);
             userRepository.save(user);
             return org.springframework.http.ResponseEntity.ok(user);
+        } catch (java.io.IOException e) {
+            return org.springframework.http.ResponseEntity.internalServerError().body("Error al guardar imagen: " + e.getMessage());
         }
-        return org.springframework.http.ResponseEntity.badRequest().body("No se proporcionó la imagen");
     }
 }

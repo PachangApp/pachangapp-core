@@ -30,6 +30,9 @@ public class ReservaController {
     @Autowired
     private com.pachangapp.services.ReservaService reservaService;
 
+    @Autowired
+    private com.pachangapp.services.PdfService pdfService;
+
     // Obtener horas ocupadas considerando jerarquía (F11 vs F7)
 
     @GetMapping("/disponibilidad")
@@ -37,6 +40,17 @@ public class ReservaController {
         LocalDate date = LocalDate.parse(fecha);
         List<String> horasOcupadas = reservaService.getHorasOcupadasEnJerarquia(campoId, date);
         return ResponseEntity.ok(horasOcupadas);
+    }
+
+    @GetMapping("/{id}/export-pdf")
+    public ResponseEntity<byte[]> exportReservaPdf(@PathVariable Long id) {
+        return reservaRepository.findById(id).map(reserva -> {
+            byte[] pdfBytes = pdfService.generateReservaPdf(reserva);
+            return ResponseEntity.ok()
+                    .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"reserva_" + id + ".pdf\"")
+                    .contentType(org.springframework.http.MediaType.APPLICATION_PDF)
+                    .body(pdfBytes);
+        }).orElse(ResponseEntity.notFound().build());
     }
 
 
