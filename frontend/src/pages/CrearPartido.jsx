@@ -16,7 +16,11 @@ const SubPistaGrid = ({ campoId, fecha, onSelect, timeSlots, submitting }) => {
       console.log(`SubPistaGrid [${campoId}]: Consultando para ${fecha}`);
       setLoading(true);
       try {
-        const response = await fetch(`${API_BASE_URL}/reservas/disponibilidad?campoId=${campoId}&fecha=${fecha}`);
+        const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+        const token = storedUser.token;
+        const response = await fetch(`${API_BASE_URL}/reservas/disponibilidad?campoId=${campoId}&fecha=${fecha}`, {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
         if (response.ok) {
           const data = await response.json();
           console.log(`SubPistaGrid [${campoId}] resultado:`, data);
@@ -114,7 +118,11 @@ const CrearPartido = () => {
   const fetchDisponibilidad = useCallback(async (campoId, fecha) => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/reservas/disponibilidad?campoId=${campoId}&fecha=${fecha}`);
+      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+      const token = storedUser.token;
+      const response = await fetch(`${API_BASE_URL}/reservas/disponibilidad?campoId=${campoId}&fecha=${fecha}`, {
+          headers: { "Authorization": `Bearer ${token}` }
+      });
       if (response.ok) {
         const data = await response.json();
         setBookedSlots(data);
@@ -161,14 +169,17 @@ const CrearPartido = () => {
       return;
     }
 
-    const { id: userId } = JSON.parse(storedUser);
+    const { id: userId, token } = JSON.parse(storedUser);
     const targetCampo = specificCampo || selectedCampo;
     setSubmitting(true);
     
     try {
       const response = await fetch(`${API_BASE_URL}/partidos`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
         body: JSON.stringify({
           campoId: targetCampo.id,
           userId: userId,

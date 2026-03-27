@@ -23,7 +23,9 @@ const BuscarPartidos = () => {
   const fetchMatches = useCallback(async (pageNum = 0, isAppend = false) => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/partidos?page=${pageNum}`);
+      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+      const headers = storedUser.token ? { "Authorization": `Bearer ${storedUser.token}` } : {};
+      const response = await fetch(`${API_BASE_URL}/partidos?page=${pageNum}`, { headers });
       if (!response.ok) throw new Error("Error al obtener partidos");
       const data = await response.json();
       
@@ -71,11 +73,12 @@ const BuscarPartidos = () => {
       alert("Debes iniciar sesión para unirte.");
       return;
     }
-    const { id: userId } = JSON.parse(storedUser);
+    const { id: userId, token } = JSON.parse(storedUser);
 
     try {
       const response = await fetch(`${API_BASE_URL}/partidos/${partidoId}/unirse?userId=${userId}`, {
-        method: "POST"
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token}` }
       });
       if (response.ok) {
         alert("¡Te has unido con éxito!");

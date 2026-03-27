@@ -19,10 +19,10 @@ const BottomNav = () => {
 
         if (item.isPrimary) {
           return (
-            <div key="primary-action" className="relative -top-6 flex flex-col items-center">
+            <div key="primary-action" className="flex flex-col items-center justify-center -translate-y-4">
               <Link
                 to={item.path}
-                className="bg-emerald-600 text-white h-14 w-14 rounded-full shadow-[0_8px_16px_rgba(16,185,129,0.3)] text-2xl font-bold flex items-center justify-center transition-transform active:scale-95"
+                className="bg-emerald-600 text-white h-14 w-14 rounded-full shadow-[0_4px_12px_rgba(16,185,129,0.4)] text-2xl font-bold flex items-center justify-center"
               >
                 {item.icon}
               </Link>

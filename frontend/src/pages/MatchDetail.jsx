@@ -15,10 +15,11 @@ const MatchDetail = () => {
   const [newMessage, setNewMessage] = useState("");
 
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+  const authHeaders = currentUser.token ? { "Authorization": `Bearer ${currentUser.token}` } : {};
 
   const fetchMatch = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/partidos/${id}`);
+      const response = await fetch(`${API_BASE_URL}/partidos/${id}`, { headers: authHeaders });
       if (!response.ok) throw new Error("Partido no encontrado");
       const data = await response.json();
       setMatch(data);
@@ -31,7 +32,7 @@ const MatchDetail = () => {
 
   const fetchMessages = async () => {
     try {
-      const resp = await fetch(`${API_BASE_URL}/mensajes/partido/${id}`);
+      const resp = await fetch(`${API_BASE_URL}/mensajes/partido/${id}`, { headers: authHeaders });
       if (resp.ok) {
         const data = await resp.json();
         setMessages(data);
@@ -52,7 +53,8 @@ const MatchDetail = () => {
   const handleAssignTeam = async (userId, equipo) => {
     try {
       const response = await fetch(`${API_BASE_URL}/partidos/${id}/asignar-equipo?userId=${userId}&equipo=${equipo}`, {
-        method: "POST"
+        method: "POST",
+        headers: authHeaders
       });
       if (response.ok) fetchMatch();
     } catch (err) {
@@ -63,7 +65,8 @@ const MatchDetail = () => {
   const handleFinalize = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/partidos/${id}/finalizar?marcadorA=${scores.a}&marcadorB=${scores.b}`, {
-        method: "POST"
+        method: "POST",
+        headers: authHeaders
       });
       if (response.ok) {
         setShowFinalizeModal(false);
@@ -81,7 +84,10 @@ const MatchDetail = () => {
     try {
       const response = await fetch(`${API_BASE_URL}/mensajes`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+            "Content-Type": "application/json",
+            ...authHeaders 
+        },
         body: JSON.stringify({
           partidoId: id,
           userId: currentUser.id,

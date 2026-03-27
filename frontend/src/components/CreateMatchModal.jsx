@@ -68,13 +68,16 @@ const CreateMatchModal = ({ isOpen, onClose }) => {
       setMessage({ text: "Debes iniciar sesión para crear un partido.", type: "error" });
       return;
     }
-    const { id: userId } = JSON.parse(storedUser);
+    const { id: userId, token } = JSON.parse(storedUser);
     setLoading(true);
 
     try {
       const response = await fetch(`${API_BASE_URL}/partidos`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
         body: JSON.stringify({
           ...formData,
           userId: userId

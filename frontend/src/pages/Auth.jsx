@@ -9,6 +9,14 @@ const Auth = () => {
   
   // Sincronizar el estado con la URL
   const [isLogin, setIsLogin] = useState(location.pathname === "/login");
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
+
+  // Efecto para detectar tamaño de pantalla
+  useEffect(() => {
+    const handleResize = () => setIsDesktop(window.innerWidth >= 1024);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // Estado para Login
   const [loginData, setLoginData] = useState({ email: "", password: "" });
@@ -186,7 +194,7 @@ const Auth = () => {
         {/* CONTENEDOR DE FORMULARIOS */}
         <motion.div
           animate={{ 
-            x: isLogin ? "0%" : "-66.66%", // El contenedor de 60% se mueve hacia la izquierda para dejar sitio al panel verde
+            x: isDesktop ? (isLogin ? "0%" : "-66.66%") : "0%",
           }}
           transition={{ type: "spring", stiffness: 100, damping: 20 }}
           className="flex flex-1 items-center justify-center px-8 py-12 bg-white relative z-20"

@@ -9,8 +9,20 @@ import CrearPartido from "./pages/CrearPartido";
 import Conocenos from "./pages/Conocenos";
 import ChatBot from "./components/ChatBot";
 import MatchDetail from "./pages/MatchDetail";
+import Admin from "./pages/Admin";
 import BottomNav from "./components/home/BottomNav";
 import { useLocation } from "react-router-dom";
+import { useEffect } from "react";
+
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+};
 
 // Componente Wrapper para manejar la lógica de navegación global
 const AppContent = () => {
@@ -23,6 +35,7 @@ const AppContent = () => {
 
   return (
     <>
+      <ScrollToTop />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/register" element={<Auth />} />
@@ -34,6 +47,7 @@ const AppContent = () => {
         <Route path="/campos-disponibles" element={<CamposDisponibles />} />
         <Route path="/conocenos" element={<Conocenos />} />
         <Route path="/partido/:id" element={<MatchDetail />} />
+        <Route path="/admin" element={<Admin />} />
       </Routes>
       <ChatBot />
       {shouldShowNav && <BottomNav />}

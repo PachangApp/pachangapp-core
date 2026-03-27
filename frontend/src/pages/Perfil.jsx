@@ -22,10 +22,12 @@ const Perfil = () => {
           throw new Error("No hay sesión activa. Por favor, inicia sesión.");
         }
 
-        const { id } = JSON.parse(storedUser);
+        const { id, token } = JSON.parse(storedUser);
         
         // Cargar Datos de Usuario
-        const userResp = await fetch(`${API_BASE_URL}/users/${id}`);
+        const userResp = await fetch(`${API_BASE_URL}/users/${id}`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
         if (!userResp.ok) throw new Error("Error al obtener perfil.");
         const userData = await userResp.json();
         
@@ -47,7 +49,9 @@ const Perfil = () => {
         });
 
         // Cargar Mis Partidos
-        const matchesResp = await fetch(`${API_BASE_URL}/partidos/mis-partidos?userId=${id}`);
+        const matchesResp = await fetch(`${API_BASE_URL}/partidos/mis-partidos?userId=${id}`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
         if (matchesResp.ok) {
           const matchesData = await matchesResp.json();
           setMisPartidos(matchesData.content || []);
@@ -77,44 +81,47 @@ const Perfil = () => {
 
     setUploadingAvatar(true);
     try {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onloadend = async () => {
-        const base64data = reader.result;
-        
-        const resp = await fetch(`${API_BASE_URL}/users/${user.id}/avatar`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ avatarBase64: base64data })
-        });
+      const { token } = JSON.parse(localStorage.getItem("user") || "{}");
+      const formData = new FormData();
+      formData.append("file", file);
 
-        if (resp.ok) {
-          const updatedUser = await resp.json();
-          const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-          storedUser.avatar = updatedUser.avatar;
-          localStorage.setItem("user", JSON.stringify(storedUser));
-          
-          setUser(prev => ({ ...prev, avatar: updatedUser.avatar }));
-          window.dispatchEvent(new Event("storage"));
-          window.location.reload(); 
-        } else {
-          alert("Error al subir la imagen.");
-        }
-        setUploadingAvatar(false);
-      };
+      const resp = await fetch(`${API_BASE_URL}/users/${user.id}/avatar`, {
+        method: 'PUT',
+        headers: { 
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      if (resp.ok) {
+        const updatedUser = await resp.json();
+        const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+        storedUser.avatar = updatedUser.avatar;
+        localStorage.setItem("user", JSON.stringify(storedUser));
+        
+        setUser(prev => ({ ...prev, avatar: updatedUser.avatar }));
+        window.dispatchEvent(new Event("storage"));
+      } else {
+        alert("Error al subir la imagen. Verifica el tamaño (máx 10MB).");
+      }
     } catch (err) {
       console.error(err);
       alert("Error al cambiar avatar.");
+    } finally {
       setUploadingAvatar(false);
     }
   };
 
   const handleSavePositions = async () => {
     setSaving(true);
+    const { token } = JSON.parse(localStorage.getItem("user") || "{}");
     try {
       const resp = await fetch(`${API_BASE_URL}/users/${user.id}/preferencias`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({
           posicion1: positions.p1,
           posicion2: positions.p2,

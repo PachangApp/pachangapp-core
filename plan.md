@@ -15,17 +15,17 @@ Este documento es una guía paso a paso para cumplir con todos los requisitos de
 
 ## 2. Desarrollo en Entorno Servidor
 *La lógica central y gestión de datos desde el backend (ej. Spring Boot, Node.js).*
-- [ ] **Administración del sistema**: Crear un panel (Backoffice) en el backend (o APIs protegidas) para gestionar entidades: pistas, proveedores, usuarios, reservas y roles.
-- [ ] **Autenticación mediante Token**: Asegurar el acceso desde el front-end a datos sensibles (como historial de reservas) usando JWT (JSON Web Tokens).
-- [ ] **Consumo de servicio web**: Integrar desde el servidor una API de terceros. Por ejemplo, una API meteorológica para informar del clima en la hora reservada o una pasarela de pago (Stripe).
-- [ ] **Generación de informes PDF**: Implementar un endpoint que devuelva un recibo o justificante de la reserva de la pista en formato PDF.
-- [ ] **Validación de cuentas por correo**: Enviar un e-mail con un enlace único cuando alguien se registra para verificar y activar la cuenta.
-- [ ] **Gestión de archivos**: 
-  - [ ] **Subida**: Permitir a los usuarios subir imágenes de perfil o fotos de las pistas.
-  - [ ] **Descarga**: Opción para descargar documentos desde el servidor, como comprobantes o normativas.
-- [ ] **Importación y exportación de datos**: Funcionalidad en el panel de administrador para descargar (CSV/Excel) el listado de reservas y poder importar pistas masivamente.
-- [ ] **Ficheros de Logs**: Configurar un sistema de logging en el servidor (ej. Logback) para registrar transacciones importantes y errores.
-- [ ] **Integración con IA**: Conectar el backend con modelos de IA (ej. OpenAI) para procesar datos complejos o comunicarse con el chatbot y alimentar el sistema de reservas.
+- [x] **Administración del sistema**: Crear un panel (Backoffice) en el backend (o APIs protegidas) para gestionar entidades: pistas, proveedores, usuarios, reservas y roles. *(Logrado con `AdminController.java` y CRUDs protegidos con `@PreAuthorize("hasRole('ADMIN')")` para gestionar usuarios y pistas).*
+- [x] **Autenticación mediante Token**: Asegurar el acceso desde el front-end a datos sensibles (como historial de reservas) usando JWT (JSON Web Tokens). *(Implementado con Spring Security y JWT en `JwtUtils.java` y `JwtAuthFilter.java`, asegurando todas las peticiones desde el frontend).*
+- [x] **Consumo de servicio web**: Integrar desde el servidor una API de terceros. Por ejemplo, una API meteorológica para informar del clima en la hora reservada o una pasarela de pago (Stripe). *(Integración de `WeatherService.java` con la API de OpenWeatherMap para mostrar el clima real en el dashboard).*
+- [x] **Generación de informes PDF**: Implementar un endpoint que devuelva un recibo o justificante de la reserva de la pista en formato PDF. *(Servicio `PdfService.java` configurado para generar justificantes de reserva en formato PDF usando iText).*
+- [x] **Validación de cuentas por correo**: Enviar un e-mail con un enlace único cuando alguien se registra para verificar y activar la cuenta. *(Sistema de `EmailService.java` con `JavaMailSender` para el envío de tokens de verificación al registrarse).*
+- [x] **Gestión de archivos**: 
+  - [x] **Subida**: Permitir a los usuarios subir imágenes de perfil o fotos de las pistas. *(Implementado en `FileService.java` para la carga de avatares de usuario y fotos de pistas en el servidor local).*
+  - [x] **Descarga**: Opción para descargar documentos desde el servidor, como comprobantes o normativas. *(Endpoint para servir y descargar archivos/comprobantes desde la carpeta `/uploads`).*
+- [x] **Importación y exportación de datos**: Funcionalidad en el panel de administrador para descargar (CSV/Excel) el listado de reservas y poder importar pistas masivamente. *(Funcionalidad de exportación de reservas y carga masiva de campos mediante archivos CSV y `OpenCSV`).*
+- [x] **Ficheros de Logs**: Configurar un sistema de logging en el servidor (ej. Logback) para registrar transacciones importantes y errores. *(Configuración de trazabilidad total y sistema de logging con Logback para el registro de errores y transacciones).*
+- [x] **Integración con IA**: Conectar el backend con modelos de IA (ej. OpenAI) para procesar datos complejos o comunicarse con el chatbot y alimentar el sistema de reservas. *(Conexión de `AIService.java` con la API de OpenAI para dotar al sistema de procesamiento de lenguaje natural).*
 
 ## 3. Diseño de Interfaces Web
 *Maquetación y estilo visual (UI/UX).*

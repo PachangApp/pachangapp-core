@@ -17,8 +17,10 @@ const BookingModal = ({ isOpen, onClose, campo }) => {
 
   const fetchDisponibilidad = useCallback(async () => {
     setLoading(true);
+    const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+    const headers = storedUser.token ? { "Authorization": `Bearer ${storedUser.token}` } : {};
     try {
-      const response = await fetch(`${API_BASE_URL}/reservas/disponibilidad?campoId=${campo.id}&fecha=${selectedDate}`);
+      const response = await fetch(`${API_BASE_URL}/reservas/disponibilidad?campoId=${campo.id}&fecha=${selectedDate}`, { headers });
       if (response.ok) {
         const data = await response.json();
         setBookedSlots(data);
@@ -43,7 +45,7 @@ const BookingModal = ({ isOpen, onClose, campo }) => {
       return;
     }
 
-    const { id: userId } = JSON.parse(storedUser);
+    const { id: userId, token } = JSON.parse(storedUser);
     setBookingLoading(hora);
     
     try {
@@ -54,7 +56,10 @@ const BookingModal = ({ isOpen, onClose, campo }) => {
 
       const response = await fetch(endpoint, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
         body: JSON.stringify(payload)
       });
 
