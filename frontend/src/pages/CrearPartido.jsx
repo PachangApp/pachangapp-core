@@ -86,8 +86,10 @@ const CrearPartido = () => {
   });
   
   const [selectedCampo, setSelectedCampo] = useState(null);
+  const [selectedHora, setSelectedHora] = useState(null);
   const [maxJugadores, setMaxJugadores] = useState(10);
   const [submitting, setSubmitting] = useState(false);
+  const [paymentData, setPaymentData] = useState({ cardName: "", cardNumber: "", expiry: "", cvc: "" });
 
   const timeSlots = [
     "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00",
@@ -139,6 +141,10 @@ const CrearPartido = () => {
   };
 
   const handlePrevStep = () => {
+    if (step === 4) {
+        setStep(3);
+        return;
+    }
     setStep(step - 1);
     if (step === 3) setSelectedCampo(null);
   };
@@ -162,7 +168,22 @@ const CrearPartido = () => {
 
 
 
-  const handleCreateMatch = async (hora, specificCampo = null) => {
+  const handleConfirmSelection = (hora, specificCampo = null) => {
+    setSelectedHora(hora);
+    if (specificCampo) setSelectedCampo(specificCampo);
+    setStep(4);
+  };
+
+  const handleProcessPayment = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    // Simular retraso de pasarela de pago
+    setTimeout(() => {
+        handleExecuteCreateMatch();
+    }, 2000);
+  };
+
+  const handleExecuteCreateMatch = async () => {
     const storedUser = localStorage.getItem("user");
     if (!storedUser) {
       setMessage({ text: "Debes iniciar sesión para crear un partido.", type: "error" });
@@ -170,7 +191,7 @@ const CrearPartido = () => {
     }
 
     const { id: userId, token } = JSON.parse(storedUser);
-    const targetCampo = specificCampo || selectedCampo;
+    const targetCampo = selectedCampo;
     setSubmitting(true);
     
     try {
@@ -184,7 +205,7 @@ const CrearPartido = () => {
           campoId: targetCampo.id,
           userId: userId,
           fecha: filters.fecha,
-          hora: hora,
+          hora: selectedHora,
           maxJugadores: maxJugadores
         })
       });
@@ -230,18 +251,36 @@ const CrearPartido = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="mb-12 text-center"
+          className="mb-12 text-center relative"
         >
+          {/* Botón Volver Atrás en el Header */}
+          {step > 1 && (
+            <button 
+                onClick={handlePrevStep}
+                className="absolute left-0 top-1/2 -translate-y-1/2 flex items-center gap-2 text-gray-400 hover:text-emerald-600 font-bold transition-all group"
+            >
+                <div className="w-8 h-8 rounded-full bg-white shadow-sm border border-gray-100 flex items-center justify-center group-hover:bg-emerald-50 group-hover:border-emerald-100 transition-all">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" /></svg>
+                </div>
+                <span className="hidden md:inline text-sm">
+                    {step === 2 && "Cambiar filtros"}
+                    {step === 3 && "Cambiar de pista"}
+                    {step === 4 && "Cambiar horario"}
+                </span>
+            </button>
+          )}
+
           <div className="inline-block px-4 py-1.5 mb-4 bg-emerald-100 text-emerald-700 text-[10px] font-black uppercase tracking-widest rounded-full shadow-sm">
-            Paso {step} de 3
+            Paso {step} de 4
           </div>
           <h1 className="text-5xl font-black text-gray-900 tracking-tight">
-            Crear <span className="text-emerald-600 font-extrabold italic">Partido</span>
+            {step === 4 ? "Finalizar" : "Crear"} <span className="text-emerald-600 font-extrabold italic">{step === 4 ? "Pago" : "Partido"}</span>
           </h1>
           <p className="mt-4 text-gray-500 font-medium max-w-lg mx-auto">
             {step === 1 && "Selecciona dónde y cuándo quieres jugar para empezar."}
             {step === 2 && "Elige la pista que más te guste de las disponibles en tu zona."}
             {step === 3 && "Selecciona la hora y ajusta los detalles finales de tu partido."}
+            {step === 4 && "Introduce los datos de tu tarjeta para reservar la pista."}
           </p>
         </motion.header>
 
@@ -250,12 +289,12 @@ const CrearPartido = () => {
           <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -translate-y-1/2 rounded-full"></div>
           <motion.div 
             initial={{ width: 0 }}
-            animate={{ width: `${((step - 1) / 2) * 100}%` }}
+            animate={{ width: `${((step - 1) / 3) * 100}%` }}
             transition={{ type: "spring", stiffness: 100, damping: 20 }}
             className="absolute top-1/2 left-0 h-1 bg-emerald-500 -translate-y-1/2 rounded-full"
           ></motion.div>
           <div className="relative flex justify-between">
-            {[1, 2, 3].map((s) => (
+            {[1, 2, 3, 4].map((s) => (
               <motion.div 
                 key={s}
                 animate={{ 
@@ -264,7 +303,7 @@ const CrearPartido = () => {
                   borderColor: s <= step ? "#ecfdf5" : "#f3f4f6",
                   color: s <= step ? "#ffffff" : "#d1d5db"
                 }}
-                className={`w-10 h-10 rounded-full flex items-center justify-center font-black transition-all duration-300 border-4`}
+                className={`w-10 h-10 rounded-full flex items-center justify-center font-black transition-all duration-300 border-4 shadow-sm`}
               >
                 {s}
               </motion.div>
@@ -348,14 +387,8 @@ const CrearPartido = () => {
           {/* PASO 2: SELECCIÓN DE CAMPO */}
           {step === 2 && (
             <div>
-              <div className="flex justify-between items-center mb-10 max-w-4xl mx-auto">
-                <button onClick={handlePrevStep} className="flex items-center gap-2 text-gray-400 hover:text-gray-900 font-bold transition-colors">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" /></svg>
-                  Volver atrás
-                </button>
-                <div className="text-right">
+              <div className="mb-10 max-w-4xl mx-auto text-right">
                   <span className="text-xs font-black text-emerald-600 uppercase tracking-widest">Encontrados: {filteredCampos.length}</span>
-                </div>
               </div>
 
               {filteredCampos.length > 0 ? (
@@ -382,6 +415,152 @@ const CrearPartido = () => {
                   <button onClick={handlePrevStep} className="px-8 py-4 bg-emerald-600 text-white font-black rounded-2xl hover:bg-emerald-700 transition-all">
                     Cambiar búsqueda
                   </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* PASO 4: PASARELA DE PAGO FICTICIA */}
+          {step === 4 && selectedCampo && (
+            <div className="max-w-4xl mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {/* Resumen del pedido */}
+                <div className="md:col-span-1 space-y-6">
+                    <div className="bg-white p-6 rounded-[2.5rem] shadow-xl border border-gray-100">
+                        <h3 className="text-lg font-black text-gray-900 mb-6 uppercase tracking-tight">Resumen</h3>
+                        <div className="space-y-4">
+                            <div className="flex justify-between">
+                                <span className="text-xs font-bold text-gray-400">Pista</span>
+                                <span className="text-xs font-black text-gray-700">{selectedCampo.nombre}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-xs font-bold text-gray-400">Fecha</span>
+                                <span className="text-xs font-black text-gray-700">{filters.fecha}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-xs font-bold text-gray-400">Hora</span>
+                                <span className="text-xs font-black text-gray-700">{selectedHora}</span>
+                            </div>
+                            <div className="pt-4 border-t border-gray-50 flex justify-between items-center">
+                                <span className="text-sm font-black text-gray-900">Total</span>
+                                <span className="text-xl font-black text-emerald-600">{selectedCampo.precioPorHora}€</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div className="bg-emerald-50 p-6 rounded-3xl border border-emerald-100">
+                        <div className="flex items-center gap-3 text-emerald-700 mb-2">
+                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                             <span className="text-xs font-black uppercase">Pago Seguro</span>
+                        </div>
+                        <p className="text-[10px] text-emerald-600/70 font-medium">Tus datos están protegidos por encriptación de extremo a extremo.</p>
+                    </div>
+                </div>
+
+                {/* Formulario de Pago */}
+                <div className="md:col-span-2">
+                    <form onSubmit={handleProcessPayment} className="bg-white p-10 rounded-[3rem] shadow-2xl border border-gray-100">
+                        <div className="space-y-6">
+                            <div>
+                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">Nombre en la tarjeta</label>
+                                <input 
+                                    type="text"
+                                    required
+                                    placeholder="JUAN PEREZ"
+                                    value={paymentData.cardName}
+                                    onChange={(e) => setPaymentData({...paymentData, cardName: e.target.value.toUpperCase()})}
+                                    className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-4 focus:ring-emerald-500/10 font-bold text-gray-700 transition-all font-black placeholder:text-gray-300"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">Número de tarjeta</label>
+                                <div className="relative">
+                                    <input 
+                                        type="text"
+                                        required
+                                        maxLength="19"
+                                        placeholder="0000 0000 0000 0000"
+                                        value={paymentData.cardNumber}
+                                        onChange={(e) => {
+                                            const val = e.target.value.replace(/\D/g, '').replace(/(.{4})/g, '$1 ').trim();
+                                            setPaymentData({...paymentData, cardNumber: val});
+                                        }}
+                                        className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-4 focus:ring-emerald-500/10 font-black text-gray-700 transition-all font-mono placeholder:text-gray-300"
+                                    />
+                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 flex gap-2">
+                                        <div className="w-8 h-5 bg-gray-200 rounded"></div>
+                                        <div className="w-8 h-5 bg-gray-300 rounded"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">Caducidad</label>
+                                    <input 
+                                        type="text"
+                                        required
+                                        placeholder="MM/AA"
+                                        maxLength="5"
+                                        value={paymentData.expiry}
+                                        onChange={(e) => {
+                                            let val = e.target.value.replace(/\D/g, '');
+                                            if (val.length >= 2) val = val.slice(0, 2) + '/' + val.slice(2, 4);
+                                            setPaymentData({...paymentData, expiry: val});
+                                        }}
+                                        className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-4 focus:ring-emerald-500/10 font-black text-gray-700 transition-all placeholder:text-gray-300"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">CVC</label>
+                                    <input 
+                                        type="text"
+                                        required
+                                        placeholder="123"
+                                        maxLength="3"
+                                        value={paymentData.cvc}
+                                        onChange={(e) => setPaymentData({...paymentData, cvc: e.target.value.replace(/\D/g, '')})}
+                                        className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-4 focus:ring-emerald-500/10 font-black text-gray-700 transition-all placeholder:text-gray-300"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="mt-12">
+                            <button 
+                                type="submit"
+                                disabled={submitting}
+                                className="w-full py-6 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-3xl transition-all shadow-xl shadow-emerald-200 hover:scale-[1.02] active:scale-[0.98] text-xl flex items-center justify-center gap-3 disabled:opacity-50"
+                            >
+                                {submitting ? (
+                                    <>
+                                        <div className="w-6 h-6 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        <span>Procesando Pago...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+                                        Pagar {selectedCampo.precioPorHora}€ y Reservar
+                                    </>
+                                )}
+                            </button>
+                            <p className="text-center mt-6 text-[10px] text-gray-400 font-bold uppercase tracking-widest leading-relaxed">Al pulsar el botón aceptas los términos y condiciones de reserva de pistas de PachangApp.</p>
+                        </div>
+                    </form>
+                </div>
+              </div>
+
+              {message.text && (
+                <div className={`mt-10 p-6 rounded-3xl text-sm font-black animate-in slide-in-from-bottom-4 duration-500 shadow-md ${
+                  message.type === 'success' ? "bg-emerald-100 text-emerald-800 border border-emerald-200" : "bg-red-100 text-red-800 border border-red-200"
+                }`}>
+                  <div className="flex items-center gap-3">
+                    {message.type === 'success' ? (
+                      <svg className="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" /></svg>
+                    ) : (
+                      <svg className="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    )}
+                    {message.text}
+                  </div>
                 </div>
               )}
             </div>
@@ -436,11 +615,6 @@ const CrearPartido = () => {
                     <p className="text-[10px] text-emerald-200/60 leading-relaxed font-medium">Este será el número máximo de personas que podrán apuntarse a tu partido público.</p>
                   </div>
                 </div>
-                
-                <button onClick={handlePrevStep} className="w-full flex items-center justify-center gap-2 py-4 text-gray-400 hover:text-gray-900 font-bold transition-colors">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" /></svg>
-                  Cambiar de pista
-                </button>
               </div>
 
               {/* Grid de Horarios */}
@@ -459,8 +633,7 @@ const CrearPartido = () => {
                                         campoId={subPista.id} 
                                         fecha={filters.fecha} 
                                         onSelect={(hora) => {
-                                            setSelectedCampo(subPista); // Cambiamos temporalmente el seleccionado para la petición
-                                            handleCreateMatch(hora, subPista);
+                                            handleConfirmSelection(hora, subPista);
                                         }}
                                         timeSlots={timeSlots}
                                         submitting={submitting}
@@ -489,7 +662,7 @@ const CrearPartido = () => {
                               <button
                                 key={hora}
                                 disabled={isBooked || submitting}
-                                onClick={() => handleCreateMatch(hora, selectedCampo)}
+                                onClick={() => handleConfirmSelection(hora, selectedCampo)}
                                 className={`group py-6 rounded-3xl font-black text-lg transition-all relative overflow-hidden border-2 ${
                                   isBooked 
                                     ? "bg-red-50 text-red-300 border-red-50 cursor-not-allowed opacity-60" 
