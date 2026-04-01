@@ -85,6 +85,7 @@ public class UserController {
             response.put("username", userDetails.getUsername());
             response.put("email", userDetails.getEmail());
             response.put("role", userDetails.getAuthorities().iterator().next().getAuthority());
+            response.put("avatar", user.getAvatar());
 
             return org.springframework.http.ResponseEntity.ok(response);
         } catch (org.springframework.security.core.AuthenticationException e) {
