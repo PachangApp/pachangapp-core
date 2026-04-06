@@ -1,0 +1,48 @@
+# ---------- Deployment (el contenedor del Backend) ----------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: devIbrahim14/pachangapp-backend:latest
+          ports:
+            - containerPort: 8091
+          env:
+            # URL de conexión a la BBDD — usa el nombre del Service de MySQL
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:mysql://mysql-service:3306/pachangapp?allowPublicKeyRetrieval=true&useSSL=false"
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: pachangapp-secrets
+                  key: db-user
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pachangapp-secrets
+                  key: db-password
+
+---
+# ---------- Service (expone el Backend al Ingress y al exterior en puerto 8091) ----------
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+spec:
+  selector:
+    app: backend
+  ports:
+    - port: 8091
+      targetPort: 8091
+  type: ClusterIP
