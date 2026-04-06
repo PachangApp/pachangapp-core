@@ -54,6 +54,6 @@ jobs:
           username: ubuntu
           key: ${{ secrets.AWS_SSH_KEY }}
           script: |
-            sudo kubectl apply -f /home/ubuntu/pachangapp/k8s/
+            sudo kubectl apply -f /home/ubuntu/pachangapp-core/k8s/
             sudo kubectl rollout restart deployment/backend
             sudo kubectl rollout restart deployment/frontend
