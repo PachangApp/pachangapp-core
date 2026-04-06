@@ -907,12 +907,115 @@ jobs:
 | 0 | Instalar Swagger en `pom.xml` | ✅ Hecho |
 | 1 | Crear `backend/Dockerfile` | ✅ Hecho |
 | 2 | Crear `frontend/Dockerfile` | ✅ Hecho |
-| 3 | Crear `docker-compose.yml` en la raíz | ⬜ Pendiente |
-| 4 | Probar `docker compose up` localmente | ⬜ Pendiente |
-| 5 | Crear instancia EC2 en AWS Educate | ⬜ Pendiente |
-| 6 | Vincular `pachangapp.es` a la IP de AWS en IONOS | ⬜ Pendiente |
-| 7 | Instalar K3s en la EC2 | ⬜ Pendiente |
-| 8 | Crear carpeta `k8s/` con manifiestos de despliegue | ⬜ Pendiente |
-| 9 | Instalar cert-manager y crear `k8s/ingress.yaml` | ⬜ Pendiente |
-| 10 | Crear `.github/workflows/deploy.yml` y configurar Secrets | ⬜ Pendiente |
+| 3 | Crear `docker-compose.yml` en la raíz | ✅ Hecho |
+| 4 | Crear instancia EC2 en AWS Educate | ✅ Hecho |
+| 5 | Vincular `pachangapp.es` a la IP de AWS en IONOS | ✅ Hecho |
+| 6 | Instalar K3s + Docker en la EC2 | ✅ Hecho |
+| 7 | Crear carpeta `k8s/` con todos los manifiestos | ✅ Hecho |
+| 8 | Aplicar manifiestos con `kubectl apply` | ✅ Hecho |
+| 9 | Instalar cert-manager, clusterissuer e ingress | ✅ Hecho |
+| 10 | Configurar Secrets en GitHub y crear `deploy.yml` | ⬜ Pendiente |
 | 11 | Hacer push a `main` y verificar que el CI/CD despliega solo | ⬜ Pendiente |
+| 12 | Verificación final completa | ⬜ Pendiente |
+
+---
+
+## ANTES DE COMMITEAR el `deploy.yml` — Configurar Secrets en GitHub
+
+> ⚠️ Si haces push del `deploy.yml` **antes** de configurar los Secrets, el Action fallará inmediatamente porque no encontrará las variables. Configúralos primero.
+
+### PASO A — Crear cuenta y token en DockerHub
+
+1. Si no tienes cuenta, créala en [https://hub.docker.com](https://hub.docker.com) con el usuario `devIbrahim14`.
+2. Una vez dentro: **Account Settings** → **Security** → **New Access Token**.
+3. Dale un nombre como `github-actions` y copia el token generado.
+
+---
+
+### PASO B — Añadir los 4 Secrets en GitHub
+
+Ve a tu repositorio en GitHub → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**.
+
+Añade estos 4 uno por uno:
+
+| Nombre del Secret | Valor que debes poner |
+|---|---|
+| `DOCKERHUB_USERNAME` | `devIbrahim14` |
+| `DOCKERHUB_TOKEN` | El token que generaste en DockerHub |
+| `AWS_EC2_IP` | Tu IP Elástica de AWS (ej. `54.72.XXX.XXX`) |
+| `AWS_SSH_KEY` | El contenido **completo** del archivo `pachangapp-key.pem` |
+
+> Para copiar el contenido del `.pem` en PowerShell:
+> ```powershell
+> Get-Content C:\Users\chakr\Downloads\pachangapp-key.pem | Set-Clipboard
+> ```
+> Luego pégalo directamente en el campo de valor del Secret.
+
+---
+
+### PASO C — Commitear y hacer push del deploy.yml
+
+Una vez configurados los 4 Secrets, ya puedes subir el workflow:
+
+```powershell
+git add .github/workflows/deploy.yml
+git commit -m "Añadir CI/CD con GitHub Actions"
+git push
+```
+
+> Recuerda: el Action solo se dispara cuando haces push a `main`. Para probarlo por primera vez, deberás hacer un **Pull Request** de `feature-despliegue` → `main` y mergearlo.
+
+---
+
+## ✅ FASE FINAL — Verificación completa del despliegue
+
+Una vez que el CI/CD haya corrido correctamente (puedes verlo en la pestaña **Actions** de GitHub), verifica que todo funciona:
+
+### En el servidor AWS (SSH):
+
+```bash
+# Ver que todos los pods están Running (ya no ImagePullBackOff)
+kubectl get pods
+
+# Ver el estado del Ingress (debe mostrar tu IP)
+kubectl get ingress
+
+# Ver que los certificados SSL están listos (READY = True)
+kubectl get certificate
+
+# Si algún pod falla, ver sus logs:
+kubectl logs deployment/backend
+kubectl logs deployment/frontend
+```
+
+### Desde el navegador:
+
+| URL | Qué debe aparecer |
+|-----|-------------------|
+| `https://pachangapp.es` | Tu frontend React cargado con HTTPS |
+| `https://api.pachangapp.es/swagger-ui.html` | Documentación de tu API (Swagger) |
+| `https://n8n.pachangapp.es` | Panel de login de n8n |
+
+### Si algo falla:
+
+```bash
+# Ver eventos recientes del clúster (errores y advertencias)
+kubectl get events --sort-by='.lastTimestamp'
+
+# Describir un pod específico para ver el error exacto
+kubectl describe pod NOMBRE_DEL_POD
+
+# Reiniciar un deployment si lo necesitas
+kubectl rollout restart deployment/backend
+```
+
+### Comprobar el CI/CD en GitHub:
+
+1. Entra a tu repositorio en GitHub.
+2. Haz clic en la pestaña **"Actions"**.
+3. Verás el pipeline ejecutándose (o ejecutado). Cada paso debe tener un ✅ verde.
+4. Si hay un error, haz clic en el paso rojo para ver el log exacto del fallo.
+
+---
+
+> 🎉 **¡Si todas las URLs cargan con el candado HTTPS y los pods están en Running, el Apartado 8 está 100% completado!**

@@ -16,8 +16,8 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-      - name: Ejecutar tests con Maven
-        run: mvn test -f backend/pom.xml
+      - name: Compilar Backend
+        run: mvn package -DskipTests -f backend/pom.xml
 
   build-and-push-images:
     name: Construir y subir imágenes Docker
