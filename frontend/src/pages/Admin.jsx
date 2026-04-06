@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import Navbar from "../components/Navbar";
 import { API_BASE_URL } from "../apiConfig";
 
 const Admin = () => {
+  const { t } = useTranslation();
   const [users, setUsers] = useState([]);
   const [campos, setCampos] = useState([]);
   const [activeTab, setActiveTab] = useState("campos");
@@ -37,7 +39,7 @@ const Admin = () => {
       window.URL.revokeObjectURL(url);
       a.remove();
     } catch (error) {
-      alert("No se pudo descargar el archivo: " + error.message);
+      alert(`${t('admin.errors.download_error')}: ${error.message}`);
     }
   };
 
@@ -76,17 +78,17 @@ const Admin = () => {
         })
       });
       if (resp.ok) {
-        alert("Campo creado con éxito");
+        alert(t('admin.fields.field_created'));
         setNewCampo({ nombre: "", zona: "Granada Centro", deporte: "Fútbol 7", precioPorHora: 25.0, disponible: true, parentCampoId: "" });
         fetchData();
       }
     } catch {
-      alert("Error al crear campo");
+      alert(t('admin.fields.create_error'));
     }
   };
 
   const handleDeleteCampo = async (id) => {
-    if (!window.confirm("¿Seguro que quieres borrar este campo? Borrarás también su disponibilidad.")) return;
+    if (!window.confirm(t('admin.fields.delete_confirm'))) return;
     try {
       await fetch(`${API_BASE_URL}/admin/campos/${id}`, {
         method: "DELETE",
@@ -94,9 +96,10 @@ const Admin = () => {
       });
       fetchData();
     } catch {
-      alert("Error al borrar");
+      alert(t('admin.fields.delete_error'));
     }
   };
+
 
   const handleChangeRole = async (userId, newRole) => {
     try {
@@ -106,19 +109,20 @@ const Admin = () => {
       });
       fetchData();
     } catch {
-      alert("Error al cambiar rol");
+      alert(t('admin.users.role_error'));
     }
   };
 
   if (storedUser.role !== 'ROLE_ADMIN') {
-    return <div className="p-20 text-center font-bold text-red-600">Acceso Denegado</div>;
+    return <div className="p-20 text-center font-bold text-red-600">{t('admin.errors.access_denied')}</div>;
   }
+
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       <main className="max-w-6xl mx-auto px-4 py-12">
-        <h1 className="text-3xl font-black text-gray-900 mb-8">Panel de Administración</h1>
+        <h1 className="text-3xl font-black text-gray-900 mb-8">{t('admin.panel_title')}</h1>
 
         {/* Tabs */}
         <div className="flex gap-4 mb-8 bg-gray-200 p-1 rounded-2xl w-fit">
@@ -126,76 +130,78 @@ const Admin = () => {
             onClick={() => setActiveTab("campos")}
             className={`px-6 py-2 rounded-xl font-bold transition-all ${activeTab === 'campos' ? 'bg-white text-emerald-600 shadow-sm' : 'text-gray-500'}`}
           >
-            Gestionar Campos
+            {t('admin.tabs.manage_fields')}
           </button>
           <button 
             onClick={() => setActiveTab("usuarios")}
             className={`px-6 py-2 rounded-xl font-bold transition-all ${activeTab === 'usuarios' ? 'bg-white text-emerald-600 shadow-sm' : 'text-gray-500'}`}
           >
-            Gestionar Usuarios
+            {t('admin.tabs.manage_users')}
           </button>
           <button 
             onClick={() => setActiveTab("archivos")}
             className={`px-6 py-2 rounded-xl font-bold transition-all ${activeTab === 'archivos' ? 'bg-white text-emerald-600 shadow-sm' : 'text-gray-500'}`}
           >
-            Gestionar Archivos
+            {t('admin.tabs.manage_files')}
           </button>
         </div>
+
 
         {activeTab === 'campos' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm h-fit">
-              <h2 className="text-xl font-bold mb-6">Nuevo Campo</h2>
+              <h2 className="text-xl font-bold mb-6">{t('admin.fields.new_field')}</h2>
               <form onSubmit={handleCreateCampo} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Nombre</label>
+                  <label className="block text-xs font-bold text-gray-400 uppercase mb-1">{t('admin.fields.name')}</label>
                   <input 
                     type="text" required
-                    className="w-full p-3 bg-gray-50 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full p-3 bg-gray-50 text-gray-900 font-bold rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"
                     value={newCampo.nombre}
                     onChange={e => setNewCampo({...newCampo, nombre: e.target.value})}
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Deporte</label>
+                    <label className="block text-xs font-bold text-gray-400 uppercase mb-1">{t('admin.fields.sport')}</label>
                     <select 
-                      className="w-full p-3 bg-gray-50 rounded-xl outline-none"
+                      className="w-full p-3 bg-gray-50 text-gray-900 font-bold rounded-xl outline-none"
                       value={newCampo.deporte}
                       onChange={e => setNewCampo({...newCampo, deporte: e.target.value})}
                     >
-                      <option value="Fútbol 11">Fútbol 11</option>
-                      <option value="Fútbol 7">Fútbol 7</option>
-                      <option value="Fútbol Sala">Fútbol Sala</option>
+                      <option value="Fútbol 11">{t('sports.futbol_11')}</option>
+                      <option value="Fútbol 7">{t('sports.futbol_7')}</option>
+                      <option value="Fútbol Sala">{t('sports.futbol_sala')}</option>
                       <option value="Pádel">Pádel</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Precio/h</label>
+                    <label className="block text-xs font-bold text-gray-400 uppercase mb-1">{t('admin.fields.price_per_hour')}</label>
                     <input 
                       type="number" step="0.01" required
-                      className="w-full p-3 bg-gray-50 rounded-xl outline-none"
+                      className="w-full p-3 bg-gray-50 text-gray-900 font-bold rounded-xl outline-none"
                       value={newCampo.precioPorHora}
                       onChange={e => setNewCampo({...newCampo, precioPorHora: parseFloat(e.target.value)})}
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Campo Padre (Opcional)</label>
+                  <label className="block text-xs font-bold text-gray-400 uppercase mb-1">{t('admin.fields.parent_field')}</label>
                   <select 
-                    className="w-full p-3 bg-gray-50 rounded-xl outline-none"
+                    className="w-full p-3 bg-gray-50 text-gray-900 font-bold rounded-xl outline-none"
                     value={newCampo.parentCampoId}
                     onChange={e => setNewCampo({...newCampo, parentCampoId: e.target.value})}
                   >
-                    <option value="">Ninguno</option>
+                    <option value="">{t('admin.fields.none')}</option>
                     {campos.filter(c => c.deporte === 'Fútbol 11').map(c => (
                       <option key={c.id} value={c.id}>{c.nombre}</option>
                     ))}
                   </select>
                 </div>
-                <button type="submit" className="w-full py-3 bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-100">Crear Campo</button>
+                <button type="submit" className="w-full py-3 bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-100">{t('admin.fields.create_field')}</button>
               </form>
             </div>
+
 
             <div className="lg:col-span-2 space-y-4">
               {campos.map(campo => (
@@ -206,7 +212,7 @@ const Admin = () => {
                       <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-full font-bold text-gray-500 uppercase">{campo.deporte}</span>
                       <span className="text-xs bg-emerald-100 px-2 py-0.5 rounded-full font-bold text-emerald-600 tracking-tight">{campo.precioPorHora}€/h</span>
                       {campo.parentCampoId && (
-                        <span className="text-xs bg-blue-100 px-2 py-0.5 rounded-full font-bold text-blue-600">Hijo de ID: {campo.parentCampoId}</span>
+                        <span className="text-xs bg-blue-100 px-2 py-0.5 rounded-full font-bold text-blue-600">{t('admin.fields.child_of', { id: campo.parentCampoId })}</span>
                       )}
                     </div>
                   </div>
@@ -227,10 +233,10 @@ const Admin = () => {
             <table className="w-full text-left">
               <thead className="bg-gray-50 border-b border-gray-100">
                 <tr>
-                  <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase">Usuario</th>
-                  <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase">Email</th>
-                  <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase">Rol</th>
-                  <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-right">Acciones</th>
+                  <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase">{t('admin.users.user')}</th>
+                  <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase">{t('admin.users.email')}</th>
+                  <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase">{t('admin.users.role')}</th>
+                  <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-right">{t('admin.users.actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
@@ -245,9 +251,9 @@ const Admin = () => {
                     </td>
                     <td className="px-6 py-4 text-right">
                       {u.role === 'USER' ? (
-                        <button onClick={() => handleChangeRole(u.id, 'ADMIN')} className="text-emerald-600 font-bold text-sm hover:underline">Hacer Admin</button>
+                        <button onClick={() => handleChangeRole(u.id, 'ADMIN')} className="text-emerald-600 font-bold text-sm hover:underline">{t('admin.users.make_admin')}</button>
                       ) : (
-                        <button onClick={() => handleChangeRole(u.id, 'USER')} className="text-gray-400 font-bold text-sm hover:underline">Hacer User</button>
+                        <button onClick={() => handleChangeRole(u.id, 'USER')} className="text-gray-400 font-bold text-sm hover:underline">{t('admin.users.make_user')}</button>
                       )}
                     </td>
                   </tr>
@@ -264,13 +270,13 @@ const Admin = () => {
                 <div className="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 mb-6">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                 </div>
-                <h3 className="text-xl font-black text-gray-900 mb-2">Exportar Datos</h3>
-                <p className="text-gray-500 text-sm mb-6">Descarga un volcado completo de las reservas actuales en formato CSV para auditoría externa.</p>
+                <h3 className="text-xl font-black text-gray-900 mb-2">{t('admin.files.export_data')}</h3>
+                <p className="text-gray-500 text-sm mb-6">{t('admin.files.export_desc')}</p>
                 <button 
                   onClick={() => handleDownload("/admin/reservas/export", "reservas.csv")}
                   className="inline-flex items-center gap-2 px-6 py-3 bg-gray-900 text-white font-bold rounded-2xl hover:bg-black transition-all shadow-lg shadow-gray-200"
                 >
-                  Descargar Reservas (CSV)
+                  {t('admin.files.download_csv')}
                 </button>
               </div>
 
@@ -278,13 +284,13 @@ const Admin = () => {
                 <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center text-white mb-6">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                 </div>
-                <h3 className="text-xl font-black mb-2">Informe de Actividad</h3>
-                <p className="text-emerald-50/80 text-sm mb-6">Genera un documento PDF profesional con el resumen de actividad y métricas de uso de la plataforma.</p>
+                <h3 className="text-xl font-black mb-2">{t('admin.files.activity_report')}</h3>
+                <p className="text-emerald-50/80 text-sm mb-6">{t('admin.files.report_desc')}</p>
                 <button 
                   onClick={() => handleDownload("/admin/reservas/report", "informe_pachangapp.pdf")}
                   className="inline-flex items-center gap-2 px-6 py-3 bg-white text-emerald-700 font-bold rounded-2xl hover:bg-emerald-50 transition-all shadow-xl shadow-emerald-900/20"
                 >
-                  Generar Reporte PDF
+                  {t('admin.files.generate_pdf')}
                 </button>
               </div>
             </div>
@@ -293,8 +299,8 @@ const Admin = () => {
               <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600 mb-6">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
               </div>
-              <h3 className="text-xl font-black text-gray-900 mb-2">Importación Masiva</h3>
-              <p className="text-gray-500 text-sm mb-8">Carga nuevos campos deportivos mediante un archivo CSV. El archivo debe seguir la estructura: Nombre, Deporte, Zona, Precio.</p>
+              <h3 className="text-xl font-black text-gray-900 mb-2">{t('admin.files.bulk_import')}</h3>
+              <p className="text-gray-500 text-sm mb-8">{t('admin.files.import_desc')}</p>
               
               <div className="space-y-4">
                 <div className="relative group">
@@ -306,9 +312,9 @@ const Admin = () => {
                   />
                   <div className={`p-8 border-2 border-dashed rounded-3xl flex flex-col items-center justify-center transition-all ${importFile ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200 group-hover:border-blue-400 group-hover:bg-blue-50'}`}>
                     <span className="text-sm font-bold text-gray-500">
-                      {importFile ? importFile.name : "Seleccionar archivo CSV"}
+                      {importFile ? importFile.name : t('admin.files.select_csv')}
                     </span>
-                    <span className="text-[10px] text-gray-400 mt-1 uppercase tracking-widest">Haz clic o arrastra</span>
+                    <span className="text-[10px] text-gray-400 mt-1 uppercase tracking-widest">{t('admin.files.drag_drop')}</span>
                   </div>
                 </div>
 
@@ -325,21 +331,21 @@ const Admin = () => {
                         body: formData
                       });
                       if (resp.ok) {
-                        alert("Importación completada con éxito");
+                        alert(t('admin.files.import_success'));
                         setImportFile(null);
                         fetchData();
                       } else {
-                        alert("Error al importar el archivo");
+                        alert(t('admin.files.import_error'));
                       }
                     } catch {
-                      alert("Error de red");
+                      alert(t('admin.errors.network_error'));
                     } finally {
                       setImportLoading(false);
                     }
                   }}
                   className="w-full py-4 bg-blue-600 text-white font-bold rounded-2xl shadow-lg shadow-blue-100 disabled:opacity-50 disabled:shadow-none transition-all"
                 >
-                  {importLoading ? "Importando..." : "Subir e Importar"}
+                  {importLoading ? t('admin.files.importing') : t('admin.files.upload_import')}
                 </button>
               </div>
             </div>

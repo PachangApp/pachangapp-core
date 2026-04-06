@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { API_BASE_URL } from "../apiConfig";
 import Navbar from "../components/Navbar";
@@ -8,6 +9,7 @@ import defaultAvatar from "../assets/campos/perfil.png";
 import { getFieldImage } from "../utils/fieldMapping";
 
 const Perfil = () => {
+  const { t } = useTranslation();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -136,7 +138,7 @@ const Perfil = () => {
         })
       });
       if (resp.ok) {
-        alert("Preferencias guardadas correctamente ⚽");
+        alert("Preferencias guardadas correctamente ⚽"); // Keep as string or we can wait, let's keep it simple for alerts or use t if we want, ignoring alerts for now as user requested visual
       }
     } catch (error) {
       console.error(error);
@@ -166,18 +168,25 @@ const Perfil = () => {
         <Navbar />
         <div className="grow flex flex-col items-center justify-center p-6 text-center">
           <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-4 text-2xl">⚠️</div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Error de Perfil</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">{t('profile.profile_error')}</h2>
           <p className="text-gray-500 mb-6">{error}</p>
-          <a href="/login" className="bg-emerald-600 text-white px-6 py-2 rounded-xl font-bold shadow-lg">Ir al Login</a>
+          <a href="/login" className="bg-emerald-600 text-white px-6 py-2 rounded-xl font-bold shadow-lg">{t('profile.go_to_login')}</a>
         </div>
       </div>
     );
   }
 
-  const allPositions = ["Portero", "Defensa Central", "Lateral", "Mediocentro", "Extremo", "Delantero Centro"];
+  const allPositions = [
+    t('profile.positions.goalkeeper'),
+    t('profile.positions.center_back'),
+    t('profile.positions.fullback'),
+    t('profile.positions.midfielder'),
+    t('profile.positions.winger'),
+    t('profile.positions.striker')
+  ];
 
   return (
-    <div className="min-h-screen bg-gray-50 font-['Inter',_sans-serif] pb-32 md:pb-0 overflow-x-hidden">
+    <div className="min-h-screen bg-gray-50 font-['Inter',sans-serif] pb-32 md:pb-0 overflow-x-hidden">
       <Navbar />
 
       <main className="max-w-5xl mx-auto px-4 py-12">
@@ -243,12 +252,12 @@ const Perfil = () => {
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ type: "spring", stiffness: 200, delay: 0.4 }}
-                    className="inline-flex px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full uppercase self-center md:self-auto uppercase tracking-widest"
+                    className="inline-flex px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full uppercase self-center md:self-auto tracking-widest"
                 >
                   RANKING: {user.stats.ranking}
                 </motion.span>
               </div>
-              <p className="text-gray-500 font-medium mb-6">Miembro desde {user.joined}</p>
+              <p className="text-gray-500 font-medium mb-6">{t('profile.member_since', { date: user.joined })}</p>
               
               <div className="flex flex-wrap gap-4 justify-center md:justify-start">
                 <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-xl border border-gray-100 text-sm font-semibold text-gray-700">
@@ -269,7 +278,7 @@ const Perfil = () => {
             className="mb-12"
           >
             <h2 className="text-2xl font-black text-gray-900 mb-6 flex items-center gap-3">
-              Mis Próximos Partidos
+              {t('profile.my_upcoming_matches')}
               <div className="h-1 grow bg-gray-200 rounded-full mt-1 opacity-50"></div>
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -319,18 +328,18 @@ const Perfil = () => {
             className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm mb-12"
         >
           <h3 className="text-xl font-black text-gray-900 mb-6 flex items-center gap-2">
-            ⚽ Preferencias de Posición
+            ⚽ {t('profile.position_preferences')}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[1, 2, 3].map(i => (
               <div key={i}>
-                <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Posición {i}</label>
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">{t('profile.position_num', { num: i })}</label>
                 <select 
                   className="w-full p-3 bg-gray-50 rounded-xl border-none font-bold text-gray-700 outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
                   value={positions[`p${i}`]}
                   onChange={(e) => setPositions({ ...positions, [`p${i}`]: e.target.value })}
                 >
-                  <option value="">Seleccionar...</option>
+                  <option value="">{t('profile.select')}</option>
                   {allPositions.map(pos => <option key={pos} value={pos}>{pos}</option>)}
                 </select>
               </div>
@@ -344,21 +353,21 @@ const Perfil = () => {
             disabled={saving}
             className="mt-8 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-lg shadow-emerald-200 disabled:opacity-50"
           >
-            {saving ? "Guardando..." : "Guardar Preferencias"}
+            {saving ? t('profile.saving') : t('profile.save_preferences')}
           </motion.button>
         </motion.section>
 
         {/* 4. Sección de Estadísticas */}
         <h2 className="text-2xl font-black text-gray-900 mb-6 flex items-center gap-3">
-          Estadísticas Reales
+          {t('profile.real_stats')}
           <div className="h-1 grow bg-gray-200 rounded-full mt-1 opacity-50"></div>
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {[
-            { label: "Partidos Jugados", value: user.stats.partidos, color: "emerald", icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg> },
-            { label: "Victorias", value: user.stats.victorias, color: "blue", icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" /></svg> },
-            { label: "Derrotas", value: user.stats.derrotas, color: "amber", icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> }
+            { label: t('profile.matches_played'), value: user.stats.partidos, color: "emerald", icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg> },
+            { label: t('profile.wins'), value: user.stats.victorias, color: "blue", icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" /></svg> },
+            { label: t('profile.losses'), value: user.stats.derrotas, color: "amber", icon: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> }
           ].map((stat, idx) => (
             <motion.div
                 key={stat.label}
@@ -387,12 +396,12 @@ const Perfil = () => {
             className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden"
         >
           <div className="p-6 border-b border-gray-50 flex justify-between items-center">
-            <h3 className="font-bold text-gray-900 text-lg">Últimas Actividades</h3>
-            <button className="text-emerald-600 text-sm font-bold hover:underline">Ver todo</button>
+            <h3 className="font-bold text-gray-900 text-lg">{t('profile.latest_activities')}</h3>
+            <button className="text-emerald-600 text-sm font-bold hover:underline">{t('profile.view_all')}</button>
           </div>
           <div className="p-6">
             <div className="flex items-center justify-center h-32 text-gray-400 text-sm italic">
-               Pronto podrás ver aquí tu historial de partidos detallado.
+               {t('profile.history_placeholder')}
             </div>
           </div>
         </motion.div>

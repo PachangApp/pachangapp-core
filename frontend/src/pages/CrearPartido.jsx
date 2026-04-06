@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { API_BASE_URL } from "../apiConfig";
 import Navbar from "../components/Navbar";
 import FieldCard from "../components/FieldCard";
@@ -71,6 +72,7 @@ const SubPistaGrid = ({ campoId, fecha, onSelect, timeSlots, submitting }) => {
 
 const CrearPartido = () => {
 
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [campos, setCampos] = useState([]);
@@ -230,7 +232,11 @@ const CrearPartido = () => {
 
 
   const zonas = [...new Set(campos.map(c => c.zona))];
-  const deportes = ["Fútbol 7", "Fútbol 11", "Fútbol Sala"];
+  const deportes = [
+    { value: "Fútbol 7", key: "futbol_7" },
+    { value: "Fútbol 11", key: "futbol_11" },
+    { value: "Fútbol Sala", key: "futbol_sala" }
+  ];
   
   // Si estamos en F7, mostramos solo los "Padres" (F11) para que eligan el recinto
   const filteredCampos = campos.filter(c => {
@@ -263,24 +269,24 @@ const CrearPartido = () => {
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" /></svg>
                 </div>
                 <span className="hidden md:inline text-sm">
-                    {step === 2 && "Cambiar filtros"}
-                    {step === 3 && "Cambiar de pista"}
-                    {step === 4 && "Cambiar horario"}
+                    {step === 2 && t("create_match.change_filters")}
+                    {step === 3 && t("create_match.change_field")}
+                    {step === 4 && t("create_match.change_time")}
                 </span>
             </button>
           )}
 
           <div className="inline-block px-4 py-1.5 mb-4 bg-emerald-100 text-emerald-700 text-[10px] font-black uppercase tracking-widest rounded-full shadow-sm">
-            Paso {step} de 4
+            {t("create_match.step", { current: step, total: 4 })}
           </div>
           <h1 className="text-5xl font-black text-gray-900 tracking-tight">
-            {step === 4 ? "Finalizar" : "Crear"} <span className="text-emerald-600 font-extrabold italic">{step === 4 ? "Pago" : "Partido"}</span>
+            {step === 4 ? t("create_match.step_status") : t("create_match.create_status")} <span className="text-emerald-600 font-extrabold italic">{step === 4 ? t("create_match.payment") : t("create_match.match_status")}</span>
           </h1>
           <p className="mt-4 text-gray-500 font-medium max-w-lg mx-auto">
-            {step === 1 && "Selecciona dónde y cuándo quieres jugar para empezar."}
-            {step === 2 && "Elige la pista que más te guste de las disponibles en tu zona."}
-            {step === 3 && "Selecciona la hora y ajusta los detalles finales de tu partido."}
-            {step === 4 && "Introduce los datos de tu tarjeta para reservar la pista."}
+            {step === 1 && t("create_match.desc_step1")}
+            {step === 2 && t("create_match.desc_step2")}
+            {step === 3 && t("create_match.desc_step3")}
+            {step === 4 && t("create_match.desc_step4")}
           </p>
         </motion.header>
 
@@ -329,26 +335,26 @@ const CrearPartido = () => {
                 <div className="space-y-6">
                   <div>
                     <Dropdown
-                      label="¿En qué zona?"
+                      label={t("create_match.where")}
                       options={zonas}
                       value={filters.zona}
                       onChange={(val) => setFilters({...filters, zona: val})}
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">Modalidad Deportiva</label>
+                    <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">{t("create_match.sport_type")}</label>
                     <div className="grid grid-cols-2 gap-3">
                       {deportes.map(d => (
                         <button
-                          key={d}
-                          onClick={() => setFilters({...filters, deporte: d})}
+                          key={d.value}
+                          onClick={() => setFilters({...filters, deporte: d.value})}
                           className={`py-4 rounded-2xl text-sm font-black transition-all border-2 ${
-                            filters.deporte === d 
+                            filters.deporte === d.value 
                               ? "bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-200" 
                               : "bg-gray-50 border-gray-100 text-gray-500 hover:border-emerald-200"
                           }`}
                         >
-                          {d}
+                          {t(`sports.${d.key}`)}
                         </button>
                       ))}
                     </div>
@@ -357,7 +363,7 @@ const CrearPartido = () => {
                 
                 <div className="space-y-6">
                   <div>
-                    <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">¿Qué día?</label>
+                    <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">{t("create_match.which_day")}</label>
                     <input 
                       type="date"
                       min={new Date().toISOString().split('T')[0]}
@@ -367,8 +373,8 @@ const CrearPartido = () => {
                     />
                   </div>
                   <div className="p-8 bg-emerald-50 rounded-[2.5rem] border border-emerald-100 mt-auto">
-                    <h3 className="font-black text-emerald-800 uppercase text-xs tracking-widest mb-2">Resumen rápido</h3>
-                    <p className="text-emerald-600/80 text-sm font-medium">Estás buscando pistas para <span className="font-bold">{filters.deporte}</span> en <span className="font-bold">{filters.zona}</span> el día <span className="font-bold">{new Date(filters.fecha).toLocaleDateString()}</span>.</p>
+                    <h3 className="font-black text-emerald-800 uppercase text-xs tracking-widest mb-2">{t("create_match.summary")}</h3>
+                    <p className="text-emerald-600/80 text-sm font-medium">{t("create_match.summary_desc", { deporte: filters.deporte, zona: filters.zona, fecha: new Date(filters.fecha).toLocaleDateString() })}</p>
                   </div>
                 </div>
               </div>
@@ -378,7 +384,7 @@ const CrearPartido = () => {
                   onClick={handleNextStep}
                   className="w-full py-6 bg-gray-900 hover:bg-black text-white font-black rounded-3xl transition-all shadow-xl hover:scale-[1.02] active:scale-[0.98] text-xl tracking-tight"
                 >
-                  Continuar a Selección de Pista
+                  {t("create_match.continue_to_selection")}
                 </button>
               </div>
             </div>
@@ -388,7 +394,7 @@ const CrearPartido = () => {
           {step === 2 && (
             <div>
               <div className="mb-10 max-w-4xl mx-auto text-right">
-                  <span className="text-xs font-black text-emerald-600 uppercase tracking-widest">Encontrados: {filteredCampos.length}</span>
+                  <span className="text-xs font-black text-emerald-600 uppercase tracking-widest">{t("create_match.found")}: {filteredCampos.length}</span>
               </div>
 
               {filteredCampos.length > 0 ? (
@@ -410,10 +416,10 @@ const CrearPartido = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5m0 0V11m0 0L9 1M9 1l-3 3m3-3l3 3" />
                       </svg>
                   </div>
-                  <h3 className="text-2xl font-black text-gray-900 mb-2">No hay pistas disponibles</h3>
-                  <p className="text-gray-500 mb-10">Lo sentimos, no hay instalaciones que coincidan con tu búsqueda.</p>
+                   <h3 className="text-2xl font-black text-gray-900 mb-2">{t("create_match.no_fields")}</h3>
+                  <p className="text-gray-500 mb-10">{t("create_match.no_fields_desc")}</p>
                   <button onClick={handlePrevStep} className="px-8 py-4 bg-emerald-600 text-white font-black rounded-2xl hover:bg-emerald-700 transition-all">
-                    Cambiar búsqueda
+                    {t("create_match.change_search")}
                   </button>
                 </div>
               )}
@@ -427,22 +433,22 @@ const CrearPartido = () => {
                 {/* Resumen del pedido */}
                 <div className="md:col-span-1 space-y-6">
                     <div className="bg-white p-6 rounded-[2.5rem] shadow-xl border border-gray-100">
-                        <h3 className="text-lg font-black text-gray-900 mb-6 uppercase tracking-tight">Resumen</h3>
+                        <h3 className="text-lg font-black text-gray-900 mb-6 uppercase tracking-tight">{t("create_match.payment_summary")}</h3>
                         <div className="space-y-4">
                             <div className="flex justify-between">
-                                <span className="text-xs font-bold text-gray-400">Pista</span>
+                                <span className="text-xs font-bold text-gray-400">{t("create_match.field")}</span>
                                 <span className="text-xs font-black text-gray-700">{selectedCampo.nombre}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-xs font-bold text-gray-400">Fecha</span>
+                                <span className="text-xs font-bold text-gray-400">{t("create_match.date")}</span>
                                 <span className="text-xs font-black text-gray-700">{filters.fecha}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-xs font-bold text-gray-400">Hora</span>
+                                <span className="text-xs font-bold text-gray-400">{t("create_match.hour")}</span>
                                 <span className="text-xs font-black text-gray-700">{selectedHora}</span>
                             </div>
                             <div className="pt-4 border-t border-gray-50 flex justify-between items-center">
-                                <span className="text-sm font-black text-gray-900">Total</span>
+                                <span className="text-sm font-black text-gray-900">{t("create_match.total")}</span>
                                 <span className="text-xl font-black text-emerald-600">{selectedCampo.precioPorHora}€</span>
                             </div>
                         </div>
@@ -451,9 +457,9 @@ const CrearPartido = () => {
                     <div className="bg-emerald-50 p-6 rounded-3xl border border-emerald-100">
                         <div className="flex items-center gap-3 text-emerald-700 mb-2">
                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
-                             <span className="text-xs font-black uppercase">Pago Seguro</span>
+                             <span className="text-xs font-black uppercase">{t("create_match.secure_payment")}</span>
                         </div>
-                        <p className="text-[10px] text-emerald-600/70 font-medium">Tus datos están protegidos por encriptación de extremo a extremo.</p>
+                        <p className="text-[10px] text-emerald-600/70 font-medium">{t("create_match.secure_payment_desc")}</p>
                     </div>
                 </div>
 
@@ -462,7 +468,7 @@ const CrearPartido = () => {
                     <form onSubmit={handleProcessPayment} className="bg-white p-10 rounded-[3rem] shadow-2xl border border-gray-100">
                         <div className="space-y-6">
                             <div>
-                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">Nombre en la tarjeta</label>
+                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">{t("create_match.card_name")}</label>
                                 <input 
                                     type="text"
                                     required
@@ -473,7 +479,7 @@ const CrearPartido = () => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">Número de tarjeta</label>
+                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">{t("create_match.card_number")}</label>
                                 <div className="relative">
                                     <input 
                                         type="text"
@@ -495,7 +501,7 @@ const CrearPartido = () => {
                             </div>
                             <div className="grid grid-cols-2 gap-6">
                                 <div>
-                                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">Caducidad</label>
+                                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">{t("create_match.expiry")}</label>
                                     <input 
                                         type="text"
                                         required
@@ -511,7 +517,7 @@ const CrearPartido = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">CVC</label>
+                                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">{t("create_match.cvc")}</label>
                                     <input 
                                         type="text"
                                         required
@@ -534,16 +540,16 @@ const CrearPartido = () => {
                                 {submitting ? (
                                     <>
                                         <div className="w-6 h-6 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
-                                        <span>Procesando Pago...</span>
+                                        <span>{t("create_match.processing_payment")}</span>
                                     </>
                                 ) : (
                                     <>
                                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
-                                        Pagar {selectedCampo.precioPorHora}€ y Reservar
+                                        {t("create_match.pay_and_book", { price: selectedCampo.precioPorHora })}
                                     </>
                                 )}
                             </button>
-                            <p className="text-center mt-6 text-[10px] text-gray-400 font-bold uppercase tracking-widest leading-relaxed">Al pulsar el botón aceptas los términos y condiciones de reserva de pistas de PachangApp.</p>
+                            <p className="text-center mt-6 text-[10px] text-gray-400 font-bold uppercase tracking-widest leading-relaxed">{t("create_match.terms_notice")}</p>
                         </div>
                     </form>
                 </div>
@@ -589,11 +595,11 @@ const CrearPartido = () => {
 
                   <div className="space-y-4 pt-6 border-t border-gray-50">
                     <div className="flex justify-between items-center">
-                      <span className="text-xs font-bold text-gray-400 uppercase">Día</span>
+                      <span className="text-xs font-bold text-gray-400 uppercase">{t("create_match.day")}</span>
                       <span className="font-black text-gray-700">{new Date(filters.fecha).toLocaleDateString()}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-xs font-bold text-gray-400 uppercase">Precio</span>
+                      <span className="text-xs font-bold text-gray-400 uppercase">{t("create_match.price")}</span>
                       <span className="font-black text-emerald-600 underline decoration-2 decoration-emerald-200 ">{selectedCampo.precioPorHora}€/h</span>
                     </div>
                   </div>
@@ -601,9 +607,9 @@ const CrearPartido = () => {
 
                 <div className="bg-emerald-900 text-white p-8 rounded-[2.5rem] shadow-xl relative overflow-hidden group">
                   <div className="absolute -right-4 -bottom-4 w-32 h-32 bg-emerald-800 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-700"></div>
-                  <h4 className="text-sm font-black uppercase tracking-widest text-emerald-300 mb-4 relative z-10">Configuración</h4>
+                  <h4 className="text-sm font-black uppercase tracking-widest text-emerald-300 mb-4 relative z-10">{t("create_match.settings")}</h4>
                   <div className="relative z-10">
-                    <label className="block text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-3">Máx Jugadores: {maxJugadores}</label>
+                    <label className="block text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-3">{t("create_match.max_players")}: {maxJugadores}</label>
                     <input 
                       type="range" 
                       min="2" 
@@ -612,7 +618,7 @@ const CrearPartido = () => {
                       onChange={(e) => setMaxJugadores(e.target.value)}
                       className="w-full accent-emerald-500 mb-4"
                     />
-                    <p className="text-[10px] text-emerald-200/60 leading-relaxed font-medium">Este será el número máximo de personas que podrán apuntarse a tu partido público.</p>
+                    <p className="text-[10px] text-emerald-200/60 leading-relaxed font-medium">{t("create_match.max_players_desc")}</p>
                   </div>
                 </div>
               </div>
@@ -625,7 +631,7 @@ const CrearPartido = () => {
                         {selectedCampo.subPistas?.map((subPista, index) => (
                             <div key={subPista.id} className="bg-white p-8 rounded-[3rem] shadow-xl border border-gray-100">
                                 <div className="flex items-center justify-between mb-8 px-2">
-                                    <h3 className="text-lg font-black text-gray-800 uppercase tracking-tight">Campo {index + 1}</h3>
+                                    <h3 className="text-lg font-black text-gray-800 uppercase tracking-tight">{t("create_match.field_num", { number: index + 1 })}</h3>
                                     <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full uppercase">{subPista.deporte}</span>
                                 </div>
                                 <div className="space-y-3">
@@ -645,12 +651,12 @@ const CrearPartido = () => {
                 ) : (
                     /* VISTA SIMPLE PARA F11 / SALA */
                     <div className="bg-white p-10 rounded-[3rem] shadow-xl border border-gray-100">
-                      <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-8 ml-2">Horarios Disponibles</label>
+                      <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-8 ml-2">{t("create_match.available_schedules")}</label>
                       
                       {loading ? (
                         <div className="flex flex-col items-center justify-center py-20">
                           <div className="w-12 h-12 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin mb-6"></div>
-                          <p className="text-gray-400 font-bold italic">Consultando disponibilidad en tiempo real...</p>
+                          <p className="text-gray-400 font-bold italic">{t("create_match.checking_availability")}</p>
                         </div>
                       ) : (
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -675,7 +681,7 @@ const CrearPartido = () => {
                                     <span>{hora}</span>
                                 )}
                                 {isBooked && (
-                                  <div className="absolute top-2 right-3 text-[8px] font-black uppercase text-red-300 bg-red-100 px-1.5 py-0.5 rounded-full">Ocupado</div>
+                                  <div className="absolute top-2 right-3 text-[8px] font-black uppercase text-red-300 bg-red-100 px-1.5 py-0.5 rounded-full">{t("create_match.occupied")}</div>
                                 )}
                               </button>
                             );
