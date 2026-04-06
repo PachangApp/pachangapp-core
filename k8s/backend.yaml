@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: devIbrahim14/pachangapp-backend:latest
+          image: devibrahim14/pachangapp-backend:latest
           ports:
             - containerPort: 8091
           env:

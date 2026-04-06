@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: devIbrahim14/pachangapp-frontend:latest
+          image: devibrahim14/pachangapp-frontend:latest
           ports:
             - containerPort: 80
 
