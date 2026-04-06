@@ -1,0 +1,53 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pachangapp-ingress
+  annotations:
+    # Le dice a cert-manager que genere certificados SSL automáticamente
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    # Fuerza que todo el tráfico sea HTTPS
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+spec:
+  tls:
+  - hosts:
+    - pachangapp.es
+    - www.pachangapp.es
+    - api.pachangapp.es
+    - n8n.pachangapp.es
+    secretName: pachangapp-tls
+  rules:
+  # 1. Frontend (Web principal)
+  - host: pachangapp.es
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend-service
+            port:
+              number: 80
+
+  # 2. Backend (API REST)
+  - host: api.pachangapp.es
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-service
+            port:
+              number: 8091
+
+  # 3. n8n (Automatizaciones y flujos)
+  - host: n8n.pachangapp.es
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: n8n-service
+            port:
+              number: 5678
