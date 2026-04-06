@@ -1,6 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Auth from "./pages/Auth";
-import Home from "./pages/Home";
 import Inicio from "./pages/Inicio";
 import Perfil from "./pages/Perfil";
 import BuscarPartidos from "./pages/BuscarPartidos";
@@ -37,7 +36,7 @@ const AppContent = () => {
     <>
       <ScrollToTop />
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Inicio />} />
         <Route path="/register" element={<Auth />} />
         <Route path="/login" element={<Auth />} />
         <Route path="/inicio" element={<Inicio />} />
