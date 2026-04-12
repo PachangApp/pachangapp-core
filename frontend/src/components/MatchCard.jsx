@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { getFieldImage } from "../utils/fieldMapping";
+import { API_BASE_URL } from "../apiConfig";
 
 const MatchCard = ({ match, onJoin }) => {
   const { t } = useTranslation();
@@ -14,13 +15,25 @@ const MatchCard = ({ match, onJoin }) => {
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
   const isJoined = participaciones.some(p => p.user?.id === currentUser?.id);
 
+  // Arreglo para que las imágenes relativas del backend se carguen correctamente
+  let displayImage = localImage;
+  if (campo.imagenUrl) {
+    if (campo.imagenUrl.startsWith('http')) {
+      displayImage = campo.imagenUrl;
+    } else {
+      // Asume que es una imagen subida al servidor
+      const baseUrl = API_BASE_URL.replace('/api', ''); // Ajuste: de 'http://localhost:8091/api' a 'http://localhost:8091'
+      displayImage = baseUrl + (campo.imagenUrl.startsWith('/') ? '' : '/') + campo.imagenUrl;
+    }
+  }
+
   return (
     <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 group">
       {/* Imagen del partido */}
       <div className="relative h-48 sm:h-52 overflow-hidden bg-gray-100">
-        {(campo.imagenUrl || localImage) ? (
+        {displayImage ? (
           <img 
-            src={campo.imagenUrl || localImage} 
+            src={displayImage} 
             alt={campo.nombre} 
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
