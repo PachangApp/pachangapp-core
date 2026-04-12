@@ -1019,3 +1019,81 @@ kubectl rollout restart deployment/backend
 ---
 
 > 🎉 **¡Si todas las URLs cargan con el candado HTTPS y los pods están en Running, el Apartado 8 está 100% completado!**
+
+---
+
+## 🔧 PENDIENTE — Problemas detectados a resolver
+
+### PROBLEMA 1 — Certificado SSL en `False` (HTTPS no activo)
+
+El certificado `pachangapp-tls` lleva más de 60 minutos en estado `READY: False`. Esto significa que Let's Encrypt **no ha podido validar el dominio**.
+
+**¿Por qué pasa?** Let's Encrypt necesita acceder a `http://pachangapp.es/.well-known/acme-challenge/...` para verificar que el dominio es tuyo. Si el puerto 80 no está abierto o el frontend no respondía cuando intentó validar, falla.
+
+**Diagnóstico — ejecuta esto en el servidor (SSH):**
+
+```bash
+# Ver el estado detallado del certificado
+sudo kubectl describe certificate pachangapp-tls
+
+# Ver si hay un "challenge" pendiente
+sudo kubectl get challenge
+
+# Ver los detalles del challenge (si existe)
+sudo kubectl describe challenge
+```
+
+Busca en la salida si aparece algo como `pending` o `failed` en el campo `reason`.
+
+**Solución más habitual:**
+
+1. Verifica que en tu **Security Group de AWS** tienes el puerto **80 (HTTP)** abierto para `0.0.0.0/0`. Sin él, Let's Encrypt no puede validar.
+2. Si los pods ya están en `Running`, borra el certificado para forzar que se regenere:
+```bash
+sudo kubectl delete certificate pachangapp-tls
+# cert-manager lo recreará automáticamente en 1-2 minutos
+sudo kubectl get certificate -w
+# Espera hasta que READY = True
+```
+
+---
+
+### PROBLEMA 2 — El frontend no conecta con el backend en producción
+
+**Por qué falla:** El frontend tiene el archivo `src/apiConfig.js` hardcodeado con `localhost:8091`. En producción, el navegador del usuario intenta conectar a `http://localhost:8091/api` en su propio ordenador, que claramente no existe.
+
+**El archivo a modificar es `frontend/src/apiConfig.js`:**
+
+```javascript
+// Detectamos si estamos en la App de Capacitor (móvil) o en el navegador del PC
+const isCapacitor = window.location.protocol === 'capacitor:' || !!window.Capacitor?.isNativePlatform();
+
+// Detectamos si estamos en producción (dominio real) o en desarrollo (localhost)
+const isProduction = window.location.hostname === 'pachangapp.es' || window.location.hostname === 'www.pachangapp.es';
+
+// Tu IP de red local (para el móvil en desarrollo)
+const PC_IP = "192.168.18.156";
+const PORT = "8091";
+
+export const API_BASE_URL = isCapacitor
+  ? `http://${PC_IP}:${PORT}/api`          // Móvil en desarrollo → IP local
+  : isProduction
+    ? `https://api.pachangapp.es/api`       // Navegador en producción → dominio real
+    : `http://localhost:${PORT}/api`;       // Navegador en desarrollo → localhost
+```
+
+**Pasos para aplicarlo:**
+1. Modifica el archivo `frontend/src/apiConfig.js` con el código de arriba.
+2. Haz commit y push a `feature-despliegue`:
+```powershell
+git add frontend/src/apiConfig.js
+git commit -m "fix: API URL apunta a produccion en el navegador"
+git push
+```
+3. El CI/CD reconstruirá la imagen del frontend con la URL correcta y lo desplegará automáticamente.
+4. En unos minutos podrás iniciar sesión desde `https://pachangapp.es`.
+
+> ⚠️ También hay un fetch hardcodeado en `frontend/src/components/home/CamposDestacados.jsx` en la línea 13. Cámbialo de:
+> `fetch("http://localhost:8091/api/campos")`
+> a:
+> `fetch(\`${API_BASE_URL}/campos\`)` (importando `API_BASE_URL` desde `apiConfig.js`)
