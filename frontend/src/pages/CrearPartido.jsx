@@ -6,6 +6,7 @@ import { API_BASE_URL } from "../apiConfig";
 import Navbar from "../components/Navbar";
 import FieldCard from "../components/FieldCard";
 import Dropdown from "../components/Dropdown";
+import DatePicker from "../components/DatePicker";
 import { getFieldImage } from "../utils/fieldMapping";
 
 const SubPistaGrid = ({ campoId, fecha, onSelect, timeSlots, submitting }) => {
@@ -363,13 +364,12 @@ const CrearPartido = () => {
                 
                 <div className="space-y-6">
                   <div>
-                    <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">{t("create_match.which_day")}</label>
-                    <input 
-                      type="date"
-                      min={new Date().toISOString().split('T')[0]}
+                    <DatePicker 
+                      label={t("create_match.which_day")}
                       value={filters.fecha}
-                      onChange={(e) => setFilters({...filters, fecha: e.target.value})}
-                      className="w-full px-6 py-5 bg-gray-50 border-none rounded-3xl focus:ring-4 focus:ring-emerald-500/20 font-bold text-gray-700 transition-all text-lg"
+                      minDate={new Date().toISOString().split('T')[0]}
+                      onChange={(val) => setFilters({...filters, fecha: val})}
+                      className="w-full"
                     />
                   </div>
                   <div className="p-8 bg-emerald-50 rounded-[2.5rem] border border-emerald-100 mt-auto">

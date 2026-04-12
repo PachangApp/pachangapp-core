@@ -6,6 +6,7 @@ import { API_BASE_URL } from "../apiConfig";
 import Navbar from "../components/Navbar";
 import MatchCard from "../components/MatchCard";
 import Dropdown from "../components/Dropdown";
+import DatePicker from "../components/DatePicker";
 
 const BuscarPartidos = () => {
   const { t } = useTranslation();
@@ -163,19 +164,15 @@ const BuscarPartidos = () => {
               className="w-full md:w-60"
             />
 
-            {/* Fecha */}
-            <div className="w-full md:w-60">
-              <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">{t('create_match.date')}</label>
-              <div className="relative">
-                <input 
-                  type="date" 
-                  name="date"
-                  className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-emerald-500 transition-all font-bold text-gray-700 block"
-                  value={filters.date}
-                  onChange={handleFilterChange}
-                />
-              </div>
-            </div>
+            {/* Fecha (Modern DatePicker) */}
+            <DatePicker
+              label={t('create_match.date')}
+              value={filters.date}
+              onChange={(val) => setFilters({ ...filters, date: val })}
+              className="w-full md:w-60"
+              clearable={true}
+              placeholder={t('search_matches.all')}
+            />
           </motion.div>
         </section>
 

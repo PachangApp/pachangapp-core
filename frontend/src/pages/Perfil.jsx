@@ -274,7 +274,7 @@ const Perfil = () => {
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 1.2 }}
+            transition={{ duration: 1.2, delay: 0.6 }}
             className="mb-12"
           >
             <h2 className="text-2xl font-black text-gray-900 mb-6 flex items-center gap-3">
@@ -288,7 +288,7 @@ const Perfil = () => {
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ duration: 0.8, delay: idx * 0.15 }}
+                    transition={{ duration: 0.8, delay: idx * 0.35 }}
                 >
                     <Link 
                         to={`/partido/${match.id}`}
