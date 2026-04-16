@@ -5,7 +5,16 @@ import pachanBotImg from "../assets/PachanBot.png";
 const ChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { id: 1, text: "¡Hola! Soy PachanBot ⚽. ¿En qué puedo ayudarte hoy?", sender: "bot" }
+    { 
+      id: 1, 
+      text: "¡Hola! Soy PachanBot ⚽. ¿En qué puedo ayudarte hoy?", 
+      sender: "bot",
+      options: [
+        { id: "buscar", text: "🔍 Buscar partido libre", action: "buscar_partido" },
+        { id: "reservar", text: "🏟️ Cómo reservar pista", action: "como_reservar" },
+        { id: "dudas", text: "❓ Otras dudas comunes", action: "dudas" }
+      ]
+    }
   ]);
   const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -19,6 +28,51 @@ const ChatBot = () => {
     scrollToBottom();
   }, [messages]);
 
+  const processBotResponse = async (actionOrText) => {
+    // Definimos si es una acción de botón o texto libre
+    const isAction = ["buscar_partido", "como_reservar", "dudas"].includes(actionOrText);
+    
+    // Si es una acción, buscamos el texto descriptivo para que la IA tenga contexto
+    let displayMessage = actionOrText;
+    if (actionOrText === "buscar_partido") displayMessage = "Busca un partido libre para jugar";
+    if (actionOrText === "como_reservar") displayMessage = "Dime cómo puedo reservar una pista";
+    if (actionOrText === "dudas") displayMessage = "Tengo dudas sobre el funcionamiento de la app";
+
+    const payload = {
+      action: isAction ? actionOrText : "buscar_partido",
+      chatInput: isAction ? displayMessage : actionOrText, // Enviamos siempre texto a la IA
+      sessionId: "sesion-pachangueo" // Identificador para la memoria de n8n
+    };
+
+    try {
+      const response = await fetch("http://localhost:5678/webhook-test/pachanbot-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) throw new Error("Error en la comunicación con n8n");
+      
+      const data = await response.json();
+
+      const botResponse = { 
+        id: Date.now() + 1, 
+        text: data.respuesta || "No he recibido una respuesta clara de mi cerebro central... 🤖", 
+        sender: "bot" 
+      };
+      setMessages(prev => [...prev, botResponse]);
+      setIsTyping(false);
+    } catch (error) {
+      console.error("ChatBot Error:", error);
+      setIsTyping(false);
+      setMessages(prev => [...prev, { 
+        id: Date.now(), 
+        text: "Ups, los servidores de PachangApp están calentando. Prueba de nuevo en unos segundos. ⚽", 
+        sender: "bot" 
+      }]);
+    }
+  };
+
   const handleSend = async () => {
     if (!inputValue.trim()) return;
 
@@ -27,24 +81,16 @@ const ChatBot = () => {
     setInputValue("");
     setIsTyping(true);
 
-    // Simulación de respuesta o llamada a n8n/Backend
-    try {
-      // Aquí iría el fetch a tu endpoint de n8n
-      // const response = await fetch('TU_WEBHOOK_URL', { ... })
-      
-      setTimeout(() => {
-        const botResponse = { 
-          id: Date.now() + 1, 
-          text: "Estoy procesando tu solicitud... Por ahora soy un prototipo, pero pronto podré buscarte pistas en tiempo real. 🚀", 
-          sender: "bot" 
-        };
-        setMessages(prev => [...prev, botResponse]);
-        setIsTyping(false);
-      }, 1500);
-    } catch {
-      setIsTyping(false);
-      setMessages(prev => [...prev, { id: Date.now(), text: "Ups, algo ha fallado en mi sistema central.", sender: "bot" }]);
-    }
+    processBotResponse(inputValue);
+  };
+
+  const handleOptionClick = (opt) => {
+    const userMessage = { id: Date.now(), text: opt.text, sender: "user" };
+    setMessages(prev => [...prev, userMessage]);
+    setIsTyping(true);
+    
+    // Process the specific action string in n8n
+    processBotResponse(opt.action);
   };
 
   return (
@@ -94,7 +140,20 @@ const ChatBot = () => {
                       : "bg-white text-gray-700 self-start rounded-tl-none border border-gray-100"
                   }`}
                 >
-                  {msg.text}
+                  <span style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{msg.text}</span>
+                  {msg.options && (
+                    <div className="mt-3 flex flex-col gap-2">
+                      {msg.options.map(opt => (
+                        <button 
+                          key={opt.id}
+                          onClick={() => handleOptionClick(opt)}
+                          className="bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200 text-xs font-bold py-2.5 px-3 rounded-xl text-left transition-colors shadow-sm active:scale-95 duration-100"
+                        >
+                          {opt.text}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </motion.div>
               ))}
               {isTyping && (

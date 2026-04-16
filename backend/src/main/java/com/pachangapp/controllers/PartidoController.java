@@ -46,6 +46,36 @@ public class PartidoController {
         return partidoRepository.findByEstadoOrderByReservaFechaAsc("ABIERTO", PageRequest.of(page, 4));
     }
 
+    @GetMapping("/search")
+    public java.util.List<java.util.Map<String, Object>> searchPartidos(
+            @RequestParam(required = false) String lugar,
+            @RequestParam(required = false) String fecha,
+            @RequestParam(defaultValue = "0") int page) {
+        
+        java.time.LocalDate localDate = null;
+        if (fecha != null && !fecha.isEmpty()) {
+            try {
+                localDate = java.time.LocalDate.parse(fecha);
+            } catch (Exception e) {
+                // Ignorar error de parseo
+            }
+        }
+        
+        org.springframework.data.domain.Page<Partido> partidos = partidoRepository.searchPartidos(lugar, localDate, org.springframework.data.domain.PageRequest.of(page, 20));
+
+        return partidos.getContent().stream().map(p -> {
+            java.util.Map<String, Object> map = new java.util.HashMap<>();
+            map.put("id", p.getId());
+            map.put("lugar", p.getReserva().getCampo().getNombre());
+            map.put("fecha", p.getReserva().getFecha().toString());
+            map.put("hora", p.getReserva().getHoraInicio().toString().substring(0, 5)); // HH:mm
+            map.put("deporte", p.getDeporte());
+            map.put("plazasLibres", p.getMaxJugadores() - p.getParticipaciones().size());
+            map.put("precio", p.getReserva().getCampo().getPrecioPorHora());
+            return map;
+        }).collect(java.util.stream.Collectors.toList());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Partido> getPartidoById(@PathVariable Long id) {
         return partidoRepository.findById(id)

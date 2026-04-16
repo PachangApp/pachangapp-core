@@ -60,7 +60,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/", "/index.html", "/static/**", "/assets/**", "/*.svg").permitAll()
                 .requestMatchers("/api/users/login", "/api/users/register", "/api/users/verify").permitAll()
-                .requestMatchers("/api/campos").permitAll()
+                .requestMatchers("/api/campos", "/api/partidos", "/api/partidos/search").permitAll()
                 .requestMatchers("/api/files/**").permitAll()
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll()

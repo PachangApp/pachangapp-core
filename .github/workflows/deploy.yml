@@ -3,6 +3,7 @@ name: CI/CD PachangApp
 on:
   push:
     branches: [ "feature-despliegue" ]
+  workflow_dispatch:
 
 jobs:
 
@@ -55,7 +56,9 @@ jobs:
           key: ${{ secrets.AWS_SSH_KEY }}
           script: |
             cd /home/ubuntu/pachangapp-core
-            git pull origin feature-despliegue
+            git fetch origin
+            git checkout ${{ github.ref_name }}
+            git pull origin ${{ github.ref_name }}
             sudo kubectl apply -f k8s/
             sudo kubectl rollout restart deployment/backend
             sudo kubectl rollout restart deployment/frontend
