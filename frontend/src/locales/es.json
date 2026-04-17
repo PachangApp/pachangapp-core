@@ -7,6 +7,9 @@
     "about_us": "Conócenos",
     "admin": "Administración",
     "logout": "Salir",
+    "torneos": "Torneos",
+    "explore": "Explorar",
+    "create": "Crear",
     "welcome": "Bienvenido",
     "hello": "¡Hola {{name}}!"
   },

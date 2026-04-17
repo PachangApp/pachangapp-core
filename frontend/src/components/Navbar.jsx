@@ -36,6 +36,7 @@ const Navbar = () => {
     { name: t("navbar.profile"), path: "/perfil" },
     { name: t("navbar.search_matches"), path: "/buscar-partidos" },
     { name: t("navbar.create_match"), path: "/crear-partido" },
+    { name: t("navbar.torneos"), path: "/torneos" },
     { name: t("navbar.about_us"), path: "/conocenos" },
     ...(user?.role === 'ROLE_ADMIN' ? [{ name: t("navbar.admin"), path: "/admin" }] : []),
   ];

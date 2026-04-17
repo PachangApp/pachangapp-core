@@ -3,7 +3,7 @@ import Auth from "./pages/Auth";
 import Inicio from "./pages/Inicio";
 import Perfil from "./pages/Perfil";
 import BuscarPartidos from "./pages/BuscarPartidos";
-import CamposDisponibles from "./pages/CamposDisponibles";
+import Torneos from "./pages/Torneos";
 import CrearPartido from "./pages/CrearPartido";
 import Conocenos from "./pages/Conocenos";
 import ChatBot from "./components/ChatBot";
@@ -43,7 +43,7 @@ const AppContent = () => {
         <Route path="/perfil" element={<Perfil />} />
         <Route path="/buscar-partidos" element={<BuscarPartidos />} />
         <Route path="/crear-partido" element={<CrearPartido />} />
-        <Route path="/campos-disponibles" element={<CamposDisponibles />} />
+        <Route path="/torneos" element={<Torneos />} />
         <Route path="/conocenos" element={<Conocenos />} />
         <Route path="/partido/:id" element={<MatchDetail />} />
         <Route path="/admin" element={<Admin />} />

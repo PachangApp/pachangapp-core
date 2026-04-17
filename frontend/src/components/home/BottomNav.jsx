@@ -1,32 +1,43 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const BottomNav = () => {
+  const { t } = useTranslation();
   const location = useLocation();
 
   const navItems = [
-    { name: "Inicio", path: "/inicio", icon: "🏠" },
-    { name: "Explorar", path: "/buscar-partidos", icon: "🔍" },
-    { name: "Crear", path: "/crear-partido", icon: "+", isPrimary: true },
-    { name: "Campos", path: "/campos-disponibles", icon: "🏟️" },
-    { name: "Perfil", path: "/perfil", icon: "👤" },
+    { name: t("navbar.home"), path: "/inicio", icon: "🏠" },
+    { name: t("navbar.explore"), path: "/buscar-partidos", icon: "🔍" },
+    { name: t("navbar.create"), path: "/crear-partido", icon: "+", isPrimary: true },
+    { name: t("navbar.torneos"), path: "/torneos", icon: "🏆" },
+    { name: t("navbar.profile"), path: "/perfil", icon: "👤" },
   ];
 
   return (
-    <nav className="fixed bottom-0 w-full bg-white border-t border-gray-200 flex justify-around p-2 pb-safe z-50 md:hidden">
+    <nav className="fixed bottom-0 w-full bg-white border-t border-gray-200 flex justify-around items-end pb-safe z-[100] md:hidden h-[72px] overflow-visible px-2">
       {navItems.map((item) => {
         const isActive = location.pathname === item.path;
 
         if (item.isPrimary) {
           return (
-            <div key="primary-action" className="flex flex-col items-center justify-center -translate-y-4">
-              <Link
-                to={item.path}
-                className="bg-emerald-600 text-white h-14 w-14 rounded-full shadow-[0_4px_12px_rgba(16,185,129,0.4)] text-2xl font-bold flex items-center justify-center"
-              >
-                {item.icon}
-              </Link>
-            </div>
+            <Link
+              key={item.name}
+              to={item.path}
+              className="flex flex-col items-center justify-end w-16 h-full pb-2 relative transition-all active:scale-95"
+            >
+              {/* Botón flotante circular, cortado al medio por el borde del footer. 
+                  h-15 w-15 (60px). -top-[30px] lo posiciona exactamente en la mitad de la línea.
+                  border-white simula el corte visual sobre el borde gris del navbar. */}
+              <div className="absolute -top-[30px] bg-emerald-600 text-white h-[60px] w-[60px] rounded-full shadow-[0_4px_12px_rgba(16,185,129,0.35)] text-3xl font-medium flex items-center justify-center border-[4px] border-white z-10 transition-transform">
+                <span className="mb-1 leading-none">{item.icon}</span>
+              </div>
+              
+              {/* El texto se alinea en la misma línea base que los demás textos gracias al h-full y pb-2 uniformes */}
+              <span className={`text-[10px] whitespace-nowrap mt-auto ${isActive ? "text-emerald-600 font-bold" : "text-gray-400 font-medium"}`}>
+                {item.name}
+              </span>
+            </Link>
           );
         }
 
@@ -34,11 +45,11 @@ const BottomNav = () => {
           <Link
             key={item.name}
             to={item.path}
-            className={`flex flex-col items-center justify-center w-16 transition-colors ${
+            className={`flex flex-col items-center justify-end w-16 h-full pb-2 transition-colors ${
               isActive ? "text-emerald-600" : "text-gray-400 hover:text-gray-600"
             }`}
           >
-            <span className={`text-2xl mb-1 ${isActive ? "scale-110 transition-transform" : ""}`}>
+            <span className={`text-2xl mb-1 mt-auto ${isActive ? "scale-110 transition-transform" : ""}`}>
               {item.icon}
             </span>
             <span className={`text-[10px] whitespace-nowrap ${isActive ? "font-bold" : "font-medium"}`}>

@@ -7,6 +7,9 @@
     "about_us": "About us",
     "admin": "Admin",
     "logout": "Logout",
+    "torneos": "Tournaments",
+    "explore": "Explore",
+    "create": "Create",
     "welcome": "Welcome",
     "hello": "Hello {{name}}!"
   },
