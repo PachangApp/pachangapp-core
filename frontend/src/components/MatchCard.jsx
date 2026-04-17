@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { getFieldImage } from "../utils/fieldMapping";
+import { formatDate } from "../utils/dateFormatter";
 import { API_BASE_URL } from "../apiConfig";
 
 const MatchCard = ({ match, onJoin }) => {
@@ -28,7 +29,7 @@ const MatchCard = ({ match, onJoin }) => {
   }
 
   return (
-    <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 group">
+    <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 group flex flex-col h-full">
       {/* Imagen del partido */}
       <div className="relative h-48 sm:h-52 overflow-hidden bg-gray-100">
         {displayImage ? (
@@ -61,7 +62,7 @@ const MatchCard = ({ match, onJoin }) => {
         {/* Hora y Plazas */}
         <div className="absolute bottom-4 left-4 right-4 flex justify-between items-center text-white drop-shadow-md">
             <span className="bg-black/40 backdrop-blur-md px-3 py-1 rounded-lg text-xs font-bold">
-                {fecha} • {horaInicio.substring(0, 5)}
+                {formatDate(fecha)} • {horaInicio.substring(0, 5)}
             </span>
             <span className="bg-black/40 backdrop-blur-md px-3 py-1 rounded-lg text-xs font-bold">
                 {participaciones.length}/{maxJugadores}
@@ -70,8 +71,8 @@ const MatchCard = ({ match, onJoin }) => {
       </div>
 
       {/* Contenido info */}
-      <div className="p-5">
-        <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-emerald-600 transition-colors">
+      <div className="p-5 flex flex-col flex-grow">
+        <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-emerald-600 transition-colors line-clamp-2 h-14">
           {t('match_card.match_at', { campo: campo.nombre })}
         </h3>
         <div className="flex items-center gap-2 text-gray-500 text-sm mb-4">

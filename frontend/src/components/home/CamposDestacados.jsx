@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { getFieldImage } from "../../utils/fieldMapping";
 
 const CamposDestacados = () => {
+  const navigate = useNavigate();
   const [campos, setCampos] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -50,7 +51,7 @@ const CamposDestacados = () => {
           return (
           <div 
             key={campo.id} 
-            onClick={() => window.location.href = "/campos-disponibles"}
+            onClick={() => navigate("/campos-disponibles")}
             className="min-w-[260px] sm:min-w-[300px] shrink-0 snap-center rounded-3xl overflow-hidden relative group cursor-pointer shadow-sm hover:shadow-xl transition-all duration-500"
           >
             {/* Imagen del campo con fallback al gradiente */}

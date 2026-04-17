@@ -14,6 +14,8 @@ const BuscarPartidos = () => {
   const [matches, setMatches] = useState([]);
   const [allCampos, setAllCampos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [visibleCount, setVisibleCount] = useState(4);
+
 
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -63,10 +65,18 @@ const BuscarPartidos = () => {
   }, [fetchMatches]);
 
   const handleLoadMore = () => {
-    const nextPage = page + 1;
-    if (nextPage < totalPages) {
-      setPage(nextPage);
-      fetchMatches(nextPage, true);
+    if (visibleCount < filteredMatches.length) {
+      // Si tenemos más partidos ya cargados pero no visibles, mostramos 4 más
+      setVisibleCount(prev => prev + 4);
+    } else {
+      // Si ya mostramos todos los cargados, pedimos la siguiente página al backend
+      const nextPage = page + 1;
+      if (nextPage < totalPages) {
+        setPage(nextPage);
+        fetchMatches(nextPage, true);
+        // Al cargar más del backend, también incrementamos lo que se puede ver
+        setVisibleCount(prev => prev + 4);
+      }
     }
   };
 
@@ -168,6 +178,7 @@ const BuscarPartidos = () => {
             <DatePicker
               label={t('create_match.date')}
               value={filters.date}
+              minDate={new Date().toISOString().split('T')[0]}
               onChange={(val) => setFilters({ ...filters, date: val })}
               className="w-full md:w-60"
               clearable={true}
@@ -200,7 +211,7 @@ const BuscarPartidos = () => {
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
             >
               <AnimatePresence mode="popLayout">
-                {filteredMatches.map((match, index) => (
+                {filteredMatches.slice(0, visibleCount).map((match, index) => (
                   <motion.div
                     key={match.id}
                     layout
@@ -219,7 +230,7 @@ const BuscarPartidos = () => {
               </AnimatePresence>
             </motion.div>
 
-            {page + 1 < totalPages && (
+            {(visibleCount < filteredMatches.length || page + 1 < totalPages) && (
               <div className="mt-12 text-center">
                 <button 
                   onClick={handleLoadMore}

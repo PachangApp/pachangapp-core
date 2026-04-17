@@ -1,7 +1,8 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import logo from "../assets/logo pachangapp.png";
 import LanguageSelector from "./LanguageSelector";
 
 const Navbar = () => {
@@ -9,6 +10,7 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [user, setUser] = React.useState(JSON.parse(localStorage.getItem("user") || "null"));
+  const [showLogoutModal, setShowLogoutModal] = React.useState(false);
 
   React.useEffect(() => {
     const syncUser = () => {
@@ -19,8 +21,13 @@ const Navbar = () => {
   }, []);
 
   const handleLogout = () => {
+    setShowLogoutModal(true);
+  };
+
+  const confirmLogout = () => {
     localStorage.removeItem("user");
     setUser(null);
+    setShowLogoutModal(false);
     navigate("/");
   };
 
@@ -36,14 +43,12 @@ const Navbar = () => {
   const isActive = (path) => location.pathname === path;
 
   return (
+    <>
     <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 pt-[env(safe-area-inset-top)] transition-all">
       {/* 1. MÓVIL: Header Corto y Limpio (Replicado de Inicio) */}
-      <div className="md:hidden flex justify-between items-center p-4">
-        <Link to="/inicio">
-          <h1 className="text-xl font-black text-emerald-600 tracking-tight">PachangApp ⚽</h1>
-          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-0.5">
-            {user ? t("navbar.hello", { name: user.username }) : t("navbar.welcome")}
-          </p>
+      <div className="md:hidden flex justify-between items-center px-4 py-1">
+        <Link to="/inicio" className="flex items-center">
+          <img src={logo} alt="PachangApp Logo" className="w-[80px] h-[80px] object-contain" />
         </Link>
         <div className="flex items-center gap-3">
             <LanguageSelector />
@@ -59,6 +64,15 @@ const Navbar = () => {
                     alt="Perfil"
                 />
             </Link>
+            
+            <button
+                onClick={handleLogout}
+                className="w-9 h-9 flex items-center justify-center rounded-full bg-red-50 text-red-600 transition-all active:scale-95"
+            >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+            </button>
         </div>
       </div>
 
@@ -66,11 +80,9 @@ const Navbar = () => {
       <div className="hidden md:block max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           {/* Logo */}
-          <Link to="/inicio" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center transition-transform hover:scale-110">
-              <span className="text-white font-black text-sm">P</span>
-            </div>
-            <span className="text-gray-900 font-black text-xl tracking-tight">
+          <Link to="/inicio" className="flex items-center gap-3">
+            <img src={logo} alt="Logo" className="w-[72px] h-[72px] object-contain transition-transform hover:scale-110" />
+            <span className="text-emerald-600 font-black text-xl tracking-tight">
               PachangApp
             </span>
           </Link>
@@ -127,6 +139,45 @@ const Navbar = () => {
         </div>
       </div>
     </nav>
+    <AnimatePresence>
+      {showLogoutModal && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-gray-950/60 backdrop-blur-md">
+            <motion.div 
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl text-center border border-gray-100"
+            >
+                <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6 text-red-500">
+                    <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                </div>
+                
+                <h3 className="text-xl font-black text-gray-900 mb-2">¿Cerrar sesión?</h3>
+                <p className="text-gray-500 font-medium mb-8 leading-relaxed">
+                    Seguro que desea salir de PachangApp? <br/>¡Te esperaremos para la próxima!
+                </p>
+                
+                <div className="flex flex-col gap-3">
+                    <button 
+                        onClick={confirmLogout}
+                        className="w-full py-4 bg-red-600 text-white font-black rounded-2xl shadow-lg shadow-red-600/20 hover:bg-red-700 transition-all active:scale-95"
+                    >
+                        Sí, cerrar sesión
+                    </button>
+                    <button 
+                        onClick={() => setShowLogoutModal(false)}
+                        className="w-full py-4 bg-emerald-50 text-emerald-700 font-black rounded-2xl hover:bg-emerald-100 transition-all active:scale-95"
+                    >
+                        No, me quedo
+                    </button>
+                </div>
+            </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+    </>
   );
 };
 

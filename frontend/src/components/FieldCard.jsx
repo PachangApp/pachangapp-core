@@ -7,7 +7,7 @@ const FieldCard = ({ campo, onBook }) => {
 
 
   return (
-    <div className="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 group">
+    <div className="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 group flex flex-col h-full">
       <div className="relative h-48 bg-gray-100 flex items-center justify-center p-4">
         {(imagenUrl || localImage) ? (
           <img 
@@ -44,8 +44,8 @@ const FieldCard = ({ campo, onBook }) => {
       </div>
 
       {/* Info */}
-      <div className="p-6">
-        <h3 className="text-xl font-black text-gray-900 mb-1 group-hover:text-emerald-600 transition-colors">
+      <div className="p-6 flex flex-col flex-grow">
+        <h3 className="text-xl font-black text-gray-900 mb-1 group-hover:text-emerald-600 transition-colors line-clamp-2 h-14">
           {nombre}
         </h3>
         <p className="text-gray-500 text-sm font-medium mb-4 flex items-center gap-1.5">

@@ -8,6 +8,7 @@ import FieldCard from "../components/FieldCard";
 import Dropdown from "../components/Dropdown";
 import DatePicker from "../components/DatePicker";
 import { getFieldImage } from "../utils/fieldMapping";
+import { formatDate } from "../utils/dateFormatter";
 
 const SubPistaGrid = ({ campoId, fecha, onSelect, timeSlots, submitting }) => {
   const [bookedSlots, setBookedSlots] = useState([]);
@@ -49,6 +50,17 @@ const SubPistaGrid = ({ campoId, fecha, onSelect, timeSlots, submitting }) => {
     <div className="grid grid-cols-2 gap-3">
       {timeSlots.map(hora => {
         const isBooked = bookedSlots.includes(hora);
+        
+        // Nueva lógica: Filtrar horas pasadas si es hoy
+        const isToday = fecha === new Date().toISOString().split('T')[0];
+        const currentTime = new Date();
+        const [h, m] = hora.split(':').map(Number);
+        const slotDate = new Date();
+        slotDate.setHours(h, m, 0, 0);
+        const isPast = isToday && slotDate < currentTime;
+
+        if (isPast) return null; // No mostramos horas pasadas
+
         return (
           <button
             key={hora}
@@ -179,6 +191,18 @@ const CrearPartido = () => {
 
   const handleProcessPayment = async (e) => {
     e.preventDefault();
+    
+    // Validaciones extra manuales
+    if (paymentData.cardName.trim().length < 3) {
+      setMessage({ text: "El nombre en la tarjeta debe tener al menos 3 caracteres", type: "error" });
+      return;
+    }
+    
+    if (paymentData.cardNumber.replace(/\s/g, '').length < 16) {
+      setMessage({ text: "El número de tarjeta no es válido", type: "error" });
+      return;
+    }
+
     setSubmitting(true);
     // Simular retraso de pasarela de pago
     setTimeout(() => {
@@ -242,7 +266,7 @@ const CrearPartido = () => {
   // Si estamos en F7, mostramos solo los "Padres" (F11) para que eligan el recinto
   const filteredCampos = campos.filter(c => {
     if (filters.deporte === "Fútbol 7") {
-        return c.deporte === "Fútbol 11"; // Mostramos todos los complejos para F7
+        return c.deporte === "Fútbol 11" && c.zona === filters.zona; 
     }
     return c.zona === filters.zona && c.deporte === filters.deporte;
   });
@@ -374,7 +398,7 @@ const CrearPartido = () => {
                   </div>
                   <div className="p-8 bg-emerald-50 rounded-[2.5rem] border border-emerald-100 mt-auto">
                     <h3 className="font-black text-emerald-800 uppercase text-xs tracking-widest mb-2">{t("create_match.summary")}</h3>
-                    <p className="text-emerald-600/80 text-sm font-medium">{t("create_match.summary_desc", { deporte: filters.deporte, zona: filters.zona, fecha: new Date(filters.fecha).toLocaleDateString() })}</p>
+                    <p className="text-emerald-600/80 text-sm font-medium">{t("create_match.summary_desc", { deporte: filters.deporte, zona: filters.zona, fecha: formatDate(filters.fecha) })}</p>
                   </div>
                 </div>
               </div>
@@ -441,7 +465,7 @@ const CrearPartido = () => {
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-xs font-bold text-gray-400">{t("create_match.date")}</span>
-                                <span className="text-xs font-black text-gray-700">{filters.fecha}</span>
+                                <span className="text-xs font-black text-gray-700">{formatDate(filters.fecha)}</span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-xs font-bold text-gray-400">{t("create_match.hour")}</span>
@@ -475,6 +499,7 @@ const CrearPartido = () => {
                                     placeholder="JUAN PEREZ"
                                     value={paymentData.cardName}
                                     onChange={(e) => setPaymentData({...paymentData, cardName: e.target.value.toUpperCase()})}
+                                    minLength={3}
                                     className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-4 focus:ring-emerald-500/10 font-bold text-gray-700 transition-all font-black placeholder:text-gray-300"
                                 />
                             </div>
@@ -491,6 +516,8 @@ const CrearPartido = () => {
                                             const val = e.target.value.replace(/\D/g, '').replace(/(.{4})/g, '$1 ').trim();
                                             setPaymentData({...paymentData, cardNumber: val});
                                         }}
+                                        pattern="\d{4} \d{4} \d{4} \d{4}"
+                                        minLength={19}
                                         className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-4 focus:ring-emerald-500/10 font-black text-gray-700 transition-all font-mono placeholder:text-gray-300"
                                     />
                                     <div className="absolute right-4 top-1/2 -translate-y-1/2 flex gap-2">
@@ -596,7 +623,7 @@ const CrearPartido = () => {
                   <div className="space-y-4 pt-6 border-t border-gray-50">
                     <div className="flex justify-between items-center">
                       <span className="text-xs font-bold text-gray-400 uppercase">{t("create_match.day")}</span>
-                      <span className="font-black text-gray-700">{new Date(filters.fecha).toLocaleDateString()}</span>
+                      <span className="font-black text-gray-700">{formatDate(filters.fecha)}</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-xs font-bold text-gray-400 uppercase">{t("create_match.price")}</span>
@@ -663,6 +690,16 @@ const CrearPartido = () => {
                           {timeSlots.map(hora => {
                             const isBooked = bookedSlots.includes(hora);
                             const isThisSubmitting = submitting && message.text === "";
+
+                            // Nueva lógica: Filtrar horas pasadas si es hoy
+                            const isToday = filters.fecha === new Date().toISOString().split('T')[0];
+                            const currentTime = new Date();
+                            const [h, m] = hora.split(':').map(Number);
+                            const slotDate = new Date();
+                            slotDate.setHours(h, m, 0, 0);
+                            const isPast = isToday && slotDate < currentTime;
+
+                            if (isPast) return null;
 
                             return (
                               <button

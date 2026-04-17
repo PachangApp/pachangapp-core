@@ -150,7 +150,7 @@ const Admin = () => {
         {activeTab === 'campos' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm h-fit">
-              <h2 className="text-xl font-bold mb-6">{t('admin.fields.new_field')}</h2>
+              <h2 className="text-xl font-bold mb-6 shadow-gray-200/50">{t('admin.fields.new_field')}</h2>
               <form onSubmit={handleCreateCampo} className="space-y-4">
                 <div>
                   <label className="block text-xs font-bold text-gray-400 uppercase mb-1">{t('admin.fields.name')}</label>

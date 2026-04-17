@@ -43,7 +43,7 @@ public class PartidoController {
 
     @GetMapping
     public Page<Partido> getPartidos(@RequestParam(defaultValue = "0") int page) {
-        return partidoRepository.findByEstadoOrderByReservaFechaAsc("ABIERTO", PageRequest.of(page, 4));
+        return partidoRepository.findByEstadoOrderByReservaFechaAsc("ABIERTO", PageRequest.of(page, 20));
     }
 
     @GetMapping("/search")

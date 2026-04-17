@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { API_BASE_URL } from "../apiConfig";
+import logo from "../assets/logo pachangapp.png";
 
 // Reusing components
 import MatchCard from "../components/MatchCard";
@@ -413,8 +414,8 @@ const Home = () => {
       {/* FOOTER BASICO */}
       <footer className="bg-gray-950 text-gray-400 py-12 text-center font-medium">
           <div className="max-w-7xl mx-auto px-4 flex flex-col items-center">
-              <div className="w-12 h-12 bg-emerald-600 rounded-2xl flex items-center justify-center mb-6 text-white font-black text-2xl rotate-12">
-                  P
+              <div className="w-[100px] h-[100px] mb-6 transition-transform hover:scale-110">
+                  <img src={logo} alt="PachangApp Logo" className="w-full h-full object-contain" />
               </div>
               <p className="mb-4 text-emerald-500 font-bold uppercase tracking-widest text-sm">PachangApp © 2026</p>
               <p className="text-sm max-w-md mx-auto leading-loose text-gray-500">

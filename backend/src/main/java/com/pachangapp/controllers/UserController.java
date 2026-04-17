@@ -58,6 +58,7 @@ public class UserController {
         return userRepository.findByVerificationToken(token).map(user -> {
             user.setEnabled(true);
             user.setVerificationToken(null);
+            user.setFechaVerificacion(java.time.LocalDate.now());
             userRepository.save(user);
             return org.springframework.http.ResponseEntity.ok("Cuenta activada correctamente. Ya puedes iniciar sesión.");
         }).orElse(org.springframework.http.ResponseEntity.badRequest().body("Token de verificación inválido."));

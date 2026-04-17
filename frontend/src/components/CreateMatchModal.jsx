@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../apiConfig";
 import Dropdown from "./Dropdown";
 
 const CreateMatchModal = ({ isOpen, onClose }) => {
+  const navigate = useNavigate();
   const [campos, setCampos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedZona, setSelectedZona] = useState("");
@@ -89,7 +91,7 @@ const CreateMatchModal = ({ isOpen, onClose }) => {
         setMessage({ text: "¡Partido creado con éxito! Entrando...", type: "success" });
         setTimeout(() => {
           onClose();
-          window.location.href = `/partido/${data.id}`;
+          navigate(`/partido/${data.id}`);
         }, 1500);
       } else {
         const error = await response.text();

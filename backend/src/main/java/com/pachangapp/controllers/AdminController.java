@@ -125,13 +125,29 @@ public class AdminController {
             reader.readNext(); // Saltar cabecera
             int count = 0;
             while ((nextLine = reader.readNext()) != null) {
+                // Formato: Nombre, Deporte, Zona, PrecioPorHora, ImagenUrl, NombrePadre
                 Campo c = new Campo();
-                c.setNombre(nextLine[0]);
-                c.setDeporte(nextLine[1]);
-                c.setZona(nextLine[2]);
-                c.setPrecioPorHora(Double.parseDouble(nextLine[3]));
+                c.setNombre(nextLine[0].trim());
+                c.setDeporte(nextLine[1].trim());
+                c.setZona(nextLine[2].trim());
+                c.setPrecioPorHora(Double.parseDouble(nextLine[3].trim()));
                 c.setDisponible(true);
-                c.setImagenUrl("");
+                
+                // Imagen URL (opcional)
+                if (nextLine.length > 4 && nextLine[4] != null) {
+                    c.setImagenUrl(nextLine[4].trim());
+                } else {
+                    c.setImagenUrl("");
+                }
+
+                // Lógica de Padre (opcional)
+                if (nextLine.length > 5 && nextLine[5] != null && !nextLine[5].trim().isEmpty()) {
+                    String parentName = nextLine[5].trim();
+                    campoRepository.findByNombre(parentName).ifPresent(p -> {
+                        c.setParentCampoId(p.getId());
+                    });
+                }
+                
                 campoRepository.save(c);
                 count++;
             }

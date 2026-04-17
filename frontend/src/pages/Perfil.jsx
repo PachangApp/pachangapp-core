@@ -5,8 +5,10 @@ import { motion } from "framer-motion";
 import { API_BASE_URL } from "../apiConfig";
 import Navbar from "../components/Navbar";
 import StatCard from "../components/StatCard";
-import defaultAvatar from "../assets/campos/perfil.png";
 import { getFieldImage } from "../utils/fieldMapping";
+import { formatDate } from "../utils/dateFormatter";
+
+const DEFAULT_AVATAR = "https://ui-avatars.com/api/?background=10b981&color=fff";
 
 const Perfil = () => {
   const { t } = useTranslation();
@@ -15,6 +17,8 @@ const Perfil = () => {
   const [error, setError] = useState(null);
   const [misPartidos, setMisPartidos] = useState([]);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [positions, setPositions] = useState({ p1: "", p2: "", p3: "" });
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -42,7 +46,9 @@ const Perfil = () => {
 
         setUser({
           ...userData,
-          joined: "Marzo 2024", 
+          joined: userData.fechaVerificacion 
+            ? formatDate(userData.fechaVerificacion)
+            : "01/03/2024", 
           stats: {
             partidos: userData.partidosJugados || 0,
             victorias: userData.victorias || 0,
@@ -76,8 +82,6 @@ const Perfil = () => {
     fetchUserData();
   }, []);
 
-  const [positions, setPositions] = useState({ p1: "", p2: "", p3: "" });
-  const [saving, setSaving] = useState(false);
 
   const handleAvatarChange = async (e) => {
     const file = e.target.files[0];
@@ -206,7 +210,7 @@ const Perfil = () => {
             >
               <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-emerald-100 border-4 border-white shadow-xl flex items-center justify-center overflow-hidden relative">
                 <img 
-                  src={user.avatar || defaultAvatar} 
+                  src={user.avatar || DEFAULT_AVATAR} 
                   alt="Perfil" 
                   className={`w-full h-full object-cover transition-opacity ${uploadingAvatar ? 'opacity-50' : 'group-hover:opacity-75'}`} 
                   onError={(e) => {
@@ -306,7 +310,7 @@ const Perfil = () => {
                         {match.reserva.campo.nombre}
                         </h4>
                         <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest">
-                        {match.reserva.fecha} • {match.reserva.horaInicio.substring(0,5)}
+                        {formatDate(match.reserva.fecha)} • {match.reserva.horaInicio.substring(0,5)}
                         </p>
                     </div>
                     <div className="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-all">

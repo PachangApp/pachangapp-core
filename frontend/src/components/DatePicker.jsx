@@ -109,7 +109,9 @@ const DatePicker = ({ label, value, onChange, minDate, placeholder = "Selecciona
   const getDisplayValue = () => {
     if (!value) return placeholder;
     const [y, m, d] = value.split('-').map(Number);
-    return new Date(y, m - 1, d).toLocaleDateString(i18n.language, { day: 'numeric', month: 'short', year: 'numeric' });
+    const day = String(d).padStart(2, '0');
+    const month = String(m).padStart(2, '0');
+    return `${day}/${month}/${y}`;
   };
 
   const displayValue = getDisplayValue();

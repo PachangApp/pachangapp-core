@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { API_BASE_URL } from "../apiConfig";
+import logo from "../assets/logo pachangapp.png";
 
 const Auth = () => {
   const location = useLocation();
@@ -147,11 +148,8 @@ const Auth = () => {
             background: "linear-gradient(135deg, #059669 0%, #047857 50%, #065f46 100%)",
           }}
         >
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center">
-              <span className="text-emerald-600 font-black text-lg">P</span>
-            </div>
-            <span className="text-white font-bold text-xl tracking-wide">PachangApp</span>
+          <div className="flex items-center gap-3 opacity-0">
+             {/* Espaciador para mantener estructura si es necesario o simplemente eliminar */}
           </div>
 
           <AnimatePresence mode="wait">
@@ -161,7 +159,9 @@ const Auth = () => {
               animate={{ opacity: 1, scale: 1, x: 0 }}
               exit={{ opacity: 0, scale: 0.9, x: isLogin ? 20 : -20 }}
               transition={{ duration: 0.4 }}
+              className="flex flex-col items-center text-center w-full"
             >
+              <img src={logo} alt="Logo" className="w-full max-w-[450px] h-auto object-contain mb-8 drop-shadow-2xl" />
               <h2 className="text-white text-4xl font-extrabold leading-tight mb-6">
                 {isLogin ? (
                   <>Bienvenido de nuevo, <br /><span className="text-emerald-300 font-black">¡A jugar!</span></>
@@ -197,17 +197,20 @@ const Auth = () => {
             x: isDesktop ? (isLogin ? "0%" : "-66.66%") : "0%",
           }}
           transition={{ type: "spring", stiffness: 100, damping: 20 }}
-          className="flex flex-1 items-center justify-center px-8 py-12 bg-white relative z-20"
+          className="flex flex-1 items-start lg:items-center justify-center px-8 py-10 lg:py-12 bg-white relative z-20 overflow-y-auto"
         >
           <div className="w-full max-w-md relative">
             
-            {/* Logo Mobile */}
-            <div className="flex items-center gap-3 mb-10 lg:hidden">
-              <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center">
-                <span className="text-white font-black text-lg">P</span>
-              </div>
-              <span className="text-gray-900 font-black text-2xl tracking-tight">PachangApp</span>
-            </div>
+            {/* Logo Mobile Animado */}
+            <motion.div 
+              layout
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.5 }}
+              className="flex flex-col items-center mb-8 lg:hidden w-full shrink-0"
+            >
+              <img src={logo} alt="Logo" className="w-[180px] h-[180px] object-contain mb-0" />
+            </motion.div>
 
             <AnimatePresence mode="wait">
               {isLogin ? (
