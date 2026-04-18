@@ -14,6 +14,9 @@ public interface PartidoRepository extends JpaRepository<Partido, Long> {
     @org.springframework.data.jpa.repository.Query("SELECT p FROM Partido p JOIN p.participaciones pt WHERE pt.user.id = :userId AND p.estado != 'FINALIZADO' ORDER BY p.reserva.fecha ASC, p.reserva.horaInicio ASC")
     Page<Partido> findProximosPartidosUsuario(@org.springframework.data.repository.query.Param("userId") Long userId, Pageable pageable);
 
+    @org.springframework.data.jpa.repository.Query("SELECT p FROM Partido p JOIN p.participaciones pt WHERE pt.user.id = :userId AND p.estado = 'FINALIZADO' ORDER BY p.reserva.fecha DESC, p.reserva.horaInicio DESC")
+    Page<Partido> findHistorialPartidosUsuario(@org.springframework.data.repository.query.Param("userId") Long userId, Pageable pageable);
+
     @org.springframework.data.jpa.repository.Query("SELECT p FROM Partido p WHERE " +
             "(:lugar IS NULL OR LOWER(p.reserva.campo.nombre) LIKE LOWER(CONCAT('%', :lugar, '%'))) AND " +
             "(:fecha IS NULL OR p.reserva.fecha = :fecha) AND " +

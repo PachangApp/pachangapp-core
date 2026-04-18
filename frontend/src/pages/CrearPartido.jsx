@@ -74,7 +74,7 @@ const SubPistaGrid = ({ campoId, fecha, onSelect, timeSlots, submitting }) => {
           >
             {hora}
             {isBooked && (
-              <span className="absolute top-1 right-2 text-[6px] font-black uppercase text-red-300">Oculto</span>
+              <span className="absolute top-1 right-2 text-[6px] font-black uppercase text-red-300">Ocupado</span>
             )}
           </button>
         );
@@ -101,6 +101,7 @@ const CrearPartido = () => {
   });
   
   const [selectedCampo, setSelectedCampo] = useState(null);
+  const [selectedSubPista, setSelectedSubPista] = useState(null);
   const [selectedHora, setSelectedHora] = useState(null);
   const [maxJugadores, setMaxJugadores] = useState(10);
   const [submitting, setSubmitting] = useState(false);
@@ -152,19 +153,25 @@ const CrearPartido = () => {
   }, []);
 
   const handleNextStep = () => {
+    window.scrollTo(0, 0);
     setStep(step + 1);
   };
 
   const handlePrevStep = () => {
+    window.scrollTo(0, 0);
     if (step === 4) {
         setStep(3);
         return;
     }
     setStep(step - 1);
-    if (step === 3) setSelectedCampo(null);
+    if (step === 3) {
+        setSelectedCampo(null);
+        setSelectedSubPista(null);
+    }
   };
 
   const handleSelectCampo = async (campo) => {
+    window.scrollTo(0, 0);
     console.log("Campo seleccionado:", campo);
     setSelectedCampo(campo);
     
@@ -184,8 +191,13 @@ const CrearPartido = () => {
 
 
   const handleConfirmSelection = (hora, specificCampo = null) => {
+    window.scrollTo(0, 0);
     setSelectedHora(hora);
-    if (specificCampo) setSelectedCampo(specificCampo);
+    if (specificCampo && specificCampo.id !== selectedCampo?.id) {
+        setSelectedSubPista(specificCampo);
+    } else {
+        setSelectedSubPista(null);
+    }
     setStep(4);
   };
 
@@ -218,7 +230,7 @@ const CrearPartido = () => {
     }
 
     const { id: userId, token } = JSON.parse(storedUser);
-    const targetCampo = selectedCampo;
+    const targetCampo = selectedSubPista || selectedCampo;
     setSubmitting(true);
     
     try {

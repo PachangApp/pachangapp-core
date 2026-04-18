@@ -8,6 +8,18 @@ import MatchCard from "../components/MatchCard";
 import Dropdown from "../components/Dropdown";
 import DatePicker from "../components/DatePicker";
 
+// Función auxiliar para extraer el "recinto base" de un campo
+const getBaseName = (name) => {
+    let n = name;
+    n = n.replace(/ - f[uú]tbol sala pista \d+/i, ''); // ej. Fuentenueva - futbol sala pista 1 -> Fuentenueva
+    n = n.replace(/ - F[uú]tbol \d+/i, ''); // ej. Diputación Armilla - Fútbol 11 -> Diputación Armilla
+    n = n.replace(/ - F[uú]tbol Sala/i, ''); // ej. Diputación Armilla - Fútbol Sala -> Diputación Armilla
+    n = n.replace(/^Pista \d+ - /i, ''); // ej. Pista 1 - Campus Cartuja -> Campus Cartuja
+    n = n.replace(/^Campo de f[uú]tbol /i, ''); // ej. Campo de fútbol Fuentenueva -> Fuentenueva
+    n = n.replace(/^Centro de Actividades Deportiva UGR - /i, ''); // ej. Centro...UGR - Campus Cartuja -> Campus Cartuja
+    return n.trim();
+};
+
 const BuscarPartidos = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -117,8 +129,12 @@ const BuscarPartidos = () => {
     const isJoined = match.participaciones?.some(p => p.user.id === currentUser.id);
     if (isJoined) return false;
 
-    // 1. Filtrar por Campo
-    const matchesCampo = filters.campo === "Todos" || match.reserva.campo.nombre === filters.campo;
+    // 1. Filtrar por Campo (Recinto Agrupado)
+    let matchesCampo = filters.campo === "Todos";
+    if (!matchesCampo) {
+        const matchBaseName = getBaseName(match.reserva.campo.nombre);
+        matchesCampo = matchBaseName === filters.campo;
+    }
     
     // 2. Filtrar por Modalidad (Deporte)
     const matchesCat = filters.category === "Todos" || match.deporte === filters.category;
@@ -152,13 +168,19 @@ const BuscarPartidos = () => {
             className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col md:flex-row gap-6"
           >
             {/* Buscador de campo (Modern Dropdown) */}
-            <Dropdown
-              label={t('create_match.field')}
-              options={["Todos", ...[...new Set(allCampos.map(c => c.nombre))].sort()]}
-              value={filters.campo}
-              onChange={(val) => setFilters({ ...filters, campo: val })}
-              className="grow"
-            />
+            {(() => {
+                const uniqueBaseNames = [...new Set(allCampos.map(c => getBaseName(c.nombre)))].sort();
+                const campoOptions = ["Todos", ...uniqueBaseNames];
+                return (
+                  <Dropdown
+                    label={t('create_match.field')}
+                    options={campoOptions}
+                    value={filters.campo}
+                    onChange={(val) => setFilters({ ...filters, campo: val })}
+                    className="grow"
+                  />
+                );
+            })()}
 
             {/* Selector Deporte (Modern Dropdown) */}
             <Dropdown
@@ -254,7 +276,7 @@ const BuscarPartidos = () => {
         )}
 
         {/* Botón Flotante para Crear (A la izquierda del ChatBot) */}
-        <div className="fixed bottom-6 right-24 md:right-32 z-40 transition-all">
+        <div className="hidden md:block fixed bottom-6 right-24 md:right-32 z-40 transition-all">
             <button 
                 onClick={() => navigate("/crear-partido")}
                 className="bg-emerald-600 hover:bg-emerald-700 text-white font-black p-4 sm:py-4 sm:px-8 rounded-2xl shadow-2xl shadow-emerald-200 transform hover:-translate-y-2 transition-all flex items-center gap-3 active:scale-95 group"

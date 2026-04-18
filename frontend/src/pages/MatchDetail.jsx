@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import { API_BASE_URL } from "../apiConfig";
 import Navbar from "../components/Navbar";
 import { formatDate } from "../utils/dateFormatter";
+import Counter from "../components/Counter";
 
 const MatchDetail = () => {
   const { id } = useParams();
@@ -107,9 +108,9 @@ const MatchDetail = () => {
   if (error) return <div className="p-20 text-center text-red-500">Error: {error}</div>;
 
   const isOrganizer = currentUser.id === match.organizador.id;
-  const teamWhite = match.participaciones.filter(p => p.equipo === 'BLANCO');
-  const teamBlack = match.participaciones.filter(p => p.equipo === 'NEGRO');
-  const unassigned = match.participaciones.filter(p => p.equipo === 'NINGUNO' || !p.equipo);
+  const teamWhite = match.participaciones.filter(p => p.equipo === 'BLANCO').sort((a, b) => a.user.username.localeCompare(b.user.username));
+  const teamBlack = match.participaciones.filter(p => p.equipo === 'NEGRO').sort((a, b) => a.user.username.localeCompare(b.user.username));
+  const unassigned = match.participaciones.filter(p => p.equipo === 'NINGUNO' || !p.equipo).sort((a, b) => a.user.username.localeCompare(b.user.username));
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans pb-32 md:pb-0">
@@ -383,27 +384,26 @@ const MatchDetail = () => {
               exit={{ scale: 0.9, opacity: 0 }}
               className="bg-white rounded-4xl p-10 max-w-md w-full shadow-2xl overflow-hidden relative"
             >
-              <h2 className="text-2xl font-black text-gray-900 mb-2">Introducir Resultado</h2>
+              <h2 className="text-2xl font-black text-gray-900 mb-2 text-center">Introducir Resultado</h2>
               <div className="flex items-center justify-around gap-6 mb-10 mt-8">
-                <div className="text-center">
-                    <label className="block text-xs font-black text-gray-400 uppercase mb-2">Blanco</label>
-                    <input 
-                        type="number" 
-                        value={scores.a} 
-                        onChange={(e) => setScores({...scores, a: e.target.value})}
-                        className="w-20 h-20 text-4xl font-black text-center bg-gray-50 border-none rounded-3xl outline-none focus:ring-4 focus:ring-emerald-500/10 text-gray-900"
-                    />
-                </div>
-                <div className="text-2xl font-black text-emerald-500 mt-6">-</div>
-                <div className="text-center">
-                    <label className="block text-xs font-black text-gray-400 uppercase mb-2">Negro</label>
-                    <input 
-                        type="number" 
-                        value={scores.b} 
-                        onChange={(e) => setScores({...scores, b: e.target.value})}
-                        className="w-20 h-20 text-4xl font-black text-center bg-gray-50 border-none rounded-3xl outline-none focus:ring-4 focus:ring-emerald-500/10 text-gray-900"
-                    />
-                </div>
+                <Counter 
+                    label="Blanco"
+                    value={scores.a} 
+                    onChange={(val) => setScores({...scores, a: val})}
+                    size="lg"
+                    min={0}
+                    labelAlign="center"
+                />
+                <div className="text-4xl font-black text-emerald-500 mt-6">-</div>
+                <Counter 
+                    label="Negro"
+                    value={scores.b} 
+                    onChange={(val) => setScores({...scores, b: val})}
+                    size="lg"
+                    min={0}
+                    color="black"
+                    labelAlign="center"
+                />
               </div>
 
               <div className="flex gap-4">

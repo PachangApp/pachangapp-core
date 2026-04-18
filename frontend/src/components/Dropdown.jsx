@@ -24,7 +24,7 @@ const Dropdown = ({ label, options, value, onChange, placeholder = "Seleccionar"
   return (
     <div className={`relative ${className}`} ref={dropdownRef}>
       {label && (
-        <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">
+        <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">
           {label}
         </label>
       )}

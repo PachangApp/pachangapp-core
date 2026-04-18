@@ -32,6 +32,9 @@ const AppContent = () => {
   const hideNavPaths = ["/", "/login", "/register"];
   const shouldShowNav = !hideNavPaths.includes(location.pathname) && storedUser;
 
+  // No mostrar PachanBot en login/register o hero antes de entrar
+  const shouldShowBot = storedUser && !["/login", "/register", "/"].includes(location.pathname);
+
   return (
     <>
       <ScrollToTop />
@@ -48,7 +51,7 @@ const AppContent = () => {
         <Route path="/partido/:id" element={<MatchDetail />} />
         <Route path="/admin" element={<Admin />} />
       </Routes>
-      <ChatBot />
+      {shouldShowBot && <ChatBot />}
       {shouldShowNav && <BottomNav />}
     </>
   );

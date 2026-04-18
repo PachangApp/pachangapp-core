@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { API_BASE_URL } from "../apiConfig";
+import Counter from "./Counter";
 
 const BookingModal = ({ isOpen, onClose, campo }) => {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
@@ -157,17 +158,15 @@ const BookingModal = ({ isOpen, onClose, campo }) => {
 
              {isPublic && (
                 <div className="flex items-center gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                   <div className="grow">
-                      <label className="block text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-2">Máximo de jugadores</label>
-                      <input 
-                        type="number" 
-                        value={maxJugadores}
-                        onChange={(e) => setMaxJugadores(e.target.value)}
-                        className="w-full px-4 py-2 bg-white border-none rounded-xl focus:ring-2 focus:ring-emerald-500 font-bold text-gray-700"
-                        min="2"
-                        max="22"
-                      />
-                   </div>
+                    <div className="grow">
+                       <Counter 
+                         label="Máximo de jugadores"
+                         value={maxJugadores}
+                         onChange={(val) => setMaxJugadores(val)}
+                         min={2}
+                         max={22}
+                       />
+                    </div>
                 </div>
              )}
           </div>

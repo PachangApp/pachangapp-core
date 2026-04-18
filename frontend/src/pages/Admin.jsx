@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import Navbar from "../components/Navbar";
 import { API_BASE_URL } from "../apiConfig";
+import Dropdown from "../components/Dropdown";
+import Counter from "../components/Counter";
 
 const Admin = () => {
   const { t } = useTranslation();
@@ -150,7 +152,7 @@ const Admin = () => {
         {activeTab === 'campos' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm h-fit">
-              <h2 className="text-xl font-bold mb-6 shadow-gray-200/50">{t('admin.fields.new_field')}</h2>
+              <h2 className="text-xl font-black text-emerald-600 mb-6">{t('admin.fields.new_field')}</h2>
               <form onSubmit={handleCreateCampo} className="space-y-4">
                 <div>
                   <label className="block text-xs font-bold text-gray-400 uppercase mb-1">{t('admin.fields.name')}</label>
@@ -162,42 +164,38 @@ const Admin = () => {
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-400 uppercase mb-1">{t('admin.fields.sport')}</label>
-                    <select 
-                      className="w-full p-3 bg-gray-50 text-gray-900 font-bold rounded-xl outline-none"
-                      value={newCampo.deporte}
-                      onChange={e => setNewCampo({...newCampo, deporte: e.target.value})}
-                    >
-                      <option value="Fútbol 11">{t('sports.futbol_11')}</option>
-                      <option value="Fútbol 7">{t('sports.futbol_7')}</option>
-                      <option value="Fútbol Sala">{t('sports.futbol_sala')}</option>
-                      <option value="Pádel">Pádel</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-400 uppercase mb-1">{t('admin.fields.price_per_hour')}</label>
-                    <input 
-                      type="number" step="0.01" required
-                      className="w-full p-3 bg-gray-50 text-gray-900 font-bold rounded-xl outline-none"
-                      value={newCampo.precioPorHora}
-                      onChange={e => setNewCampo({...newCampo, precioPorHora: parseFloat(e.target.value)})}
-                    />
-                  </div>
+                  <Dropdown
+                    label={t('admin.fields.sport')}
+                    options={[
+                      { label: t('sports.futbol_11'), value: "Fútbol 11" },
+                      { label: t('sports.futbol_7'), value: "Fútbol 7" },
+                      { label: t('sports.futbol_sala'), value: "Fútbol Sala" },
+                      { label: "Pádel", value: "Pádel" }
+                    ]}
+                    value={newCampo.deporte}
+                    onChange={val => setNewCampo({...newCampo, deporte: val})}
+                  />
+                  <Counter
+                    label={t('admin.fields.price_per_hour')}
+                    value={newCampo.precioPorHora}
+                    onChange={val => setNewCampo({...newCampo, precioPorHora: val})}
+                    step={1}
+                    min={0}
+                    className="grow"
+                  />
                 </div>
-                <div>
-                  <label className="block text-xs font-bold text-gray-400 uppercase mb-1">{t('admin.fields.parent_field')}</label>
-                  <select 
-                    className="w-full p-3 bg-gray-50 text-gray-900 font-bold rounded-xl outline-none"
-                    value={newCampo.parentCampoId}
-                    onChange={e => setNewCampo({...newCampo, parentCampoId: e.target.value})}
-                  >
-                    <option value="">{t('admin.fields.none')}</option>
-                    {campos.filter(c => c.deporte === 'Fútbol 11').map(c => (
-                      <option key={c.id} value={c.id}>{c.nombre}</option>
-                    ))}
-                  </select>
-                </div>
+                <Dropdown
+                  label={t('admin.fields.parent_field')}
+                  options={[
+                    { label: t('admin.fields.none'), value: "" },
+                    ...campos.filter(c => c.deporte === 'Fútbol 11').map(c => ({ 
+                      label: c.nombre, 
+                      value: c.id.toString() 
+                    }))
+                  ]}
+                  value={newCampo.parentCampoId}
+                  onChange={val => setNewCampo({...newCampo, parentCampoId: val})}
+                />
                 <button type="submit" className="w-full py-3 bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-100">{t('admin.fields.create_field')}</button>
               </form>
             </div>

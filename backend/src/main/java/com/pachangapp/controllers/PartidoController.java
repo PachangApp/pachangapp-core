@@ -93,6 +93,16 @@ public class PartidoController {
         return ResponseEntity.ok(partidos);
     }
 
+    @GetMapping("/historial")
+    public ResponseEntity<?> getHistorialPartidos(@RequestParam Long userId, @RequestParam(defaultValue = "0") int page) {
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            return ResponseEntity.badRequest().body("Usuario no encontrado");
+        }
+        Page<Partido> partidos = partidoRepository.findHistorialPartidosUsuario(userId, PageRequest.of(page, 10));
+        return ResponseEntity.ok(partidos);
+    }
+
     @PostMapping
     public ResponseEntity<?> crearPartido(@RequestBody Map<String, Object> payload) {
         try {

@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { API_BASE_URL } from "../apiConfig";
 import Navbar from "../components/Navbar";
 import StatCard from "../components/StatCard";
+import Dropdown from "../components/Dropdown";
 import { getFieldImage } from "../utils/fieldMapping";
 import { formatDate } from "../utils/dateFormatter";
 
@@ -19,6 +20,11 @@ const Perfil = () => {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [positions, setPositions] = useState({ p1: "", p2: "", p3: "" });
   const [saving, setSaving] = useState(false);
+  const [matchesPage, setMatchesPage] = useState(0);
+  const [matchesTotalPages, setMatchesTotalPages] = useState(0);
+  const [loadingMatches, setLoadingMatches] = useState(false);
+  const [historial, setHistorial] = useState([]);
+  const [showAllHistory, setShowAllHistory] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -63,14 +69,11 @@ const Perfil = () => {
           p3: userData.posicion3 || ""
         });
 
-        // Cargar Mis Partidos
-        const matchesResp = await fetch(`${API_BASE_URL}/partidos/mis-partidos?userId=${id}`, {
-          headers: { "Authorization": `Bearer ${token}` }
-        });
-        if (matchesResp.ok) {
-          const matchesData = await matchesResp.json();
-          setMisPartidos(matchesData.content || []);
-        }
+        // Cargar Mis Partidos (Primera Página)
+        await fetchMisPartidos(0, false);
+        
+        // Cargar Historial
+        await fetchHistorial(id, token);
 
       } catch (err) {
         setError(err.message);
@@ -81,6 +84,44 @@ const Perfil = () => {
 
     fetchUserData();
   }, []);
+
+  const fetchMisPartidos = async (pageNum, isAppend = false) => {
+    try {
+      setLoadingMatches(true);
+      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+      const resp = await fetch(`${API_BASE_URL}/partidos/mis-partidos?userId=${storedUser.id}&page=${pageNum}`, {
+        headers: { "Authorization": `Bearer ${storedUser.token}` }
+      });
+      if (resp.ok) {
+        const data = await resp.json();
+        if (isAppend) {
+          setMisPartidos(prev => [...prev, ...data.content]);
+        } else {
+          setMisPartidos(data.content || []);
+        }
+        setMatchesTotalPages(data.totalPages);
+        setMatchesPage(pageNum);
+      }
+    } catch (err) {
+      console.error("Error fetching upcoming matches:", err);
+    } finally {
+      setLoadingMatches(false);
+    }
+  };
+
+  const fetchHistorial = async (id, token) => {
+    try {
+      const resp = await fetch(`${API_BASE_URL}/partidos/historial?userId=${id}`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (resp.ok) {
+        const data = await resp.json();
+        setHistorial(data.content || []);
+      }
+    } catch (err) {
+      console.error("Error fetching historial:", err);
+    }
+  };
 
 
   const handleAvatarChange = async (e) => {
@@ -190,7 +231,7 @@ const Perfil = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 font-['Inter',sans-serif] pb-32 md:pb-0 overflow-x-hidden">
+    <div className="min-h-screen bg-gray-50 font-['Inter',sans-serif] pb-32 md:pb-0">
       <Navbar />
 
       <main className="max-w-5xl mx-auto px-4 py-12">
@@ -289,10 +330,10 @@ const Perfil = () => {
               {misPartidos.map((match, idx) => (
                 <motion.div
                     key={match.id}
+                    layout
                     initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.8, delay: idx * 0.35 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, delay: idx * 0.15 }}
                 >
                     <Link 
                         to={`/partido/${match.id}`}
@@ -320,6 +361,19 @@ const Perfil = () => {
                 </motion.div>
               ))}
             </div>
+
+            {matchesPage + 1 < matchesTotalPages && (
+              <div className="mt-10 text-center">
+                <button 
+                  onClick={() => fetchMisPartidos(matchesPage + 1, true)}
+                  disabled={loadingMatches}
+                  className="px-8 py-3 bg-white border-2 border-emerald-100 text-emerald-600 font-black rounded-2xl hover:bg-emerald-50 transition-all shadow-sm flex items-center gap-2 mx-auto disabled:opacity-50"
+                >
+                  {loadingMatches ? t('search_matches.loading') : t('search_matches.load_more')}
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" /></svg>
+                </button>
+              </div>
+            )}
           </motion.section>
         )}
 
@@ -336,17 +390,14 @@ const Perfil = () => {
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[1, 2, 3].map(i => (
-              <div key={i}>
-                <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">{t('profile.position_num', { num: i })}</label>
-                <select 
-                  className="w-full p-3 bg-gray-50 rounded-xl border-none font-bold text-gray-700 outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
-                  value={positions[`p${i}`]}
-                  onChange={(e) => setPositions({ ...positions, [`p${i}`]: e.target.value })}
-                >
-                  <option value="">{t('profile.select')}</option>
-                  {allPositions.map(pos => <option key={pos} value={pos}>{pos}</option>)}
-                </select>
-              </div>
+              <Dropdown
+                key={i}
+                label={t('profile.position_num', { num: i })}
+                options={[{ label: t('profile.select'), value: "" }, ...allPositions.map(pos => ({ label: pos, value: pos }))]}
+                value={positions[`p${i}`]}
+                onChange={(val) => setPositions({ ...positions, [`p${i}`]: val })}
+                className="w-full"
+              />
             ))}
           </div>
           <motion.button 
@@ -401,12 +452,69 @@ const Perfil = () => {
         >
           <div className="p-6 border-b border-gray-50 flex justify-between items-center">
             <h3 className="font-bold text-gray-900 text-lg">{t('profile.latest_activities')}</h3>
-            <button className="text-emerald-600 text-sm font-bold hover:underline">{t('profile.view_all')}</button>
+            {historial.length > 3 && (
+                <button 
+                    onClick={() => setShowAllHistory(!showAllHistory)}
+                    className="text-emerald-600 text-sm font-bold hover:underline"
+                >
+                    {showAllHistory ? t('back') : t('profile.view_all')}
+                </button>
+            )}
           </div>
           <div className="p-6">
-            <div className="flex items-center justify-center h-32 text-gray-400 text-sm italic">
-               {t('profile.history_placeholder')}
-            </div>
+            {historial.length > 0 ? (
+                <div className="space-y-4">
+                    {(showAllHistory ? historial : historial.slice(0, 3)).map((match, idx) => {
+                        const userParticipation = match.participaciones?.find(p => p.user?.id === user.id);
+                        const team = userParticipation?.equipo;
+                        const isWin = (match.marcadorA > match.marcadorB && team === "BLANCO") || 
+                                     (match.marcadorB > match.marcadorA && team === "NEGRO");
+                        const isDraw = match.marcadorA === match.marcadorB;
+                        
+                        return (
+                            <motion.div 
+                                key={match.id}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ duration: 0.5, delay: idx * 0.1 }}
+                                className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-transparent hover:border-gray-100 transition-all group"
+                            >
+                                <div className="flex items-center gap-4">
+                                    <div className="text-sm font-black text-gray-400 min-w-[60px]">
+                                        {formatDate(match.reserva.fecha).split('/').slice(0,2).join('/')}
+                                    </div>
+                                    <div className="font-bold text-gray-900 group-hover:text-emerald-600 transition-colors">
+                                        {match.reserva.campo.nombre}
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <div className="px-3 py-1 bg-white rounded-lg shadow-sm font-black text-gray-900">
+                                        {match.marcadorA} - {match.marcadorB}
+                                    </div>
+                                    
+                                    {isDraw ? (
+                                        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500" title="Empate">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M20 12H4" /></svg>
+                                        </div>
+                                    ) : isWin ? (
+                                        <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600" title="Victoria">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
+                                        </div>
+                                    ) : (
+                                        <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-600" title="Derrota">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12" /></svg>
+                                        </div>
+                                    )}
+                                </div>
+                            </motion.div>
+                        );
+                    })}
+                </div>
+            ) : (
+                <div className="flex items-center justify-center h-32 text-gray-400 text-sm italic">
+                   {t('profile.history_placeholder')}
+                </div>
+            )}
           </div>
         </motion.div>
       </main>
