@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { GoogleLogin } from "@react-oauth/google";
 
 import { API_BASE_URL } from "../apiConfig";
 
@@ -17,6 +18,42 @@ const Login = () => {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleGoogleLoginSuccess = async (credentialResponse) => {
+    setMessage("");
+    setError(false);
+    setLoading(true);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/users/google-auth`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          token: credentialResponse.credential
+        }),
+      });
+
+      if (response.ok) {
+        setError(false);
+        const userData = await response.json();
+        localStorage.setItem("user", JSON.stringify(userData));
+        setMessage("¡Inicio de sesión exitoso! Bienvenido " + (userData.username || userData.email));
+        setTimeout(() => {
+          navigate("/inicio");
+        }, 1500);
+      } else {
+        const errorData = await response.text();
+        setError(true);
+        setMessage(errorData || "Error al iniciar sesión con Google.");
+      }
+    } catch (err) {
+      console.error("Error detallado de conexión (Google):", err);
+      setError(true);
+      setMessage("No se pudo conectar con el servidor.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -191,6 +228,28 @@ const Login = () => {
             >
               {loading ? "Iniciando sesión..." : "Entrar →"}
             </button>
+
+            <div className="flex items-center my-4">
+              <div className="flex-grow border-t border-gray-200"></div>
+              <span className="px-3 text-gray-400 text-sm">o continúa con</span>
+              <div className="flex-grow border-t border-gray-200"></div>
+            </div>
+
+            <div className="flex justify-center w-full">
+              <GoogleLogin
+                onSuccess={handleGoogleLoginSuccess}
+                onError={() => {
+                  console.error('Google Login Failed');
+                  setError(true);
+                  setMessage('Error al intentar iniciar sesión con Google.');
+                }}
+                useOneTap
+                theme="outline"
+                size="large"
+                shape="rectangular"
+                width="100%"
+              />
+            </div>
           </form>
 
         </div>

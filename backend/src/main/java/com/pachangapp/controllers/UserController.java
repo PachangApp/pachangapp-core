@@ -31,6 +31,9 @@ public class UserController {
     @Autowired
     private com.pachangapp.services.FileService fileService;
 
+    @org.springframework.beans.factory.annotation.Value("${pachangapp.app.googleClientId}")
+    private String googleClientId;
+
     @GetMapping
     public List<User> getAllUsers() {
         return userRepository.findAll();
@@ -124,6 +127,71 @@ public class UserController {
             return org.springframework.http.ResponseEntity.ok(user);
         } catch (java.io.IOException e) {
             return org.springframework.http.ResponseEntity.internalServerError().body("Error al guardar imagen: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/google-auth")
+    public org.springframework.http.ResponseEntity<?> googleAuth(@RequestBody java.util.Map<String, String> payload) {
+        String tokenString = payload.get("token");
+        
+        if (tokenString == null || tokenString.isEmpty()) {
+            return org.springframework.http.ResponseEntity.badRequest().body("Token es requerido.");
+        }
+        
+        try {
+            com.google.api.client.http.HttpTransport transport = new com.google.api.client.http.javanet.NetHttpTransport();
+            com.google.api.client.json.JsonFactory jsonFactory = com.google.api.client.json.gson.GsonFactory.getDefaultInstance();
+            
+            com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier verifier = new com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier.Builder(transport, jsonFactory)
+                .setAudience(java.util.Collections.singletonList(googleClientId))
+                .build();
+                
+            com.google.api.client.googleapis.auth.oauth2.GoogleIdToken idToken = verifier.verify(tokenString);
+            
+            if (idToken != null) {
+                com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload googlePayload = idToken.getPayload();
+                
+                String email = googlePayload.getEmail();
+                String name = (String) googlePayload.get("name");
+                
+                User user = userRepository.findByEmail(email).orElse(null);
+                
+                if (user == null) {
+                    user = new User();
+                    user.setEmail(email);
+                    user.setUsername(name != null ? name.replaceAll("\\s+", "") + (int)(Math.random()*1000) : "user" + (int)(Math.random()*1000));
+                    user.setPassword(passwordEncoder.encode(java.util.UUID.randomUUID().toString())); // Contraseña aleatoria imposible de adivinar
+                    user.setRole(com.pachangapp.models.Role.USER);
+                    user.setEnabled(true); // Auto-verificado
+                    if (googlePayload.get("picture") != null) {
+                        user.setAvatar((String) googlePayload.get("picture"));
+                    }
+                    user = userRepository.save(user); // Guardar e instanciar
+                }
+                
+                org.springframework.security.core.userdetails.UserDetails userDetails = com.pachangapp.security.services.UserDetailsImpl.build(user);
+                
+                org.springframework.security.core.Authentication authentication = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities());
+                org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(authentication);
+                
+                String jwt = jwtUtils.generateJwtToken(authentication);
+                
+                java.util.Map<String, Object> response = new java.util.HashMap<>();
+                response.put("token", jwt);
+                response.put("id", user.getId());
+                response.put("username", user.getUsername());
+                response.put("email", user.getEmail());
+                response.put("role", user.getRole().name());
+                
+                return org.springframework.http.ResponseEntity.ok(response);
+            } else {
+                return org.springframework.http.ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED).body("Token de Google inválido (la verificación falló).");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return org.springframework.http.ResponseEntity.status(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Error backend: " + e.getClass().getName() + " - " + e.getMessage());
         }
     }
 }

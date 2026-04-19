@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { GoogleLogin } from "@react-oauth/google";
 import { API_BASE_URL } from "../apiConfig";
 
 const Auth = () => {
@@ -109,6 +110,39 @@ const Auth = () => {
         const errorData = await response.text();
         setError(true);
         setMessage(errorData || "Error al registrar el usuario.");
+      }
+    } catch {
+      setError(true);
+      setMessage("No se pudo conectar con el servidor.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleAuthSuccess = async (credentialResponse) => {
+    setMessage("");
+    setError(false);
+    setLoading(true);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/users/google-auth`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          token: credentialResponse.credential
+        }),
+      });
+
+      if (response.ok) {
+        setError(false);
+        const userData = await response.json();
+        localStorage.setItem("user", JSON.stringify(userData));
+        setMessage("¡Acceso exitoso! Bienvenido " + (userData.username || userData.email));
+        setTimeout(() => navigate("/inicio"), 1500);
+      } else {
+        const errorData = await response.text();
+        setError(true);
+        setMessage(errorData || "Error de autenticación con Google.");
       }
     } catch {
       setError(true);
@@ -256,6 +290,26 @@ const Auth = () => {
                     >
                       {loading ? "Iniciando..." : "Entrar →"}
                     </motion.button>
+                    
+                    <div className="flex items-center my-6">
+                      <div className="flex-grow border-t border-gray-200"></div>
+                      <span className="px-4 text-gray-400 font-medium text-sm">o continúa con</span>
+                      <div className="flex-grow border-t border-gray-200"></div>
+                    </div>
+                    <div className="flex justify-center w-full">
+                      <GoogleLogin
+                        onSuccess={handleGoogleAuthSuccess}
+                        onError={() => {
+                          setError(true);
+                          setMessage('Error conectando con Google.');
+                        }}
+                        useOneTap
+                        theme="outline"
+                        size="large"
+                        shape="rectangular"
+                        width="100%"
+                      />
+                    </div>
                   </form>
                 </motion.div>
               ) : (
@@ -319,6 +373,26 @@ const Auth = () => {
                     >
                       {loading ? "Registrando..." : "Crear cuenta →"}
                     </motion.button>
+
+                    <div className="flex items-center my-6">
+                      <div className="flex-grow border-t border-gray-200"></div>
+                      <span className="px-4 text-gray-400 font-medium text-sm">o regístrate con</span>
+                      <div className="flex-grow border-t border-gray-200"></div>
+                    </div>
+                    <div className="flex justify-center w-full">
+                      <GoogleLogin
+                        onSuccess={handleGoogleAuthSuccess}
+                        onError={() => {
+                          setError(true);
+                          setMessage('Error conectando con Google.');
+                        }}
+                        useOneTap
+                        theme="outline"
+                        size="large"
+                        shape="rectangular"
+                        width="100%"
+                      />
+                    </div>
                   </form>
                 </motion.div>
               )}
