@@ -4,6 +4,8 @@ import Inicio from "./pages/Inicio";
 import Perfil from "./pages/Perfil";
 import BuscarPartidos from "./pages/BuscarPartidos";
 import Torneos from "./pages/Torneos";
+import TorneoDetail from "./pages/TorneoDetail";
+import CrearTorneo from "./pages/CrearTorneo";
 import CrearPartido from "./pages/CrearPartido";
 import Conocenos from "./pages/Conocenos";
 import ChatBot from "./components/ChatBot";
@@ -47,6 +49,8 @@ const AppContent = () => {
         <Route path="/buscar-partidos" element={<BuscarPartidos />} />
         <Route path="/crear-partido" element={<CrearPartido />} />
         <Route path="/torneos" element={<Torneos />} />
+        <Route path="/torneos/:id" element={<TorneoDetail />} />
+        <Route path="/crear-torneo" element={<CrearTorneo />} />
         <Route path="/conocenos" element={<Conocenos />} />
         <Route path="/partido/:id" element={<MatchDetail />} />
         <Route path="/admin" element={<Admin />} />
