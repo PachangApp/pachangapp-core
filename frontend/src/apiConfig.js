@@ -10,7 +10,7 @@ const isProduction = window.location.hostname === 'pachangapp.es' || window.loca
 
 // Si es móvil usamos la IP, si es producción usamos el subdominio, si es local usamos localhost
 export const API_BASE_URL = isProduction
-  ? 'https://api.pachangapp.es'
+  ? 'https://api.pachangapp.es/api'
   : isCapacitor 
     ? `http://${PC_IP}:${PORT}/api` 
     : `http://localhost:${PORT}/api`;
