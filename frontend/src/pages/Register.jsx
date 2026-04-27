@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { GoogleLogin } from "@react-oauth/google";
 import { API_BASE_URL } from "../apiConfig";
 import logo from "../assets/logo pachangapp.png";
 
@@ -14,9 +15,46 @@ const Register = () => {
   const [message, setMessage] = useState("");
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleGoogleRegisterSuccess = async (credentialResponse) => {
+    setMessage("");
+    setError(false);
+    setLoading(true);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/users/google-auth`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          token: credentialResponse.credential
+        }),
+      });
+
+      if (response.ok) {
+        setError(false);
+        const userData = await response.json();
+        localStorage.setItem("user", JSON.stringify(userData));
+        setMessage("¡Registro y sesión exitosos! Bienvenido " + (userData.username || userData.email));
+        setTimeout(() => {
+          navigate("/inicio");
+        }, 1500);
+      } else {
+        const errorData = await response.text();
+        setError(true);
+        setMessage(errorData || "Error al registrarse con Google.");
+      }
+    } catch (err) {
+      console.error("Error detallado de conexión (Google):", err);
+      setError(true);
+      setMessage("No se pudo conectar con el servidor.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -211,6 +249,28 @@ const Register = () => {
             >
               {loading ? "Creando cuenta..." : "Crear cuenta →"}
             </button>
+
+            <div className="flex items-center my-4">
+              <div className="flex-grow border-t border-gray-200"></div>
+              <span className="px-3 text-gray-400 text-sm">o regístrate con</span>
+              <div className="flex-grow border-t border-gray-200"></div>
+            </div>
+
+            <div className="flex justify-center w-full">
+              <GoogleLogin
+                onSuccess={handleGoogleRegisterSuccess}
+                onError={() => {
+                  console.error('Google Register Failed');
+                  setError(true);
+                  setMessage('Error al intentar registrarse con Google.');
+                }}
+                useOneTap
+                theme="outline"
+                size="large"
+                shape="rectangular"
+                width="100%"
+              />
+            </div>
           </form>
 
           {/* Footer */}
