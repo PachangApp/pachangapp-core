@@ -483,13 +483,19 @@ const Perfil = () => {
                                     <div className="text-sm font-black text-gray-400 min-w-[60px]">
                                         {formatDate(match.reserva.fecha).split('/').slice(0,2).join('/')}
                                     </div>
-                                    <div className="font-bold text-gray-900 group-hover:text-emerald-600 transition-colors">
+                                    <div className="font-bold text-gray-900 group-hover:text-emerald-600 transition-colors line-clamp-2 leading-tight text-sm sm:text-base flex-1 min-w-0">
                                         {match.reserva.campo.nombre}
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-3">
-                                    <div className="px-3 py-1 bg-white rounded-lg shadow-sm font-black text-gray-900">
-                                        {match.marcadorA} - {match.marcadorB}
+                                    <div className="flex items-center bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden whitespace-nowrap">
+                                        <div className="px-2.5 py-1 font-black text-gray-900 min-w-[30px] text-center">
+                                            {match.marcadorA}
+                                        </div>
+                                        <div className="w-[1px] h-4 bg-gray-200"></div>
+                                        <div className="px-2.5 py-1 font-black text-gray-900 min-w-[30px] text-center">
+                                            {match.marcadorB}
+                                        </div>
                                     </div>
                                     
                                     {isDraw ? (
