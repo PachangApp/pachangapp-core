@@ -43,7 +43,37 @@ public class PartidoController {
 
     @GetMapping
     public Page<Partido> getPartidos(@RequestParam(defaultValue = "0") int page) {
-        return partidoRepository.findByEstadoOrderByReservaFechaAsc("ABIERTO", PageRequest.of(page, 4));
+        return partidoRepository.findByEstadoOrderByReservaFechaAsc("ABIERTO", PageRequest.of(page, 20));
+    }
+
+    @GetMapping("/search")
+    public java.util.List<java.util.Map<String, Object>> searchPartidos(
+            @RequestParam(required = false) String lugar,
+            @RequestParam(required = false) String fecha,
+            @RequestParam(defaultValue = "0") int page) {
+        
+        java.time.LocalDate localDate = null;
+        if (fecha != null && !fecha.isEmpty()) {
+            try {
+                localDate = java.time.LocalDate.parse(fecha);
+            } catch (Exception e) {
+                // Ignorar error de parseo
+            }
+        }
+        
+        org.springframework.data.domain.Page<Partido> partidos = partidoRepository.searchPartidos(lugar, localDate, org.springframework.data.domain.PageRequest.of(page, 20));
+
+        return partidos.getContent().stream().map(p -> {
+            java.util.Map<String, Object> map = new java.util.HashMap<>();
+            map.put("id", p.getId());
+            map.put("lugar", p.getReserva().getCampo().getNombre());
+            map.put("fecha", p.getReserva().getFecha().toString());
+            map.put("hora", p.getReserva().getHoraInicio().toString().substring(0, 5)); // HH:mm
+            map.put("deporte", p.getDeporte());
+            map.put("plazasLibres", p.getMaxJugadores() - p.getParticipaciones().size());
+            map.put("precio", p.getReserva().getCampo().getPrecioPorHora());
+            return map;
+        }).collect(java.util.stream.Collectors.toList());
     }
 
     @GetMapping("/{id}")
@@ -60,6 +90,16 @@ public class PartidoController {
             return ResponseEntity.badRequest().body("Usuario no encontrado");
         }
         Page<Partido> partidos = partidoRepository.findProximosPartidosUsuario(userId, PageRequest.of(page, 4));
+        return ResponseEntity.ok(partidos);
+    }
+
+    @GetMapping("/historial")
+    public ResponseEntity<?> getHistorialPartidos(@RequestParam Long userId, @RequestParam(defaultValue = "0") int page) {
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            return ResponseEntity.badRequest().body("Usuario no encontrado");
+        }
+        Page<Partido> partidos = partidoRepository.findHistorialPartidosUsuario(userId, PageRequest.of(page, 10));
         return ResponseEntity.ok(partidos);
     }
 

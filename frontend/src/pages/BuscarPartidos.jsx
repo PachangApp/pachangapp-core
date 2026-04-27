@@ -1,16 +1,33 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { API_BASE_URL } from "../apiConfig";
 import Navbar from "../components/Navbar";
 import MatchCard from "../components/MatchCard";
 import Dropdown from "../components/Dropdown";
+import DatePicker from "../components/DatePicker";
+
+// Función auxiliar para extraer el "recinto base" de un campo
+const getBaseName = (name) => {
+    let n = name;
+    n = n.replace(/ - f[uú]tbol sala pista \d+/i, ''); // ej. Fuentenueva - futbol sala pista 1 -> Fuentenueva
+    n = n.replace(/ - F[uú]tbol \d+/i, ''); // ej. Diputación Armilla - Fútbol 11 -> Diputación Armilla
+    n = n.replace(/ - F[uú]tbol Sala/i, ''); // ej. Diputación Armilla - Fútbol Sala -> Diputación Armilla
+    n = n.replace(/^Pista \d+ - /i, ''); // ej. Pista 1 - Campus Cartuja -> Campus Cartuja
+    n = n.replace(/^Campo de f[uú]tbol /i, ''); // ej. Campo de fútbol Fuentenueva -> Fuentenueva
+    n = n.replace(/^Centro de Actividades Deportiva UGR - /i, ''); // ej. Centro...UGR - Campus Cartuja -> Campus Cartuja
+    return n.trim();
+};
 
 const BuscarPartidos = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [matches, setMatches] = useState([]);
   const [allCampos, setAllCampos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [visibleCount, setVisibleCount] = useState(4);
+
 
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -60,10 +77,18 @@ const BuscarPartidos = () => {
   }, [fetchMatches]);
 
   const handleLoadMore = () => {
-    const nextPage = page + 1;
-    if (nextPage < totalPages) {
-      setPage(nextPage);
-      fetchMatches(nextPage, true);
+    if (visibleCount < filteredMatches.length) {
+      // Si tenemos más partidos ya cargados pero no visibles, mostramos 4 más
+      setVisibleCount(prev => prev + 4);
+    } else {
+      // Si ya mostramos todos los cargados, pedimos la siguiente página al backend
+      const nextPage = page + 1;
+      if (nextPage < totalPages) {
+        setPage(nextPage);
+        fetchMatches(nextPage, true);
+        // Al cargar más del backend, también incrementamos lo que se puede ver
+        setVisibleCount(prev => prev + 4);
+      }
     }
   };
 
@@ -104,8 +129,12 @@ const BuscarPartidos = () => {
     const isJoined = match.participaciones?.some(p => p.user.id === currentUser.id);
     if (isJoined) return false;
 
-    // 1. Filtrar por Campo
-    const matchesCampo = filters.campo === "Todos" || match.reserva.campo.nombre === filters.campo;
+    // 1. Filtrar por Campo (Recinto Agrupado)
+    let matchesCampo = filters.campo === "Todos";
+    if (!matchesCampo) {
+        const matchBaseName = getBaseName(match.reserva.campo.nombre);
+        matchesCampo = matchBaseName === filters.campo;
+    }
     
     // 2. Filtrar por Modalidad (Deporte)
     const matchesCat = filters.category === "Todos" || match.deporte === filters.category;
@@ -129,7 +158,7 @@ const BuscarPartidos = () => {
             transition={{ duration: 0.8 }}
             className="text-4xl font-black text-gray-900 mb-8 tracking-tight"
           >
-            Encuentra tu próximo <span className="text-emerald-600">partido</span>
+            {t('search_matches.find_next')} <span className="text-emerald-600">{t('search_matches.match_colored')}</span>
           </motion.h1>
 
           <motion.div 
@@ -139,36 +168,44 @@ const BuscarPartidos = () => {
             className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col md:flex-row gap-6"
           >
             {/* Buscador de campo (Modern Dropdown) */}
-            <Dropdown
-              label="Campo"
-              options={["Todos", ...[...new Set(allCampos.map(c => c.nombre))].sort()]}
-              value={filters.campo}
-              onChange={(val) => setFilters({ ...filters, campo: val })}
-              className="grow"
-            />
+            {(() => {
+                const uniqueBaseNames = [...new Set(allCampos.map(c => getBaseName(c.nombre)))].sort();
+                const campoOptions = ["Todos", ...uniqueBaseNames];
+                return (
+                  <Dropdown
+                    label={t('create_match.field')}
+                    options={campoOptions}
+                    value={filters.campo}
+                    onChange={(val) => setFilters({ ...filters, campo: val })}
+                    className="grow"
+                  />
+                );
+            })()}
 
             {/* Selector Deporte (Modern Dropdown) */}
             <Dropdown
-              label="Modalidad"
-              options={["Todos", "Fútbol 7", "Fútbol 11", "Fútbol Sala"]}
+              label={t('search_matches.category')}
+              options={[
+                { label: t('search_matches.all'), value: "Todos" },
+                { label: t('sports.futbol_7'), value: "Fútbol 7" },
+                { label: t('sports.futbol_11'), value: "Fútbol 11" },
+                { label: t('sports.futbol_sala'), value: "Fútbol Sala" }
+              ]}
               value={filters.category}
               onChange={(val) => setFilters({ ...filters, category: val })}
               className="w-full md:w-60"
             />
 
-            {/* Fecha */}
-            <div className="w-full md:w-60">
-              <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Fecha</label>
-              <div className="relative">
-                <input 
-                  type="date" 
-                  name="date"
-                  className="w-full px-4 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-emerald-500 transition-all font-bold text-gray-700 block"
-                  value={filters.date}
-                  onChange={handleFilterChange}
-                />
-              </div>
-            </div>
+            {/* Fecha (Modern DatePicker) */}
+            <DatePicker
+              label={t('create_match.date')}
+              value={filters.date}
+              minDate={new Date().toISOString().split('T')[0]}
+              onChange={(val) => setFilters({ ...filters, date: val })}
+              className="w-full md:w-60"
+              clearable={true}
+              placeholder={t('search_matches.all')}
+            />
           </motion.div>
         </section>
 
@@ -176,7 +213,7 @@ const BuscarPartidos = () => {
         {/* Resultados */}
         <div className="flex justify-between items-end mb-8">
             <h2 className="text-xl font-bold text-gray-800">
-                Partidos disponibles <span className="text-emerald-500 ml-1">({filteredMatches.length})</span>
+                {t('search_matches.available_matches')} <span className="text-emerald-500 ml-1">({filteredMatches.length})</span>
             </h2>
         </div>
 
@@ -187,7 +224,7 @@ const BuscarPartidos = () => {
               transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
               className="inline-block w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full mb-4"
             ></motion.div>
-            <p className="text-gray-500 font-bold">Buscando pachangas cerca de ti...</p>
+            <p className="text-gray-500 font-bold">{t('search_matches.searching_matches')}</p>
           </div>
         ) : filteredMatches.length > 0 ? (
           <>
@@ -196,7 +233,7 @@ const BuscarPartidos = () => {
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
             >
               <AnimatePresence mode="popLayout">
-                {filteredMatches.map((match, index) => (
+                {filteredMatches.slice(0, visibleCount).map((match, index) => (
                   <motion.div
                     key={match.id}
                     layout
@@ -215,14 +252,14 @@ const BuscarPartidos = () => {
               </AnimatePresence>
             </motion.div>
 
-            {page + 1 < totalPages && (
+            {(visibleCount < filteredMatches.length || page + 1 < totalPages) && (
               <div className="mt-12 text-center">
                 <button 
                   onClick={handleLoadMore}
                   disabled={loading}
                   className="px-8 py-3 bg-white border-2 border-emerald-100 text-emerald-600 font-black rounded-2xl hover:bg-emerald-50 transition-all shadow-sm flex items-center gap-2 mx-auto disabled:opacity-50"
                 >
-                  {loading ? "Cargando..." : "Cargar más partidos"}
+                  {loading ? t('search_matches.loading') : t('search_matches.load_more')}
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" /></svg>
                 </button>
               </div>
@@ -233,13 +270,13 @@ const BuscarPartidos = () => {
             <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6 text-gray-300">
                 <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.172 9.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">No se encontraron partidos</h3>
-            <p className="text-gray-500">Prueba ajustando los filtros de búsqueda o abriendo tú un partido.</p>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">{t('search_matches.no_matches_found')}</h3>
+            <p className="text-gray-500">{t('search_matches.no_matches_desc')}</p>
           </div>
         )}
 
         {/* Botón Flotante para Crear (A la izquierda del ChatBot) */}
-        <div className="fixed bottom-6 right-24 md:right-32 z-40 transition-all">
+        <div className="hidden md:block fixed bottom-6 right-24 md:right-32 z-40 transition-all">
             <button 
                 onClick={() => navigate("/crear-partido")}
                 className="bg-emerald-600 hover:bg-emerald-700 text-white font-black p-4 sm:py-4 sm:px-8 rounded-2xl shadow-2xl shadow-emerald-200 transform hover:-translate-y-2 transition-all flex items-center gap-3 active:scale-95 group"
@@ -247,7 +284,7 @@ const BuscarPartidos = () => {
                 <div className="w-6 h-6 bg-white/20 rounded-lg flex items-center justify-center group-hover:rotate-90 transition-transform shrink-0">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4" /></svg>
                 </div>
-                <span className="hidden sm:inline whitespace-nowrap">Crear Partido</span>
+                <span className="hidden sm:inline whitespace-nowrap">{t('search_matches.create_match_btn')}</span>
             </button>
         </div>
       </main>

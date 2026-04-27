@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import { API_BASE_URL } from "../apiConfig";
+import logo from "../assets/logo pachangapp.png";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -107,11 +108,8 @@ const Register = () => {
           background: "linear-gradient(135deg, #059669 0%, #047857 50%, #065f46 100%)",
         }}
       >
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center">
-            <span className="text-emerald-600 font-black text-lg">P</span>
-          </div>
-          <span className="text-white font-bold text-xl tracking-wide">PachangApp</span>
+        <div className="flex flex-col items-center text-center w-full">
+            <img src={logo} alt="Logo" className="w-full max-w-[450px] h-auto object-contain mb-2" />
         </div>
 
         <div>

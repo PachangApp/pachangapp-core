@@ -24,7 +24,7 @@ const Dropdown = ({ label, options, value, onChange, placeholder = "Seleccionar"
   return (
     <div className={`relative ${className}`} ref={dropdownRef}>
       {label && (
-        <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">
+        <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1.5 ml-1">
           {label}
         </label>
       )}
@@ -37,7 +37,7 @@ const Dropdown = ({ label, options, value, onChange, placeholder = "Seleccionar"
         }`}
       >
         <span className={`font-bold transition-colors ${value ? "text-gray-900" : "text-gray-400"}`}>
-          {value || placeholder}
+          {options.find(opt => typeof opt === 'object' ? opt.value === value : opt === value)?.label || value || placeholder}
         </span>
         <motion.svg
           animate={{ rotate: isOpen ? 180 : 0 }}
@@ -59,23 +59,28 @@ const Dropdown = ({ label, options, value, onChange, placeholder = "Seleccionar"
             transition={{ duration: 0.2, ease: "easeOut" }}
             className="absolute z-50 w-full mt-2 bg-white border border-gray-100 rounded-2xl shadow-2xl p-2 max-h-60 overflow-y-auto"
           >
-            {options.map((option, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => handleSelect(option)}
-                className={`w-full text-left px-4 py-3 rounded-xl text-sm font-bold transition-all flex items-center justify-between group ${
-                  value === option 
-                    ? "bg-emerald-50 text-emerald-600" 
-                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                }`}
-              >
-                {option}
-                {value === option && (
-                  <motion.div layoutId="check" className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
-                )}
-              </button>
-            ))}
+            {options.map((option, idx) => {
+              const opValue = typeof option === 'object' ? option.value : option;
+              const opLabel = typeof option === 'object' ? option.label : option;
+              
+              return (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => handleSelect(opValue)}
+                  className={`w-full text-left px-4 py-3 rounded-xl text-sm font-bold transition-all flex items-center justify-between group ${
+                    value === opValue 
+                      ? "bg-emerald-50 text-emerald-600" 
+                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  }`}
+                >
+                  {opLabel}
+                  {value === opValue && (
+                    <motion.div layoutId="check" className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
+                  )}
+                </button>
+              );
+            })}
           </motion.div>
         )}
       </AnimatePresence>

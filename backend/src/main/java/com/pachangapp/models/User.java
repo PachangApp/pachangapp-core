@@ -28,6 +28,8 @@ public class User {
 
     private boolean enabled = false;
     private String verificationToken;
+    private java.time.LocalDate fechaVerificacion;
+
 
     public User() {
     }
@@ -101,4 +103,7 @@ public class User {
 
     public String getVerificationToken() { return verificationToken; }
     public void setVerificationToken(String verificationToken) { this.verificationToken = verificationToken; }
+
+    public java.time.LocalDate getFechaVerificacion() { return fechaVerificacion; }
+    public void setFechaVerificacion(java.time.LocalDate fechaVerificacion) { this.fechaVerificacion = fechaVerificacion; }
 }

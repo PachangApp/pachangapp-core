@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { API_BASE_URL } from "../apiConfig";
 import Navbar from "../components/Navbar";
 import FieldCard from "../components/FieldCard";
 import Dropdown from "../components/Dropdown";
+import DatePicker from "../components/DatePicker";
 import { getFieldImage } from "../utils/fieldMapping";
+import { formatDate } from "../utils/dateFormatter";
 
 const SubPistaGrid = ({ campoId, fecha, onSelect, timeSlots, submitting }) => {
   const [bookedSlots, setBookedSlots] = useState([]);
@@ -47,6 +50,17 @@ const SubPistaGrid = ({ campoId, fecha, onSelect, timeSlots, submitting }) => {
     <div className="grid grid-cols-2 gap-3">
       {timeSlots.map(hora => {
         const isBooked = bookedSlots.includes(hora);
+        
+        // Nueva lógica: Filtrar horas pasadas si es hoy
+        const isToday = fecha === new Date().toISOString().split('T')[0];
+        const currentTime = new Date();
+        const [h, m] = hora.split(':').map(Number);
+        const slotDate = new Date();
+        slotDate.setHours(h, m, 0, 0);
+        const isPast = isToday && slotDate < currentTime;
+
+        if (isPast) return null; // No mostramos horas pasadas
+
         return (
           <button
             key={hora}
@@ -60,7 +74,7 @@ const SubPistaGrid = ({ campoId, fecha, onSelect, timeSlots, submitting }) => {
           >
             {hora}
             {isBooked && (
-              <span className="absolute top-1 right-2 text-[6px] font-black uppercase text-red-300">Oculto</span>
+              <span className="absolute top-1 right-2 text-[6px] font-black uppercase text-red-300">Ocupado</span>
             )}
           </button>
         );
@@ -71,6 +85,7 @@ const SubPistaGrid = ({ campoId, fecha, onSelect, timeSlots, submitting }) => {
 
 const CrearPartido = () => {
 
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [campos, setCampos] = useState([]);
@@ -86,8 +101,11 @@ const CrearPartido = () => {
   });
   
   const [selectedCampo, setSelectedCampo] = useState(null);
+  const [selectedSubPista, setSelectedSubPista] = useState(null);
+  const [selectedHora, setSelectedHora] = useState(null);
   const [maxJugadores, setMaxJugadores] = useState(10);
   const [submitting, setSubmitting] = useState(false);
+  const [paymentData, setPaymentData] = useState({ cardName: "", cardNumber: "", expiry: "", cvc: "" });
 
   const timeSlots = [
     "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00",
@@ -135,15 +153,25 @@ const CrearPartido = () => {
   }, []);
 
   const handleNextStep = () => {
+    window.scrollTo(0, 0);
     setStep(step + 1);
   };
 
   const handlePrevStep = () => {
+    window.scrollTo(0, 0);
+    if (step === 4) {
+        setStep(3);
+        return;
+    }
     setStep(step - 1);
-    if (step === 3) setSelectedCampo(null);
+    if (step === 3) {
+        setSelectedCampo(null);
+        setSelectedSubPista(null);
+    }
   };
 
   const handleSelectCampo = async (campo) => {
+    window.scrollTo(0, 0);
     console.log("Campo seleccionado:", campo);
     setSelectedCampo(campo);
     
@@ -162,7 +190,39 @@ const CrearPartido = () => {
 
 
 
-  const handleCreateMatch = async (hora, specificCampo = null) => {
+  const handleConfirmSelection = (hora, specificCampo = null) => {
+    window.scrollTo(0, 0);
+    setSelectedHora(hora);
+    if (specificCampo && specificCampo.id !== selectedCampo?.id) {
+        setSelectedSubPista(specificCampo);
+    } else {
+        setSelectedSubPista(null);
+    }
+    setStep(4);
+  };
+
+  const handleProcessPayment = async (e) => {
+    e.preventDefault();
+    
+    // Validaciones extra manuales
+    if (paymentData.cardName.trim().length < 3) {
+      setMessage({ text: "El nombre en la tarjeta debe tener al menos 3 caracteres", type: "error" });
+      return;
+    }
+    
+    if (paymentData.cardNumber.replace(/\s/g, '').length < 16) {
+      setMessage({ text: "El número de tarjeta no es válido", type: "error" });
+      return;
+    }
+
+    setSubmitting(true);
+    // Simular retraso de pasarela de pago
+    setTimeout(() => {
+        handleExecuteCreateMatch();
+    }, 2000);
+  };
+
+  const handleExecuteCreateMatch = async () => {
     const storedUser = localStorage.getItem("user");
     if (!storedUser) {
       setMessage({ text: "Debes iniciar sesión para crear un partido.", type: "error" });
@@ -170,7 +230,7 @@ const CrearPartido = () => {
     }
 
     const { id: userId, token } = JSON.parse(storedUser);
-    const targetCampo = specificCampo || selectedCampo;
+    const targetCampo = selectedSubPista || selectedCampo;
     setSubmitting(true);
     
     try {
@@ -184,7 +244,7 @@ const CrearPartido = () => {
           campoId: targetCampo.id,
           userId: userId,
           fecha: filters.fecha,
-          hora: hora,
+          hora: selectedHora,
           maxJugadores: maxJugadores
         })
       });
@@ -209,12 +269,16 @@ const CrearPartido = () => {
 
 
   const zonas = [...new Set(campos.map(c => c.zona))];
-  const deportes = ["Fútbol 7", "Fútbol 11", "Fútbol Sala"];
+  const deportes = [
+    { value: "Fútbol 7", key: "futbol_7" },
+    { value: "Fútbol 11", key: "futbol_11" },
+    { value: "Fútbol Sala", key: "futbol_sala" }
+  ];
   
   // Si estamos en F7, mostramos solo los "Padres" (F11) para que eligan el recinto
   const filteredCampos = campos.filter(c => {
     if (filters.deporte === "Fútbol 7") {
-        return c.deporte === "Fútbol 11"; // Mostramos todos los complejos para F7
+        return c.deporte === "Fútbol 11" && c.zona === filters.zona; 
     }
     return c.zona === filters.zona && c.deporte === filters.deporte;
   });
@@ -230,18 +294,36 @@ const CrearPartido = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="mb-12 text-center"
+          className="mb-12 text-center relative"
         >
+          {/* Botón Volver Atrás en el Header */}
+          {step > 1 && (
+            <button 
+                onClick={handlePrevStep}
+                className="absolute left-0 top-1/2 -translate-y-1/2 flex items-center gap-2 text-gray-400 hover:text-emerald-600 font-bold transition-all group"
+            >
+                <div className="w-8 h-8 rounded-full bg-white shadow-sm border border-gray-100 flex items-center justify-center group-hover:bg-emerald-50 group-hover:border-emerald-100 transition-all">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" /></svg>
+                </div>
+                <span className="hidden md:inline text-sm">
+                    {step === 2 && t("create_match.change_filters")}
+                    {step === 3 && t("create_match.change_field")}
+                    {step === 4 && t("create_match.change_time")}
+                </span>
+            </button>
+          )}
+
           <div className="inline-block px-4 py-1.5 mb-4 bg-emerald-100 text-emerald-700 text-[10px] font-black uppercase tracking-widest rounded-full shadow-sm">
-            Paso {step} de 3
+            {t("create_match.step", { current: step, total: 4 })}
           </div>
           <h1 className="text-5xl font-black text-gray-900 tracking-tight">
-            Crear <span className="text-emerald-600 font-extrabold italic">Partido</span>
+            {step === 4 ? t("create_match.step_status") : t("create_match.create_status")} <span className="text-emerald-600 font-extrabold italic">{step === 4 ? t("create_match.payment") : t("create_match.match_status")}</span>
           </h1>
           <p className="mt-4 text-gray-500 font-medium max-w-lg mx-auto">
-            {step === 1 && "Selecciona dónde y cuándo quieres jugar para empezar."}
-            {step === 2 && "Elige la pista que más te guste de las disponibles en tu zona."}
-            {step === 3 && "Selecciona la hora y ajusta los detalles finales de tu partido."}
+            {step === 1 && t("create_match.desc_step1")}
+            {step === 2 && t("create_match.desc_step2")}
+            {step === 3 && t("create_match.desc_step3")}
+            {step === 4 && t("create_match.desc_step4")}
           </p>
         </motion.header>
 
@@ -250,12 +332,12 @@ const CrearPartido = () => {
           <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -translate-y-1/2 rounded-full"></div>
           <motion.div 
             initial={{ width: 0 }}
-            animate={{ width: `${((step - 1) / 2) * 100}%` }}
+            animate={{ width: `${((step - 1) / 3) * 100}%` }}
             transition={{ type: "spring", stiffness: 100, damping: 20 }}
             className="absolute top-1/2 left-0 h-1 bg-emerald-500 -translate-y-1/2 rounded-full"
           ></motion.div>
           <div className="relative flex justify-between">
-            {[1, 2, 3].map((s) => (
+            {[1, 2, 3, 4].map((s) => (
               <motion.div 
                 key={s}
                 animate={{ 
@@ -264,7 +346,7 @@ const CrearPartido = () => {
                   borderColor: s <= step ? "#ecfdf5" : "#f3f4f6",
                   color: s <= step ? "#ffffff" : "#d1d5db"
                 }}
-                className={`w-10 h-10 rounded-full flex items-center justify-center font-black transition-all duration-300 border-4`}
+                className={`w-10 h-10 rounded-full flex items-center justify-center font-black transition-all duration-300 border-4 shadow-sm`}
               >
                 {s}
               </motion.div>
@@ -277,9 +359,9 @@ const CrearPartido = () => {
           <AnimatePresence mode="wait">
             <motion.div 
               key={step}
-              initial={{ opacity: 0, x: 40 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -40 }}
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -40 }}
               transition={{ duration: 0.6, ease: "easeInOut" }}
             >
           
@@ -290,26 +372,26 @@ const CrearPartido = () => {
                 <div className="space-y-6">
                   <div>
                     <Dropdown
-                      label="¿En qué zona?"
+                      label={t("create_match.where")}
                       options={zonas}
                       value={filters.zona}
                       onChange={(val) => setFilters({...filters, zona: val})}
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">Modalidad Deportiva</label>
+                    <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">{t("create_match.sport_type")}</label>
                     <div className="grid grid-cols-2 gap-3">
                       {deportes.map(d => (
                         <button
-                          key={d}
-                          onClick={() => setFilters({...filters, deporte: d})}
+                          key={d.value}
+                          onClick={() => setFilters({...filters, deporte: d.value})}
                           className={`py-4 rounded-2xl text-sm font-black transition-all border-2 ${
-                            filters.deporte === d 
+                            filters.deporte === d.value 
                               ? "bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-200" 
                               : "bg-gray-50 border-gray-100 text-gray-500 hover:border-emerald-200"
                           }`}
                         >
-                          {d}
+                          {t(`sports.${d.key}`)}
                         </button>
                       ))}
                     </div>
@@ -318,18 +400,17 @@ const CrearPartido = () => {
                 
                 <div className="space-y-6">
                   <div>
-                    <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">¿Qué día?</label>
-                    <input 
-                      type="date"
-                      min={new Date().toISOString().split('T')[0]}
+                    <DatePicker 
+                      label={t("create_match.which_day")}
                       value={filters.fecha}
-                      onChange={(e) => setFilters({...filters, fecha: e.target.value})}
-                      className="w-full px-6 py-5 bg-gray-50 border-none rounded-3xl focus:ring-4 focus:ring-emerald-500/20 font-bold text-gray-700 transition-all text-lg"
+                      minDate={new Date().toISOString().split('T')[0]}
+                      onChange={(val) => setFilters({...filters, fecha: val})}
+                      className="w-full"
                     />
                   </div>
                   <div className="p-8 bg-emerald-50 rounded-[2.5rem] border border-emerald-100 mt-auto">
-                    <h3 className="font-black text-emerald-800 uppercase text-xs tracking-widest mb-2">Resumen rápido</h3>
-                    <p className="text-emerald-600/80 text-sm font-medium">Estás buscando pistas para <span className="font-bold">{filters.deporte}</span> en <span className="font-bold">{filters.zona}</span> el día <span className="font-bold">{new Date(filters.fecha).toLocaleDateString()}</span>.</p>
+                    <h3 className="font-black text-emerald-800 uppercase text-xs tracking-widest mb-2">{t("create_match.summary")}</h3>
+                    <p className="text-emerald-600/80 text-sm font-medium">{t("create_match.summary_desc", { deporte: filters.deporte, zona: filters.zona, fecha: formatDate(filters.fecha) })}</p>
                   </div>
                 </div>
               </div>
@@ -339,7 +420,7 @@ const CrearPartido = () => {
                   onClick={handleNextStep}
                   className="w-full py-6 bg-gray-900 hover:bg-black text-white font-black rounded-3xl transition-all shadow-xl hover:scale-[1.02] active:scale-[0.98] text-xl tracking-tight"
                 >
-                  Continuar a Selección de Pista
+                  {t("create_match.continue_to_selection")}
                 </button>
               </div>
             </div>
@@ -348,14 +429,8 @@ const CrearPartido = () => {
           {/* PASO 2: SELECCIÓN DE CAMPO */}
           {step === 2 && (
             <div>
-              <div className="flex justify-between items-center mb-10 max-w-4xl mx-auto">
-                <button onClick={handlePrevStep} className="flex items-center gap-2 text-gray-400 hover:text-gray-900 font-bold transition-colors">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" /></svg>
-                  Volver atrás
-                </button>
-                <div className="text-right">
-                  <span className="text-xs font-black text-emerald-600 uppercase tracking-widest">Encontrados: {filteredCampos.length}</span>
-                </div>
+              <div className="mb-10 max-w-4xl mx-auto text-right">
+                  <span className="text-xs font-black text-emerald-600 uppercase tracking-widest">{t("create_match.found")}: {filteredCampos.length}</span>
               </div>
 
               {filteredCampos.length > 0 ? (
@@ -377,11 +452,160 @@ const CrearPartido = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5m0 0V11m0 0L9 1M9 1l-3 3m3-3l3 3" />
                       </svg>
                   </div>
-                  <h3 className="text-2xl font-black text-gray-900 mb-2">No hay pistas disponibles</h3>
-                  <p className="text-gray-500 mb-10">Lo sentimos, no hay instalaciones que coincidan con tu búsqueda.</p>
+                   <h3 className="text-2xl font-black text-gray-900 mb-2">{t("create_match.no_fields")}</h3>
+                  <p className="text-gray-500 mb-10">{t("create_match.no_fields_desc")}</p>
                   <button onClick={handlePrevStep} className="px-8 py-4 bg-emerald-600 text-white font-black rounded-2xl hover:bg-emerald-700 transition-all">
-                    Cambiar búsqueda
+                    {t("create_match.change_search")}
                   </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* PASO 4: PASARELA DE PAGO FICTICIA */}
+          {step === 4 && selectedCampo && (
+            <div className="max-w-4xl mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {/* Resumen del pedido */}
+                <div className="md:col-span-1 space-y-6">
+                    <div className="bg-white p-6 rounded-[2.5rem] shadow-xl border border-gray-100">
+                        <h3 className="text-lg font-black text-gray-900 mb-6 uppercase tracking-tight">{t("create_match.payment_summary")}</h3>
+                        <div className="space-y-4">
+                            <div className="flex justify-between">
+                                <span className="text-xs font-bold text-gray-400">{t("create_match.field")}</span>
+                                <span className="text-xs font-black text-gray-700">{selectedCampo.nombre}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-xs font-bold text-gray-400">{t("create_match.date")}</span>
+                                <span className="text-xs font-black text-gray-700">{formatDate(filters.fecha)}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-xs font-bold text-gray-400">{t("create_match.hour")}</span>
+                                <span className="text-xs font-black text-gray-700">{selectedHora}</span>
+                            </div>
+                            <div className="pt-4 border-t border-gray-50 flex justify-between items-center">
+                                <span className="text-sm font-black text-gray-900">{t("create_match.total")}</span>
+                                <span className="text-xl font-black text-emerald-600">{selectedCampo.precioPorHora}€</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div className="bg-emerald-50 p-6 rounded-3xl border border-emerald-100">
+                        <div className="flex items-center gap-3 text-emerald-700 mb-2">
+                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                             <span className="text-xs font-black uppercase">{t("create_match.secure_payment")}</span>
+                        </div>
+                        <p className="text-[10px] text-emerald-600/70 font-medium">{t("create_match.secure_payment_desc")}</p>
+                    </div>
+                </div>
+
+                {/* Formulario de Pago */}
+                <div className="md:col-span-2">
+                    <form onSubmit={handleProcessPayment} className="bg-white p-10 rounded-[3rem] shadow-2xl border border-gray-100">
+                        <div className="space-y-6">
+                            <div>
+                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">{t("create_match.card_name")}</label>
+                                <input 
+                                    type="text"
+                                    required
+                                    placeholder="JUAN PEREZ"
+                                    value={paymentData.cardName}
+                                    onChange={(e) => setPaymentData({...paymentData, cardName: e.target.value.toUpperCase()})}
+                                    minLength={3}
+                                    className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-4 focus:ring-emerald-500/10 font-bold text-gray-700 transition-all font-black placeholder:text-gray-300"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">{t("create_match.card_number")}</label>
+                                <div className="relative">
+                                    <input 
+                                        type="text"
+                                        required
+                                        maxLength="19"
+                                        placeholder="0000 0000 0000 0000"
+                                        value={paymentData.cardNumber}
+                                        onChange={(e) => {
+                                            const val = e.target.value.replace(/\D/g, '').replace(/(.{4})/g, '$1 ').trim();
+                                            setPaymentData({...paymentData, cardNumber: val});
+                                        }}
+                                        pattern="\d{4} \d{4} \d{4} \d{4}"
+                                        minLength={19}
+                                        className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-4 focus:ring-emerald-500/10 font-black text-gray-700 transition-all font-mono placeholder:text-gray-300"
+                                    />
+                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 flex gap-2">
+                                        <div className="w-8 h-5 bg-gray-200 rounded"></div>
+                                        <div className="w-8 h-5 bg-gray-300 rounded"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">{t("create_match.expiry")}</label>
+                                    <input 
+                                        type="text"
+                                        required
+                                        placeholder="MM/AA"
+                                        maxLength="5"
+                                        value={paymentData.expiry}
+                                        onChange={(e) => {
+                                            let val = e.target.value.replace(/\D/g, '');
+                                            if (val.length >= 2) val = val.slice(0, 2) + '/' + val.slice(2, 4);
+                                            setPaymentData({...paymentData, expiry: val});
+                                        }}
+                                        className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-4 focus:ring-emerald-500/10 font-black text-gray-700 transition-all placeholder:text-gray-300"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">{t("create_match.cvc")}</label>
+                                    <input 
+                                        type="text"
+                                        required
+                                        placeholder="123"
+                                        maxLength="3"
+                                        value={paymentData.cvc}
+                                        onChange={(e) => setPaymentData({...paymentData, cvc: e.target.value.replace(/\D/g, '')})}
+                                        className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-4 focus:ring-emerald-500/10 font-black text-gray-700 transition-all placeholder:text-gray-300"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="mt-12">
+                            <button 
+                                type="submit"
+                                disabled={submitting}
+                                className="w-full py-6 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-3xl transition-all shadow-xl shadow-emerald-200 hover:scale-[1.02] active:scale-[0.98] text-xl flex items-center justify-center gap-3 disabled:opacity-50"
+                            >
+                                {submitting ? (
+                                    <>
+                                        <div className="w-6 h-6 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        <span>{t("create_match.processing_payment")}</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+                                        {t("create_match.pay_and_book", { price: selectedCampo.precioPorHora })}
+                                    </>
+                                )}
+                            </button>
+                            <p className="text-center mt-6 text-[10px] text-gray-400 font-bold uppercase tracking-widest leading-relaxed">{t("create_match.terms_notice")}</p>
+                        </div>
+                    </form>
+                </div>
+              </div>
+
+              {message.text && (
+                <div className={`mt-10 p-6 rounded-3xl text-sm font-black animate-in slide-in-from-bottom-4 duration-500 shadow-md ${
+                  message.type === 'success' ? "bg-emerald-100 text-emerald-800 border border-emerald-200" : "bg-red-100 text-red-800 border border-red-200"
+                }`}>
+                  <div className="flex items-center gap-3">
+                    {message.type === 'success' ? (
+                      <svg className="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" /></svg>
+                    ) : (
+                      <svg className="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    )}
+                    {message.text}
+                  </div>
                 </div>
               )}
             </div>
@@ -410,11 +634,11 @@ const CrearPartido = () => {
 
                   <div className="space-y-4 pt-6 border-t border-gray-50">
                     <div className="flex justify-between items-center">
-                      <span className="text-xs font-bold text-gray-400 uppercase">Día</span>
-                      <span className="font-black text-gray-700">{new Date(filters.fecha).toLocaleDateString()}</span>
+                      <span className="text-xs font-bold text-gray-400 uppercase">{t("create_match.day")}</span>
+                      <span className="font-black text-gray-700">{formatDate(filters.fecha)}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-xs font-bold text-gray-400 uppercase">Precio</span>
+                      <span className="text-xs font-bold text-gray-400 uppercase">{t("create_match.price")}</span>
                       <span className="font-black text-emerald-600 underline decoration-2 decoration-emerald-200 ">{selectedCampo.precioPorHora}€/h</span>
                     </div>
                   </div>
@@ -422,9 +646,9 @@ const CrearPartido = () => {
 
                 <div className="bg-emerald-900 text-white p-8 rounded-[2.5rem] shadow-xl relative overflow-hidden group">
                   <div className="absolute -right-4 -bottom-4 w-32 h-32 bg-emerald-800 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-700"></div>
-                  <h4 className="text-sm font-black uppercase tracking-widest text-emerald-300 mb-4 relative z-10">Configuración</h4>
+                  <h4 className="text-sm font-black uppercase tracking-widest text-emerald-300 mb-4 relative z-10">{t("create_match.settings")}</h4>
                   <div className="relative z-10">
-                    <label className="block text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-3">Máx Jugadores: {maxJugadores}</label>
+                    <label className="block text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-3">{t("create_match.max_players")}: {maxJugadores}</label>
                     <input 
                       type="range" 
                       min="2" 
@@ -433,14 +657,9 @@ const CrearPartido = () => {
                       onChange={(e) => setMaxJugadores(e.target.value)}
                       className="w-full accent-emerald-500 mb-4"
                     />
-                    <p className="text-[10px] text-emerald-200/60 leading-relaxed font-medium">Este será el número máximo de personas que podrán apuntarse a tu partido público.</p>
+                    <p className="text-[10px] text-emerald-200/60 leading-relaxed font-medium">{t("create_match.max_players_desc")}</p>
                   </div>
                 </div>
-                
-                <button onClick={handlePrevStep} className="w-full flex items-center justify-center gap-2 py-4 text-gray-400 hover:text-gray-900 font-bold transition-colors">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" /></svg>
-                  Cambiar de pista
-                </button>
               </div>
 
               {/* Grid de Horarios */}
@@ -451,7 +670,7 @@ const CrearPartido = () => {
                         {selectedCampo.subPistas?.map((subPista, index) => (
                             <div key={subPista.id} className="bg-white p-8 rounded-[3rem] shadow-xl border border-gray-100">
                                 <div className="flex items-center justify-between mb-8 px-2">
-                                    <h3 className="text-lg font-black text-gray-800 uppercase tracking-tight">Campo {index + 1}</h3>
+                                    <h3 className="text-lg font-black text-gray-800 uppercase tracking-tight">{t("create_match.field_num", { number: index + 1 })}</h3>
                                     <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full uppercase">{subPista.deporte}</span>
                                 </div>
                                 <div className="space-y-3">
@@ -459,8 +678,7 @@ const CrearPartido = () => {
                                         campoId={subPista.id} 
                                         fecha={filters.fecha} 
                                         onSelect={(hora) => {
-                                            setSelectedCampo(subPista); // Cambiamos temporalmente el seleccionado para la petición
-                                            handleCreateMatch(hora, subPista);
+                                            handleConfirmSelection(hora, subPista);
                                         }}
                                         timeSlots={timeSlots}
                                         submitting={submitting}
@@ -472,12 +690,12 @@ const CrearPartido = () => {
                 ) : (
                     /* VISTA SIMPLE PARA F11 / SALA */
                     <div className="bg-white p-10 rounded-[3rem] shadow-xl border border-gray-100">
-                      <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-8 ml-2">Horarios Disponibles</label>
+                      <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-8 ml-2">{t("create_match.available_schedules")}</label>
                       
                       {loading ? (
                         <div className="flex flex-col items-center justify-center py-20">
                           <div className="w-12 h-12 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin mb-6"></div>
-                          <p className="text-gray-400 font-bold italic">Consultando disponibilidad en tiempo real...</p>
+                          <p className="text-gray-400 font-bold italic">{t("create_match.checking_availability")}</p>
                         </div>
                       ) : (
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -485,11 +703,21 @@ const CrearPartido = () => {
                             const isBooked = bookedSlots.includes(hora);
                             const isThisSubmitting = submitting && message.text === "";
 
+                            // Nueva lógica: Filtrar horas pasadas si es hoy
+                            const isToday = filters.fecha === new Date().toISOString().split('T')[0];
+                            const currentTime = new Date();
+                            const [h, m] = hora.split(':').map(Number);
+                            const slotDate = new Date();
+                            slotDate.setHours(h, m, 0, 0);
+                            const isPast = isToday && slotDate < currentTime;
+
+                            if (isPast) return null;
+
                             return (
                               <button
                                 key={hora}
                                 disabled={isBooked || submitting}
-                                onClick={() => handleCreateMatch(hora, selectedCampo)}
+                                onClick={() => handleConfirmSelection(hora, selectedCampo)}
                                 className={`group py-6 rounded-3xl font-black text-lg transition-all relative overflow-hidden border-2 ${
                                   isBooked 
                                     ? "bg-red-50 text-red-300 border-red-50 cursor-not-allowed opacity-60" 
@@ -502,7 +730,7 @@ const CrearPartido = () => {
                                     <span>{hora}</span>
                                 )}
                                 {isBooked && (
-                                  <div className="absolute top-2 right-3 text-[8px] font-black uppercase text-red-300 bg-red-100 px-1.5 py-0.5 rounded-full">Ocupado</div>
+                                  <div className="absolute top-2 right-3 text-[8px] font-black uppercase text-red-300 bg-red-100 px-1.5 py-0.5 rounded-full">{t("create_match.occupied")}</div>
                                 )}
                               </button>
                             );

@@ -1,9 +1,11 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { HashRouter as Router, Routes, Route } from "react-router-dom";
 import Auth from "./pages/Auth";
 import Inicio from "./pages/Inicio";
 import Perfil from "./pages/Perfil";
 import BuscarPartidos from "./pages/BuscarPartidos";
-import CamposDisponibles from "./pages/CamposDisponibles";
+import Torneos from "./pages/Torneos";
+import TorneoDetail from "./pages/TorneoDetail";
+import CrearTorneo from "./pages/CrearTorneo";
 import CrearPartido from "./pages/CrearPartido";
 import Conocenos from "./pages/Conocenos";
 import ChatBot from "./components/ChatBot";
@@ -32,6 +34,9 @@ const AppContent = () => {
   const hideNavPaths = ["/", "/login", "/register"];
   const shouldShowNav = !hideNavPaths.includes(location.pathname) && storedUser;
 
+  // No mostrar PachanBot en login/register o hero antes de entrar
+  const shouldShowBot = storedUser && !["/login", "/register", "/"].includes(location.pathname);
+
   return (
     <>
       <ScrollToTop />
@@ -43,12 +48,14 @@ const AppContent = () => {
         <Route path="/perfil" element={<Perfil />} />
         <Route path="/buscar-partidos" element={<BuscarPartidos />} />
         <Route path="/crear-partido" element={<CrearPartido />} />
-        <Route path="/campos-disponibles" element={<CamposDisponibles />} />
+        <Route path="/torneos" element={<Torneos />} />
+        <Route path="/torneos/:id" element={<TorneoDetail />} />
+        <Route path="/crear-torneo" element={<CrearTorneo />} />
         <Route path="/conocenos" element={<Conocenos />} />
         <Route path="/partido/:id" element={<MatchDetail />} />
         <Route path="/admin" element={<Admin />} />
       </Routes>
-      <ChatBot />
+      {shouldShowBot && <ChatBot />}
       {shouldShowNav && <BottomNav />}
     </>
   );
