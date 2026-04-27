@@ -6,6 +6,11 @@ const PC_IP = "192.168.18.156";
 const PORT = "8091";
 
 // Si es móvil usamos la IP, si es navegador de PC usamos localhost
-export const API_BASE_URL = isCapacitor 
-  ? `http://${PC_IP}:${PORT}/api` 
-  : `http://localhost:${PORT}/api`;
+const isProduction = window.location.hostname === 'pachangapp.es' || window.location.hostname === 'www.pachangapp.es';
+
+// Si es móvil usamos la IP, si es producción usamos el subdominio, si es local usamos localhost
+export const API_BASE_URL = isProduction
+  ? 'https://api.pachangapp.es'
+  : isCapacitor 
+    ? `http://${PC_IP}:${PORT}/api` 
+    : `http://localhost:${PORT}/api`;
