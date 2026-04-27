@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { getFieldImage } from "../../utils/fieldMapping";
+import { API_BASE_URL } from "../../apiConfig";
 
 const CamposDestacados = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [campos, setCampos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -11,7 +14,7 @@ const CamposDestacados = () => {
     // Fetch real campos from the backend to make the page richer
     const fetchCampos = async () => {
       try {
-        const response = await fetch("http://localhost:8091/api/campos");
+        const response = await fetch(`${API_BASE_URL}/campos`);
         if (response.ok) {
           const data = await response.json();
           // Solo cogemos 3 al azar o los primeros 3 para destacar
@@ -33,14 +36,14 @@ const CamposDestacados = () => {
       <div className="flex justify-between items-end mb-5 px-1">
         <div>
           <h3 className="font-extrabold text-xl text-gray-900">
-            🏟️ Instalaciones Top
+            {t("home.featured_fields_title")}
           </h3>
           <p className="text-gray-500 text-sm mt-1">
-            Los campos mejor valorados de tu ciudad
+            {t("home.featured_fields_sub")}
           </p>
         </div>
         <Link to="/campos-disponibles" className="text-sm text-emerald-600 font-bold hover:underline">
-          Ver mapa
+          {t("home.view_map")}
         </Link>
       </div>
 

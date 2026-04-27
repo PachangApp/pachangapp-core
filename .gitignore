@@ -5,4 +5,5 @@ dist/
 backend/src/main/resources/application.properties
 frontend/src/apiConfig.js
 k8s/secrets.yaml
-*.pem
+*.pem
+*.log

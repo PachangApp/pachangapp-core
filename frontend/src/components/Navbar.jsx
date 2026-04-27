@@ -2,7 +2,7 @@ import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import logo from "../assets/logo pachangapp.png";
+import logo from "../assets/logo_pachangapp.png";
 import LanguageSelector from "./LanguageSelector";
 
 const Navbar = () => {

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { API_BASE_URL } from "../apiConfig";
-import logo from "../assets/logo pachangapp.png";
+import logo from "../assets/logo_pachangapp.png";
 
 const Auth = () => {
   const location = useLocation();
