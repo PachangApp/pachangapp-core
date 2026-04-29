@@ -33,13 +33,13 @@ spec:
             - containerPort: 5678
           env:
             - name: N8N_HOST
-              value: "34.197.214.53"
+              value: "n8n.pachangapp.es"
             - name: N8N_PORT
               value: "5678"
             - name: N8N_PROTOCOL
-              value: "http"
+              value: "https"
             - name: WEBHOOK_URL
-              value: "http://34.197.214.53:5678/"
+              value: "https://n8n.pachangapp.es/"
           volumeMounts:
             - name: n8n-storage
               mountPath: /home/node/.n8n
@@ -60,5 +60,4 @@ spec:
   ports:
     - port: 5678
       targetPort: 5678
-      nodePort: 5678
-  type: NodePort
+  type: ClusterIP
