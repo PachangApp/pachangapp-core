@@ -118,15 +118,23 @@ public class UserController {
     }
 
     @PutMapping("/{id}/avatar")
-    public org.springframework.http.ResponseEntity<?> updateAvatar(@PathVariable Long id, @RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
+    public org.springframework.http.ResponseEntity<?> updateAvatar(@PathVariable Long id, @RequestParam("file") org.springframework.web.multipart.MultipartFile file, jakarta.servlet.http.HttpServletRequest request) {
         User user = userRepository.findById(id).orElse(null);
         if (user == null) return org.springframework.http.ResponseEntity.notFound().build();
 
         try {
-            String fileUrl = fileService.saveFile(file);
+            String filename = fileService.saveFile(file);
+            String baseUrl = org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromRequestUri(request)
+                    .replacePath(null)
+                    .build()
+                    .toUriString();
+            String fileUrl = baseUrl + "/uploads/" + filename;
+            
             user.setAvatar(fileUrl);
             userRepository.save(user);
             return org.springframework.http.ResponseEntity.ok(user);
+        } catch (IllegalArgumentException e) {
+            return org.springframework.http.ResponseEntity.badRequest().body(e.getMessage());
         } catch (java.io.IOException e) {
             return org.springframework.http.ResponseEntity.internalServerError().body("Error al guardar imagen: " + e.getMessage());
         }

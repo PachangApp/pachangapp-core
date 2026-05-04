@@ -156,7 +156,8 @@ const Perfil = () => {
         setUser(prev => ({ ...prev, avatar: updatedUser.avatar }));
         window.dispatchEvent(new Event("storage"));
       } else {
-        alert("Error al subir la imagen. Verifica el tamaño (máx 10MB).");
+        const errorMsg = await resp.text();
+        alert(errorMsg || "Error al subir la imagen. Verifica el tamaño y formato.");
       }
     } catch (err) {
       console.error(err);
