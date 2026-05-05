@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { GoogleLogin } from "@react-oauth/google";
 import { API_BASE_URL } from "../apiConfig";
 import logo from "../assets/logo_pachangapp.png";
+import CaptchaGrid from "../components/CaptchaGrid";
 
 const Auth = () => {
   const location = useLocation();
@@ -28,12 +29,14 @@ const Auth = () => {
   const [message, setMessage] = useState("");
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isCaptchaValid, setIsCaptchaValid] = useState(false);
 
   // Actualizar el estado isLogin si cambia la URL externamente
   useEffect(() => {
     setIsLogin(location.pathname === "/login");
     setMessage(""); // Limpiar mensajes al cambiar
     setError(false);
+    setIsCaptchaValid(false);
   }, [location.pathname]);
 
   const toggleAuth = () => {
@@ -51,6 +54,11 @@ const Auth = () => {
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
+    if (!isCaptchaValid) {
+      setError(true);
+      setMessage("Por favor, completa el CAPTCHA para continuar.");
+      return;
+    }
     setMessage("");
     setError(false);
     setLoading(true);
@@ -231,7 +239,7 @@ const Auth = () => {
             x: isDesktop ? (isLogin ? "0%" : "-66.66%") : "0%",
           }}
           transition={{ type: "spring", stiffness: 100, damping: 20 }}
-          className="flex flex-1 items-start lg:items-center justify-center px-8 py-10 lg:py-12 bg-white relative z-20 overflow-y-auto"
+          className="flex flex-1 items-start lg:items-center justify-center px-8 py-6 lg:py-8 bg-white relative z-20 overflow-y-auto"
         >
           <div className="w-full max-w-md relative">
             
@@ -241,9 +249,9 @@ const Auth = () => {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.5 }}
-              className="flex flex-col items-center mb-8 lg:hidden w-full shrink-0"
+              className="flex flex-col items-center mb-4 lg:hidden w-full shrink-0"
             >
-              <img src={logo} alt="Logo" className="w-[180px] h-[180px] object-contain mb-0" />
+              <img src={logo} alt="Logo" className="w-[140px] h-[140px] object-contain mb-0" />
             </motion.div>
 
             <AnimatePresence mode="wait">
@@ -256,19 +264,19 @@ const Auth = () => {
                   exit={{ opacity: 0, x: -30 }}
                   transition={{ duration: 0.4, ease: "easeOut" }}
                 >
-                  <h1 className="text-4xl font-black text-gray-900 mb-2 tracking-tight">Iniciar sesión</h1>
-                  <p className="text-gray-500 font-medium mb-10">
+                  <h1 className="text-3xl font-black text-gray-900 mb-1 tracking-tight">Iniciar sesión</h1>
+                  <p className="text-gray-500 font-medium mb-6">
                     ¿No tienes cuenta?{" "}
                     <button onClick={toggleAuth} className="text-emerald-600 font-bold hover:underline">Regístrate aquí</button>
                   </p>
 
-                  <form onSubmit={handleLoginSubmit} className="space-y-6">
+                  <form onSubmit={handleLoginSubmit} className="space-y-4">
                     <div>
                       <label className="block text-sm font-black text-gray-700 mb-2 uppercase tracking-wider">Correo electrónico</label>
                       <input
                         type="email" name="email" required
                         placeholder="ej: anonimo@email.com"
-                        className="w-full px-5 py-3.5 rounded-xl border-2 border-gray-100 bg-gray-50 focus:bg-white focus:border-emerald-500 outline-none transition-all font-medium text-gray-900"
+                        className="w-full px-5 py-3 rounded-xl border-2 border-gray-100 bg-gray-50 focus:bg-white focus:border-emerald-500 outline-none transition-all font-medium text-gray-900"
                         onChange={handleLoginChange} value={loginData.email}
                       />
                     </div>
@@ -280,38 +288,46 @@ const Auth = () => {
                       <input
                         type="password" name="password" required
                         placeholder=""
-                        className="w-full px-5 py-3.5 rounded-xl border-2 border-gray-100 bg-gray-50 focus:bg-white focus:border-emerald-500 outline-none transition-all font-medium text-gray-900"
+                        className="w-full px-5 py-3 rounded-xl border-2 border-gray-100 bg-gray-50 focus:bg-white focus:border-emerald-500 outline-none transition-all font-medium text-gray-900"
                         onChange={handleLoginChange} value={loginData.password}
                       />
                     </div>
                     
+                    {/* Captcha */}
+                    <div className="pt-2">
+                      <CaptchaGrid onSuccess={() => setIsCaptchaValid(true)} />
+                    </div>
+
                     <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      type="submit" disabled={loading}
-                      className="w-full py-4 rounded-xl bg-emerald-600 text-white font-black text-lg shadow-xl shadow-emerald-600/30 hover:bg-emerald-700 transition-all disabled:opacity-50 mt-4"
+                      whileHover={isCaptchaValid ? { scale: 1.02 } : {}}
+                      whileTap={isCaptchaValid ? { scale: 0.98 } : {}}
+                      type="submit" disabled={loading || !isCaptchaValid}
+                      className={`w-full py-3.5 rounded-xl font-black text-lg transition-all mt-2 text-white
+                        ${!isCaptchaValid ? 'bg-gray-400 opacity-60 cursor-not-allowed' : 'bg-emerald-600 shadow-xl shadow-emerald-600/30 hover:bg-emerald-700'}`}
                     >
                       {loading ? "Iniciando..." : "Entrar →"}
                     </motion.button>
                     
-                    <div className="flex items-center my-6">
+                    <div className="flex items-center my-4">
                       <div className="flex-grow border-t border-gray-200"></div>
                       <span className="px-4 text-gray-400 font-medium text-sm">o continúa con</span>
                       <div className="flex-grow border-t border-gray-200"></div>
                     </div>
                     <div className="flex justify-center w-full">
-                      <GoogleLogin
-                        onSuccess={handleGoogleAuthSuccess}
-                        onError={() => {
-                          setError(true);
-                          setMessage('Error conectando con Google.');
-                        }}
-                        useOneTap
-                        theme="outline"
-                        size="large"
-                        shape="rectangular"
-                        width="100%"
-                      />
+                      <div className={`w-full transition-opacity duration-300 ${!isCaptchaValid ? 'opacity-50 pointer-events-none' : ''}`} title={!isCaptchaValid ? "Completa el CAPTCHA primero" : ""}>
+                        <GoogleLogin
+                          onSuccess={handleGoogleAuthSuccess}
+                          onError={() => {
+                            setError(true);
+                            setMessage('Error conectando con Google.');
+                          }}
+                          useOneTap
+                          theme="outline"
+                          size="large"
+                          shape="rectangular"
+                          width="100%"
+                        />
+                      </div>
                     </div>
                   </form>
                 </motion.div>
@@ -324,8 +340,8 @@ const Auth = () => {
                   exit={{ opacity: 0, x: 30 }}
                   transition={{ duration: 0.4, ease: "easeOut" }}
                 >
-                  <h1 className="text-4xl font-black text-gray-900 mb-2 tracking-tight">Crear cuenta</h1>
-                  <p className="text-gray-500 font-medium mb-10">
+                  <h1 className="text-3xl font-black text-gray-900 mb-1 tracking-tight">Crear cuenta</h1>
+                  <p className="text-gray-500 font-medium mb-6">
                     ¿Ya tienes cuenta?{" "}
                     <button onClick={toggleAuth} className="text-emerald-600 font-bold hover:underline">Inicia sesión</button>
                   </p>
@@ -336,7 +352,7 @@ const Auth = () => {
                       <input
                         type="text" name="username" required
                         placeholder="Tu nombre Futbolero"
-                        className="w-full px-5 py-3.5 rounded-xl border-2 border-gray-100 bg-gray-50 focus:bg-white focus:border-emerald-500 outline-none transition-all font-medium text-gray-900"
+                        className="w-full px-5 py-3 rounded-xl border-2 border-gray-100 bg-gray-50 focus:bg-white focus:border-emerald-500 outline-none transition-all font-medium text-gray-900"
                         onChange={handleRegisterChange}
                       />
                     </div>
@@ -345,7 +361,7 @@ const Auth = () => {
                       <input
                         type="email" name="email" required
                         placeholder="tu@email.com"
-                        className="w-full px-5 py-3.5 rounded-xl border-2 border-gray-100 bg-gray-50 focus:bg-white focus:border-emerald-500 outline-none transition-all font-medium text-gray-900"
+                        className="w-full px-5 py-3 rounded-xl border-2 border-gray-100 bg-gray-50 focus:bg-white focus:border-emerald-500 outline-none transition-all font-medium text-gray-900"
                         onChange={handleRegisterChange}
                       />
                     </div>
@@ -354,7 +370,7 @@ const Auth = () => {
                       <input
                         type="password" name="password" required
                         placeholder="********"
-                        className="w-full px-5 py-3.5 rounded-xl border-2 border-gray-100 bg-gray-50 focus:bg-white focus:border-emerald-500 outline-none transition-all font-medium text-gray-900"
+                        className="w-full px-5 py-3 rounded-xl border-2 border-gray-100 bg-gray-50 focus:bg-white focus:border-emerald-500 outline-none transition-all font-medium text-gray-900"
                         onChange={handleRegisterChange}
                       />
                     </div>
@@ -363,7 +379,7 @@ const Auth = () => {
                       <input
                         type="password" name="confirmPassword" required
                         placeholder="********"
-                        className="w-full px-5 py-3.5 rounded-xl border-2 border-gray-100 bg-gray-50 focus:bg-white focus:border-emerald-500 outline-none transition-all font-medium text-gray-900"
+                        className="w-full px-5 py-3 rounded-xl border-2 border-gray-100 bg-gray-50 focus:bg-white focus:border-emerald-500 outline-none transition-all font-medium text-gray-900"
                         onChange={handleRegisterChange}
                       />
                     </div>
@@ -372,12 +388,12 @@ const Auth = () => {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       type="submit" disabled={loading}
-                      className="w-full py-4 rounded-xl bg-emerald-600 text-white font-black text-lg shadow-xl shadow-emerald-600/30 hover:bg-emerald-700 transition-all disabled:opacity-50 mt-6"
+                      className="w-full py-3.5 rounded-xl bg-emerald-600 text-white font-black text-lg shadow-xl shadow-emerald-600/30 hover:bg-emerald-700 transition-all disabled:opacity-50 mt-4"
                     >
                       {loading ? "Registrando..." : "Crear cuenta →"}
                     </motion.button>
 
-                    <div className="flex items-center my-6">
+                    <div className="flex items-center my-4">
                       <div className="flex-grow border-t border-gray-200"></div>
                       <span className="px-4 text-gray-400 font-medium text-sm">o regístrate con</span>
                       <div className="flex-grow border-t border-gray-200"></div>

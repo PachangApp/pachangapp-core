@@ -59,9 +59,9 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/", "/index.html", "/static/**", "/assets/**", "/*.svg").permitAll()
-                .requestMatchers("/api/users/login", "/api/users/register", "/api/users/verify", "/api/users/google-auth").permitAll()
+                .requestMatchers("/api/users/login", "/api/users/register", "/api/users/verify", "/api/users/google-auth", "/api/captcha/verify").permitAll()
                 .requestMatchers("/api/campos").permitAll()
-                .requestMatchers("/api/users/login", "/api/users/register", "/api/users/verify").permitAll()
+                .requestMatchers("/api/partidos", "/api/partidos/search").permitAll()
                 .requestMatchers("/api/campos", "/api/partidos", "/api/partidos/search").permitAll()
                 .requestMatchers("/api/files/**", "/uploads/**").permitAll()
                 .requestMatchers("/api/**").authenticated()

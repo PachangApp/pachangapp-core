@@ -4,7 +4,7 @@ import { GoogleLogin } from "@react-oauth/google";
 
 import { API_BASE_URL } from "../apiConfig";
 import logo from "../assets/logo pachangapp.png";
-
+import CaptchaGrid from "../components/CaptchaGrid";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -15,6 +15,7 @@ const Login = () => {
   const [message, setMessage] = useState("");
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isCaptchaValid, setIsCaptchaValid] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -59,6 +60,11 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!isCaptchaValid) {
+      setError(true);
+      setMessage("Por favor, completa el CAPTCHA para continuar.");
+      return;
+    }
     setMessage("");
     setError(false);
     setLoading(true);
@@ -206,22 +212,25 @@ const Login = () => {
               />
             </div>
 
+            {/* Captcha */}
+            <CaptchaGrid onSuccess={() => setIsCaptchaValid(true)} />
+
             {/* Botón de login */}
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !isCaptchaValid}
               className="w-full py-3.5 rounded-xl text-white text-sm font-bold tracking-wide transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed mt-2"
               style={{
                 background: loading
                   ? "#6ee7b7"
-                  : "linear-gradient(135deg, #059669, #047857)",
-                boxShadow: "0 4px 15px rgba(5, 150, 105, 0.35)",
+                  : (!isCaptchaValid ? "#94a3b8" : "linear-gradient(135deg, #059669, #047857)"),
+                boxShadow: !isCaptchaValid ? "none" : "0 4px 15px rgba(5, 150, 105, 0.35)",
               }}
               onMouseEnter={(e) => {
-                if (!loading) e.target.style.transform = "translateY(-1px)";
+                if (!loading && isCaptchaValid) e.target.style.transform = "translateY(-1px)";
               }}
               onMouseLeave={(e) => {
-                e.target.style.transform = "translateY(0)";
+                if (isCaptchaValid) e.target.style.transform = "translateY(0)";
               }}
             >
               {loading ? "Iniciando sesión..." : "Entrar →"}
@@ -234,19 +243,21 @@ const Login = () => {
             </div>
 
             <div className="flex justify-center w-full">
-              <GoogleLogin
-                onSuccess={handleGoogleLoginSuccess}
-                onError={() => {
-                  console.error('Google Login Failed');
-                  setError(true);
-                  setMessage('Error al intentar iniciar sesión con Google.');
-                }}
-                useOneTap
-                theme="outline"
-                size="large"
-                shape="rectangular"
-                width="100%"
-              />
+              <div className={`w-full transition-opacity duration-300 ${!isCaptchaValid ? 'opacity-50 pointer-events-none' : ''}`} title={!isCaptchaValid ? "Completa el CAPTCHA primero" : ""}>
+                <GoogleLogin
+                  onSuccess={handleGoogleLoginSuccess}
+                  onError={() => {
+                    console.error('Google Login Failed');
+                    setError(true);
+                    setMessage('Error al intentar iniciar sesión con Google.');
+                  }}
+                  useOneTap
+                  theme="outline"
+                  size="large"
+                  shape="rectangular"
+                  width="100%"
+                />
+              </div>
             </div>
           </form>
 
