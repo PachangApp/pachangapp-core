@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { API_BASE_URL } from "../apiConfig";
 import logo from "../assets/logo_pachangapp.png";
@@ -20,10 +20,6 @@ const Home = () => {
   const [userMatches, setUserMatches] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Scroll animations for hero
-  const { scrollY } = useScroll();
-  const heroY = useTransform(scrollY, [0, 500], [0, 150]);
-  const heroOpacity = useTransform(scrollY, [0, 300], [1, 0]);
 
   // Load User & Data
   useEffect(() => {
@@ -107,7 +103,7 @@ const Home = () => {
       <Navbar />
 
       {/* HERO SECTION */}
-      <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden flex items-center min-h-[90vh]">
+      <section className="relative pt-20 pb-20 lg:pt-32 lg:pb-32 overflow-hidden flex items-center min-h-screen">
         {/* Abstract Background Elements */}
         <motion.div 
             animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
@@ -126,7 +122,7 @@ const Home = () => {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5 }}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 font-bold text-sm tracking-wide mb-8 shadow-sm"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 font-bold text-sm tracking-wide mb-4 shadow-sm"
             >
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 {t('home.stats')}
@@ -136,7 +132,7 @@ const Home = () => {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.1 }}
-                className="text-5xl md:text-7xl lg:text-8xl font-black text-gray-900 tracking-tight leading-[1.1] mb-6 max-w-5xl"
+                className="text-5xl md:text-7xl lg:text-8xl font-black text-gray-900 tracking-tight leading-[1.1] mb-4 max-w-5xl"
             >
                 {t('home.title_start')} <span className="text-transparent bg-clip-text bg-linear-to-r from-emerald-600 via-teal-500 to-emerald-400">{t('home.title_highlight')}</span> {t('home.title_end')}
             </motion.h1>
@@ -145,7 +141,7 @@ const Home = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
-                className="text-xl md:text-2xl text-gray-500 max-w-3xl mb-12"
+                className="text-xl md:text-2xl text-gray-500 max-w-3xl mb-8"
             >
                 {t('home.subtitle')}
             </motion.p>
@@ -167,18 +163,14 @@ const Home = () => {
             </motion.div>
 
              {/* Mockup de la app flotante */}
-             <div className="mt-20 w-full max-w-4xl relative z-0 mx-auto">
-                 <div className="absolute inset-0 bg-gradient-to-t from-gray-50 via-transparent to-transparent z-10 bottom-0 h-40 mt-auto pointer-events-none"></div>
-                 <motion.div 
-                    style={{ y: heroY }}
-                    className="rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border-4 border-white overflow-hidden h-[450px]"
-                 >
+             <div className="mt-32 w-full max-w-4xl relative z-0 mx-auto">
+                 <div className="rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border-4 border-white overflow-hidden h-[320px] md:h-[400px]">
                     <img 
                         src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=1200&q=80" 
                         alt="Football Pitch" 
                         className="w-full h-full object-cover"
                     />
-                 </motion.div>
+                 </div>
                  
                  {/* Floating Cards Demo - Better positioning */}
                  <div className="absolute -left-10 top-1/4 z-30 w-56 hidden md:block">
