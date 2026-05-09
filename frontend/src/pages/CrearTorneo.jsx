@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Navbar from "../components/Navbar";
+import Dropdown from "../components/Dropdown";
+import DatePicker from "../components/DatePicker";
 import { API_BASE_URL } from '../apiConfig';
 import { uploadImage } from '../services/uploadService';
 
@@ -165,19 +167,17 @@ const CrearTorneo = () => {
             {/* Fechas */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
-                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Fecha de Inicio</label>
-                <input 
-                  type="date" name="startDate" 
-                  value={formData.startDate} onChange={handleChange}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all font-bold text-gray-900"
+                <DatePicker
+                  label="Fecha de Inicio"
+                  value={formData.startDate}
+                  onChange={(val) => setFormData({ ...formData, startDate: val })}
                 />
               </div>
               <div>
-                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Fecha de Fin</label>
-                <input 
-                  type="date" name="endDate" 
-                  value={formData.endDate} onChange={handleChange}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all font-bold text-gray-900"
+                <DatePicker
+                  label="Fecha de Fin"
+                  value={formData.endDate}
+                  onChange={(val) => setFormData({ ...formData, endDate: val })}
                 />
               </div>
             </div>
@@ -185,26 +185,38 @@ const CrearTorneo = () => {
             {/* Row Config */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div>
-                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Deporte</label>
-                <select name="sportType" value={formData.sportType} onChange={handleChange} className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 shadow-inner">
-                  <option value="FUTBOL_SALA">Fútbol Sala</option>
-                  <option value="FUTBOL_7">Fútbol 7</option>
-                  <option value="FUTBOL_11">Fútbol 11</option>
-                </select>
+                <Dropdown
+                  label="Deporte"
+                  options={[
+                    { value: 'FUTBOL_SALA', label: 'Fútbol Sala' },
+                    { value: 'FUTBOL_7', label: 'Fútbol 7' },
+                    { value: 'FUTBOL_11', label: 'Fútbol 11' }
+                  ]}
+                  value={formData.sportType}
+                  onChange={(val) => setFormData({ ...formData, sportType: val })}
+                />
               </div>
               <div>
-                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Formato</label>
-                <select name="type" value={formData.type} onChange={handleChange} className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 font-bold cursor-not-allowed text-gray-400 bg-gray-100">
-                  <option value="ELIMINATORIAS">Eliminatorias</option>
-                </select>
+                <Dropdown
+                  label="Formato"
+                  options={[
+                    { value: 'ELIMINATORIAS', label: 'Eliminatorias' }
+                  ]}
+                  value={formData.type}
+                  onChange={(val) => setFormData({ ...formData, type: val })}
+                />
               </div>
               <div>
-                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Max. Equipos</label>
-                <select name="maxTeams" value={formData.maxTeams} onChange={handleChange} className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 shadow-inner">
-                  <option value="4">4 Equipos</option>
-                  <option value="8">8 Equipos</option>
-                  <option value="16">16 Equipos</option>
-                </select>
+                <Dropdown
+                  label="Max. Equipos"
+                  options={[
+                    { value: '4', label: '4 Equipos' },
+                    { value: '8', label: '8 Equipos' },
+                    { value: '16', label: '16 Equipos' }
+                  ]}
+                  value={String(formData.maxTeams)}
+                  onChange={(val) => setFormData({ ...formData, maxTeams: val })}
+                />
               </div>
             </div>
 
@@ -220,12 +232,16 @@ const CrearTorneo = () => {
                 />
               </div>
               <div>
-                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Nivel</label>
-                <select name="level" value={formData.level} onChange={handleChange} className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 shadow-inner">
-                  <option value="BASICO">Básico</option>
-                  <option value="INTERMEDIO">Intermedio</option>
-                  <option value="AVANZADO">Avanzado</option>
-                </select>
+                <Dropdown
+                  label="Nivel"
+                  options={[
+                    { value: 'BASICO', label: 'Básico' },
+                    { value: 'INTERMEDIO', label: 'Intermedio' },
+                    { value: 'AVANZADO', label: 'Avanzado' }
+                  ]}
+                  value={formData.level}
+                  onChange={(val) => setFormData({ ...formData, level: val })}
+                />
               </div>
             </div>
 

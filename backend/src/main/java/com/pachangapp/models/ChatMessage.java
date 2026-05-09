@@ -1,5 +1,6 @@
 package com.pachangapp.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -13,10 +14,12 @@ public class ChatMessage {
 
     @ManyToOne
     @JoinColumn(name = "tournament_id", nullable = false)
+    @JsonIgnoreProperties({"teams", "matches", "organizer", "description", "imageUrl", "level", "type", "maxTeams", "location", "startDate", "endDate", "price", "prize", "sportType", "status"})
     private Tournament tournament;
 
     @ManyToOne
     @JoinColumn(name = "sender_id", nullable = false)
+    @JsonIgnoreProperties({"password", "email", "roles", "participaciones", "reservas", "tournaments", "googleId", "resetToken", "resetTokenExpiry", "avatar", "points", "wins", "losses", "draws", "goalsScored", "goalsConceded", "enabled", "authorities", "accountNonExpired", "accountNonLocked", "credentialsNonExpired"})
     private User sender;
 
     @Column(columnDefinition = "TEXT")
