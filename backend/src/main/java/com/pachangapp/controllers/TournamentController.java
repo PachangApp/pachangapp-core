@@ -1,5 +1,6 @@
 package com.pachangapp.controllers;
 
+import com.pachangapp.models.LeagueStanding;
 import com.pachangapp.models.Team;
 import com.pachangapp.models.Tournament;
 import com.pachangapp.models.TournamentMatch;
@@ -26,10 +27,10 @@ public class TournamentController {
 
     @Autowired
     private UserRepository userRepository;
-    
+
     @Autowired
     private TeamRepository teamRepository;
-    
+
     @Autowired
     private TournamentMatchRepository matchRepository;
 
@@ -38,8 +39,10 @@ public class TournamentController {
         if (auth != null && auth.isAuthenticated() && !auth.getPrincipal().equals("anonymousUser")) {
             return userRepository.findByUsername(auth.getName()).orElse(null);
         }
-        return null; // Handle according to your security setup
+        return null;
     }
+
+    // ── General ──────────────────────────────────
 
     @GetMapping
     public ResponseEntity<List<Tournament>> getAllTournaments() {
@@ -54,26 +57,23 @@ public class TournamentController {
     @PostMapping
     public ResponseEntity<Tournament> createTournament(@RequestBody Tournament tournament) {
         User creator = getAuthenticatedUser();
-        // Fallback for dev if no auth context
-        if(creator == null) {
-            creator = userRepository.findById(1L).orElse(null); 
+        if (creator == null) {
+            creator = userRepository.findById(1L).orElse(null);
         }
         tournament.setCreator(creator);
         return ResponseEntity.ok(tournamentService.createTournament(tournament));
     }
 
+    // ── Teams ─────────────────────────────────────
+
     @PostMapping("/{id}/join")
     public ResponseEntity<Team> joinTournament(@PathVariable Long id, @RequestBody Map<String, Object> body) {
         User user = getAuthenticatedUser();
-        if(user == null) {
+        if (user == null) {
             user = userRepository.findById(1L).orElse(null);
         }
-        
         String teamName = (String) body.get("name");
-        // For simplicity we just use the creator as the only player for testing right now. 
-        // Real implementation would extract player IDs from body.get("players")
-        List<User> players = List.of(); 
-        
+        List<User> players = List.of();
         return ResponseEntity.ok(tournamentService.joinTournament(id, teamName, user, players));
     }
 
@@ -83,18 +83,36 @@ public class TournamentController {
         return ResponseEntity.ok(teamRepository.findByTournament(t));
     }
 
+    // ── Matches (Bracket / Eliminatorias) ─────────
+
     @GetMapping("/{id}/matches")
     public ResponseEntity<List<TournamentMatch>> getTournamentMatches(@PathVariable Long id) {
         Tournament t = tournamentService.getTournament(id);
         return ResponseEntity.ok(matchRepository.findByTournamentOrderByRoundDescMatchIndexAsc(t));
     }
 
+    // ── Liga: Matchdays ───────────────────────────
+
+    @GetMapping("/{id}/matchdays")
+    public ResponseEntity<List<TournamentMatch>> getMatchdays(@PathVariable Long id) {
+        return ResponseEntity.ok(tournamentService.getMatchesByMatchday(id));
+    }
+
+    // ── Liga: Standings ───────────────────────────
+
+    @GetMapping("/{id}/standings")
+    public ResponseEntity<List<LeagueStanding>> getStandings(@PathVariable Long id) {
+        return ResponseEntity.ok(tournamentService.getStandings(id));
+    }
+
+    // ── Result (shared: Liga + Eliminatorias) ─────
+
     @PostMapping("/matches/{matchId}/result")
-    public ResponseEntity<TournamentMatch> updateMatchResult(@PathVariable Long matchId, @RequestBody Map<String, Integer> score) {
-        // Normally check if user is admin or tournament creator
+    public ResponseEntity<TournamentMatch> updateMatchResult(
+            @PathVariable Long matchId,
+            @RequestBody Map<String, Integer> score) {
         int scoreA = score.getOrDefault("scoreA", 0);
         int scoreB = score.getOrDefault("scoreB", 0);
-        
         return ResponseEntity.ok(tournamentService.updateMatchResult(matchId, scoreA, scoreB));
     }
 }

@@ -29,6 +29,9 @@ public class TournamentMatch {
     private String round;
 
     private int matchIndex; 
+    
+    // Liga: número de jornada (1, 2, 3...). Null para eliminatorias.
+    private Integer matchday;
 
     @ManyToOne
     @JoinColumn(name = "next_match_id")
@@ -65,6 +68,9 @@ public class TournamentMatch {
 
     public int getMatchIndex() { return matchIndex; }
     public void setMatchIndex(int matchIndex) { this.matchIndex = matchIndex; }
+
+    public Integer getMatchday() { return matchday; }
+    public void setMatchday(Integer matchday) { this.matchday = matchday; }
 
     public TournamentMatch getNextMatch() { return nextMatch; }
     public void setNextMatch(TournamentMatch nextMatch) { this.nextMatch = nextMatch; }

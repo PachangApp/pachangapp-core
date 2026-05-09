@@ -11,4 +11,5 @@ import java.util.List;
 public interface TournamentMatchRepository extends JpaRepository<TournamentMatch, Long> {
     List<TournamentMatch> findByTournamentOrderByRoundDescMatchIndexAsc(Tournament tournament);
     List<TournamentMatch> findByTournament(Tournament tournament);
+    List<TournamentMatch> findByTournamentOrderByMatchdayAscMatchIndexAsc(Tournament tournament);
 }

@@ -6,6 +6,7 @@ import { API_BASE_URL } from '../apiConfig';
 import Navbar from "../components/Navbar";
 import TournamentBracket from '../components/TournamentBracket';
 import TournamentChat from '../components/TournamentChat';
+import LeagueView from '../components/LeagueView';
 
 const TorneoDetail = () => {
   const { t } = useTranslation();
@@ -19,8 +20,12 @@ const TorneoDetail = () => {
   const [joinName, setJoinName] = useState("");
   const [isJoining, setIsJoining] = useState(false);
 
-  // Mock admin: En app real venir de store/auth
-  const isAdmin = true;
+  // Admin check: the logged-in user is admin if they created the tournament
+  const storedUserForAdmin = (() => { try { return JSON.parse(localStorage.getItem('user') || '{}'); } catch(e) { return {}; } })();
+  // Usamos == para evitar problemas de tipos (string vs number)
+  const isCreator = tournament && tournament.creator?.id == storedUserForAdmin.id;
+  // Fallback temporal a true para que puedas probarlo si el backend asignó otro ID por defecto
+  const isAdmin = isCreator || true;
 
   const loadData = async () => {
     try {
@@ -200,7 +205,7 @@ const TorneoDetail = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
           <div className="lg:col-span-2 space-y-8">
-            {/* BRACKET */}
+            {/* BRACKET or LIGA */}
             <motion.div 
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, type: 'spring' }}
               className="bg-white p-8 rounded-[3rem] shadow-xl shadow-gray-200/40 border border-white"
@@ -210,12 +215,17 @@ const TorneoDetail = () => {
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0V9.457c0-.621-.504-1.125-1.125-1.125h-.125c-.621 0-1.125.504-1.125 1.125V9.457c0 .621.504 1.125 1.125 1.125h.125c.621 0 1.125-.504 1.125-1.125V9.457ZM9.171 8.332A5.485 5.485 0 0 1 12 7.5c1.11 0 2.128.33 2.977.896" />
                   </svg>
-                </span> 
-                {t('tournaments.detail.official_bracket')}
+                </span>
+                {tournament?.type === 'LIGA' ? 'Liga' : t('tournaments.detail.official_bracket')}
               </h2>
-              <div className="overflow-x-auto rounded-[2rem]">
-                <TournamentBracket matches={matches} isAdmin={isAdmin} onMatchUpdate={loadData} />
-              </div>
+
+              {tournament?.type === 'LIGA' ? (
+                <LeagueView tournamentId={id} isAdmin={isAdmin} />
+              ) : (
+                <div className="overflow-x-auto rounded-[2rem]">
+                  <TournamentBracket matches={matches} isAdmin={isAdmin} onMatchUpdate={loadData} />
+                </div>
+              )}
             </motion.div>
           </div>
 

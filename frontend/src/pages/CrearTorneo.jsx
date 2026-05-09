@@ -200,7 +200,8 @@ const CrearTorneo = () => {
                 <Dropdown
                   label="Formato"
                   options={[
-                    { value: 'ELIMINATORIAS', label: 'Eliminatorias' }
+                    { value: 'ELIMINATORIAS', label: 'Eliminatorias' },
+                    { value: 'LIGA', label: 'Liga' }
                   ]}
                   value={formData.type}
                   onChange={(val) => setFormData({ ...formData, type: val })}
