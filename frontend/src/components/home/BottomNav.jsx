@@ -8,7 +8,7 @@ const BottomNav = () => {
 
   const navItems = [
     { name: t("navbar.home"), path: "/inicio", icon: "🏠" },
-    { name: t("navbar.explore"), path: "/buscar-partidos", icon: "🔍" },
+    { name: t("navbar.explore"), path: "/explorar", icon: "🔍" },
     { name: t("navbar.create"), path: "/crear-partido", icon: "+", isPrimary: true },
     { name: t("navbar.torneos"), path: "/torneos", icon: "🏆" },
     { name: t("navbar.profile"), path: "/perfil", icon: "👤" },

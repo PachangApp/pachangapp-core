@@ -8,6 +8,7 @@ import StatCard from "../components/StatCard";
 import Dropdown from "../components/Dropdown";
 import { getFieldImage } from "../utils/fieldMapping";
 import { formatDate } from "../utils/dateFormatter";
+import { useTheme } from "../context/ThemeContext";
 
 const DEFAULT_AVATAR = "https://ui-avatars.com/api/?background=10b981&color=fff";
 
@@ -25,6 +26,7 @@ const Perfil = () => {
   const [loadingMatches, setLoadingMatches] = useState(false);
   const [historial, setHistorial] = useState([]);
   const [showAllHistory, setShowAllHistory] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -386,31 +388,66 @@ const Perfil = () => {
             transition={{ duration: 1.2 }}
             className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm mb-12"
         >
-          <h3 className="text-xl font-black text-gray-900 mb-6 flex items-center gap-2">
-            ⚽ {t('profile.position_preferences')}
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[1, 2, 3].map(i => (
-              <Dropdown
-                key={i}
-                label={t('profile.position_num', { num: i })}
-                options={[{ label: t('profile.select'), value: "" }, ...allPositions.map(pos => ({ label: pos, value: pos }))]}
-                value={positions[`p${i}`]}
-                onChange={(val) => setPositions({ ...positions, [`p${i}`]: val })}
-                className="w-full"
-              />
-            ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <div>
+              <h3 className="text-xl font-black text-gray-900 mb-6 flex items-center gap-2">
+                ⚽ {t('profile.position_preferences')}
+              </h3>
+              <div className="grid grid-cols-1 gap-4">
+                {[1, 2, 3].map(i => (
+                  <Dropdown
+                    key={i}
+                    label={t('profile.position_num', { num: i })}
+                    options={[{ label: t('profile.select'), value: "" }, ...allPositions.map(pos => ({ label: pos, value: pos }))]}
+                    value={positions[`p${i}`]}
+                    onChange={(val) => setPositions({ ...positions, [`p${i}`]: val })}
+                    className="w-full"
+                  />
+                ))}
+              </div>
+              <motion.button 
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ duration: 0.2 }}
+                onClick={handleSavePositions}
+                disabled={saving}
+                className="mt-8 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-lg shadow-emerald-200 disabled:opacity-50"
+              >
+                {saving ? t('profile.saving') : t('profile.save_preferences')}
+              </motion.button>
+            </div>
+
+            <div className="border-t md:border-t-0 md:border-l border-gray-100 pt-8 md:pt-0 md:pl-12">
+              <h3 className="text-xl font-black text-gray-900 mb-6 flex items-center gap-2">
+                🌙 {t('profile.theme_preferences') || 'Preferencia de Tema'}
+              </h3>
+              <div className="flex flex-col gap-4">
+                <button
+                  onClick={() => setTheme("light")}
+                  className={`flex items-center justify-between p-4 rounded-2xl border-2 transition-all ${theme === "light" ? "border-emerald-500 bg-emerald-50 text-emerald-700" : "border-gray-100 bg-gray-50 text-gray-500 hover:border-gray-200"}`}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">☀️</span>
+                    <span className="font-bold">{t('profile.theme_light') || 'Modo Normal'}</span>
+                  </div>
+                  {theme === "light" && <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>}
+                </button>
+                <button
+                  onClick={() => setTheme("dark")}
+                  className={`flex items-center justify-between p-4 rounded-2xl border-2 transition-all ${theme === "dark" ? "border-emerald-500 bg-emerald-900/20 text-emerald-400" : "border-gray-100 bg-gray-50 text-gray-500 hover:border-gray-200"}`}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">🌙</span>
+                    <span className="font-bold">{t('profile.theme_dark') || 'Modo Noche'}</span>
+                  </div>
+                  {theme === "dark" && <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>}
+                </button>
+              </div>
+              <p className="mt-4 text-sm text-gray-400 italic">
+                {t('profile.theme_description') || 'Elige el tema que mejor se adapte a tu vista.'}
+              </p>
+            </div>
           </div>
-          <motion.button 
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            transition={{ duration: 0.2 }}
-            onClick={handleSavePositions}
-            disabled={saving}
-            className="mt-8 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-lg shadow-emerald-200 disabled:opacity-50"
-          >
-            {saving ? t('profile.saving') : t('profile.save_preferences')}
-          </motion.button>
         </motion.section>
 
         {/* 4. Sección de Estadísticas */}

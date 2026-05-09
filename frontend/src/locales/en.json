@@ -11,7 +11,10 @@
     "explore": "Explore",
     "create": "Create",
     "welcome": "Welcome",
-    "hello": "Hello {{name}}!"
+    "hello": "Hello {{name}}!",
+    "theme_light_short": "LIGHT MODE",
+    "theme_dark_short": "DARK MODE",
+    "search_players": "Search Players"
   },
   "create_match": {
     "title": "Create new match",
@@ -87,7 +90,11 @@
       "midfielder": "Midfielder",
       "winger": "Winger",
       "striker": "Striker"
-    }
+    },
+    "theme_preferences": "Theme Preferences",
+    "theme_light": "Light Mode",
+    "theme_dark": "Dark Mode",
+    "theme_description": "Choose the theme that best suits your vision."
   },
   "search_matches": {
     "find_next": "Find your next",
@@ -292,6 +299,8 @@
     "no_tournaments": "No active tournaments",
     "no_tournaments_sub": "Be the creator of the first big event of this season.",
     "level": "Level",
+    "organizer": "Organizer",
+    "field": "Court",
     "prize": "Prize",
     "teams": "Teams",
     "enter_btn": "Enter",
@@ -334,5 +343,24 @@
       "online": "ONLINE",
       "cheer_team": "Cheer your team..."
     }
+  },
+  "explore_hub": {
+    "title": "What are you looking for?",
+    "subtitle": "Choose whether you want to join a match or find new teammates.",
+    "search_matches": "Find Matches",
+    "search_matches_desc": "Find available courts and matches in your area.",
+    "search_players": "Find Players",
+    "search_players_desc": "Find players by position and level for your games."
+  },
+  "search_players": {
+    "title": "Players in your area",
+    "all_positions": "All positions",
+    "no_players": "No players found",
+    "no_players_desc": "Try changing the search filters.",
+    "ranking": "Ranking",
+    "matches": "Matches",
+    "wins": "Wins",
+    "losses": "Losses",
+    "preferred_positions": "Preferred positions"
   }
 }

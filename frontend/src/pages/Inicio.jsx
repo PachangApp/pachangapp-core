@@ -255,7 +255,7 @@ const Home = () => {
       )}
 
       {/* PARTIDOS CERCANOS Y TRENDING */}
-      <section className="py-20 bg-[#F8FAFC]">
+      <section className="py-20 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
               <motion.div 
                   initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }}

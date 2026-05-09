@@ -5,6 +5,8 @@ import ResetPassword from "./pages/ResetPassword";
 import Inicio from "./pages/Inicio";
 import Perfil from "./pages/Perfil";
 import BuscarPartidos from "./pages/BuscarPartidos";
+import Explorar from "./pages/Explorar";
+import BuscarJugadores from "./pages/BuscarJugadores";
 import Torneos from "./pages/Torneos";
 import TorneoDetail from "./pages/TorneoDetail";
 import CrearTorneo from "./pages/CrearTorneo";
@@ -50,7 +52,9 @@ const AppContent = () => {
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/inicio" element={<Inicio />} />
         <Route path="/perfil" element={<Perfil />} />
+        <Route path="/explorar" element={<Explorar />} />
         <Route path="/buscar-partidos" element={<BuscarPartidos />} />
+        <Route path="/buscar-jugadores" element={<BuscarJugadores />} />
         <Route path="/crear-partido" element={<CrearPartido />} />
         <Route path="/torneos" element={<Torneos />} />
         <Route path="/torneos/:id" element={<TorneoDetail />} />

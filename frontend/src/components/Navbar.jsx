@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import logo from "../assets/logo_pachangapp.png";
 import LanguageSelector from "./LanguageSelector";
+import ThemeToggle from "./ThemeToggle";
 
 const Navbar = () => {
   const { t } = useTranslation();
@@ -34,7 +35,14 @@ const Navbar = () => {
   const navLinks = [
     { name: t("navbar.home"), path: "/inicio" },
     { name: t("navbar.profile"), path: "/perfil" },
-    { name: t("navbar.search_matches"), path: "/buscar-partidos" },
+    { 
+      name: t("navbar.explore"), 
+      isDropdown: true,
+      children: [
+        { name: t("navbar.search_matches"), path: "/buscar-partidos" },
+        { name: t("navbar.search_players"), path: "/buscar-jugadores" }
+      ]
+    },
     { name: t("navbar.create_match"), path: "/crear-partido" },
     { name: t("navbar.torneos"), path: "/torneos" },
     { name: t("navbar.about_us"), path: "/conocenos" },
@@ -52,6 +60,7 @@ const Navbar = () => {
           <img src={logo} alt="PachangApp Logo" className="w-[80px] h-[80px] object-contain" />
         </Link>
         <div className="flex items-center gap-3">
+            <ThemeToggle />
             <LanguageSelector />
             {user?.role === 'ROLE_ADMIN' && (
               <Link to="/admin" className="p-2 bg-red-50 text-red-600 rounded-full hover:bg-red-100 transition-all">
@@ -89,29 +98,57 @@ const Navbar = () => {
           </Link>
 
           {/* Links para Desktop */}
-          <div className="flex items-center gap-8">
+          <div className="flex items-center gap-6">
             {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                to={link.path}
-                className={`${
-                  isActive(link.path)
-                    ? "text-emerald-600 font-bold"
-                    : "text-gray-500 hover:text-emerald-600 font-medium"
-                } text-sm transition-colors relative group`}
-              >
-                {link.name}
-                {isActive(link.path) && (
-                  <motion.div 
-                    layoutId="nav-active"
-                    className="absolute -bottom-5.5 left-0 right-0 h-0.5 bg-emerald-600"
-                  />
-                )}
-              </Link>
+              link.isDropdown ? (
+                <div key={link.name} className="relative group">
+                  <button className="flex items-center gap-1 text-sm font-medium text-gray-500 hover:text-emerald-600 transition-colors">
+                    {link.name}
+                    <svg className="w-4 h-4 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                  </button>
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                    <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-2 min-w-[200px] flex flex-col gap-1">
+                      {link.children.map(child => (
+                        <Link
+                          key={child.name}
+                          to={child.path}
+                          className={`px-4 py-3 rounded-xl text-sm font-medium transition-colors flex items-center gap-3 ${
+                            isActive(child.path) 
+                              ? "bg-emerald-50 text-emerald-700 font-bold" 
+                              : "text-gray-600 hover:bg-gray-50 hover:text-emerald-600"
+                          }`}
+                        >
+                          {child.path === "/buscar-partidos" ? "⚽" : "👥"}
+                          {child.name}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <Link
+                  key={link.name}
+                  to={link.path}
+                  className={`${
+                    isActive(link.path)
+                      ? "text-emerald-600 font-bold"
+                      : "text-gray-500 hover:text-emerald-600 font-medium"
+                  } text-sm transition-colors relative group whitespace-nowrap`}
+                >
+                  {link.name}
+                  {isActive(link.path) && (
+                    <motion.div 
+                      layoutId="nav-active"
+                      className="absolute -bottom-5.5 left-0 right-0 h-0.5 bg-emerald-600"
+                    />
+                  )}
+                </Link>
+              )
             ))}
           </div>
 
           <div className="flex items-center gap-3">
+              <ThemeToggle />
               <LanguageSelector />
               
               <Link 

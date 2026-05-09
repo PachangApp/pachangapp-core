@@ -15,4 +15,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByVerificationToken(String token);
     
     Optional<User> findByResetPasswordToken(String token);
+
+    java.util.List<User> findByPosicion1OrPosicion2OrPosicion3(String p1, String p2, String p3);
 }

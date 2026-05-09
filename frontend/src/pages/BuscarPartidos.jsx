@@ -146,7 +146,7 @@ const BuscarPartidos = () => {
   });
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] font-sans pb-32 md:pb-0">
+    <div className="min-h-screen bg-gray-50 font-sans pb-32 md:pb-0">
       <Navbar />
 
       <main className="max-w-7xl mx-auto px-4 py-12">

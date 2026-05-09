@@ -11,7 +11,10 @@
     "explore": "Explorar",
     "create": "Crear",
     "welcome": "Bienvenido",
-    "hello": "¡Hola {{name}}!"
+    "hello": "¡Hola {{name}}!",
+    "theme_light_short": "MODO NORMAL",
+    "theme_dark_short": "MODO NOCHE",
+    "search_players": "Buscar Jugadores"
   },
   "create_match": {
     "title": "Crear nuevo partido",
@@ -87,7 +90,11 @@
       "midfielder": "Mediocentro",
       "winger": "Extremo",
       "striker": "Delantero Centro"
-    }
+    },
+    "theme_preferences": "Preferencia de Tema",
+    "theme_light": "Modo Normal",
+    "theme_dark": "Modo Noche",
+    "theme_description": "Elige el tema que mejor se adapte a tu vista."
   },
   "search_matches": {
     "find_next": "Encuentra tu próximo",
@@ -334,5 +341,24 @@
       "online": "ONLINE",
       "cheer_team": "Anima a tu equipo..."
     }
+  },
+  "explore_hub": {
+    "title": "¿Qué estás buscando?",
+    "subtitle": "Elige si quieres apuntarte a un partido o encontrar nuevos compañeros.",
+    "search_matches": "Buscar Partidos",
+    "search_matches_desc": "Encuentra pistas y partidos disponibles en tu zona.",
+    "search_players": "Buscar Jugadores",
+    "search_players_desc": "Encuentra jugadores por posición y nivel para tus pachangas."
+  },
+  "search_players": {
+    "title": "Jugadores en tu zona",
+    "all_positions": "Todas las posiciones",
+    "no_players": "No se han encontrado jugadores",
+    "no_players_desc": "Prueba a cambiar los filtros de búsqueda.",
+    "ranking": "Ranking",
+    "matches": "Partidos",
+    "wins": "Victorias",
+    "losses": "Derrotas",
+    "preferred_positions": "Posiciones preferidas"
   }
 }

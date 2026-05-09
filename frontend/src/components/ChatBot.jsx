@@ -10,9 +10,9 @@ const ChatBot = () => {
       text: "¡Hola! Soy PachanBot ⚽. ¿En qué puedo ayudarte hoy?", 
       sender: "bot",
       options: [
-        { id: "buscar", text: "🔍 Buscar partido libre", action: "buscar_partido" },
-        { id: "reservar", text: "🏟️ Cómo reservar pista", action: "como_reservar" },
-        { id: "dudas", text: "❓ Otras dudas comunes", action: "dudas" }
+        { id: "reservar", text: "🏟️ ¿Cómo reservo pista?", action: "como_reservar" },
+        { id: "unirse", text: "⚽ ¿Cómo me uno a un partido?", action: "como_unirse" },
+        { id: "buscar", text: "🔍 Buscar partido libre", action: "buscar_partido" }
       ]
     }
   ]);
@@ -28,24 +28,30 @@ const ChatBot = () => {
     scrollToBottom();
   }, [messages]);
 
+  // ---- URL de n8n ----
+  // Local (pruebas):     http://localhost:5678/webhook-test/pachanbot-chat
+  // Producción (activo): http://<IP_AWS>:30678/webhook/pachanbot-chat
+  // https://n8n.pachangapp.es/webhook-test/pachanbot-chat
+  const N8N_WEBHOOK_URL = "https://n8n.pachangapp.es/webhook-test/pachanbot-chat";
+
   const processBotResponse = async (actionOrText) => {
     // Definimos si es una acción de botón o texto libre
-    const isAction = ["buscar_partido", "como_reservar", "dudas"].includes(actionOrText);
+    const isAction = ["buscar_partido", "como_reservar", "como_unirse"].includes(actionOrText);
     
     // Si es una acción, buscamos el texto descriptivo para que la IA tenga contexto
-    let displayMessage = actionOrText;
-    if (actionOrText === "buscar_partido") displayMessage = "Busca un partido libre para jugar";
-    if (actionOrText === "como_reservar") displayMessage = "Dime cómo puedo reservar una pista";
-    if (actionOrText === "dudas") displayMessage = "Tengo dudas sobre el funcionamiento de la app";
+    let chatInput = actionOrText;
+    if (actionOrText === "buscar_partido") chatInput = "Busca partidos libres disponibles para jugar";
+    if (actionOrText === "como_reservar") chatInput = "¿Cómo puedo reservar una pista?";
+    if (actionOrText === "como_unirse") chatInput = "¿Cómo me uno a un partido existente?";
 
     const payload = {
       action: isAction ? actionOrText : "buscar_partido",
-      chatInput: isAction ? displayMessage : actionOrText, // Enviamos siempre texto a la IA
+      chatInput: chatInput,
       sessionId: "sesion-pachangueo" // Identificador para la memoria de n8n
     };
 
     try {
-      const response = await fetch("http://localhost:5678/webhook-test/pachanbot-chat", {
+      const response = await fetch(N8N_WEBHOOK_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
