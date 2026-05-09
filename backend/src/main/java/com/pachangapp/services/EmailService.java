@@ -16,7 +16,7 @@ public class EmailService {
     @Value("${pachangapp.app.baseUrl}")
     private String baseUrl;
 
-    @Value("${pachangapp.app.frontendUrl:http://localhost:8091}")
+    @Value("${pachangapp.app.frontendUrl:https://pachangapp.es}")
     private String frontendUrl;
 
     @Async
