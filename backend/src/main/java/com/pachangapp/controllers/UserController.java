@@ -97,6 +97,53 @@ public class UserController {
         }
     }
 
+    @PostMapping("/forgot-password")
+    public org.springframework.http.ResponseEntity<?> forgotPassword(@RequestBody java.util.Map<String, String> payload) {
+        String email = payload.get("email");
+        if (email == null || email.isEmpty()) {
+            return org.springframework.http.ResponseEntity.badRequest().body("El email es requerido.");
+        }
+
+        User user = userRepository.findByEmail(email).orElse(null);
+        if (user != null) {
+            String token = java.util.UUID.randomUUID().toString();
+            user.setResetPasswordToken(token);
+            user.setResetPasswordTokenExpiry(java.time.LocalDateTime.now().plusHours(24)); // Expira en 24h
+            userRepository.save(user);
+
+            emailService.sendPasswordResetEmail(user.getEmail(), token);
+        }
+        
+        // Siempre devolvemos OK para no revelar qué emails están registrados
+        return org.springframework.http.ResponseEntity.ok("Si el correo existe en nuestro sistema, recibirás un enlace para restablecer tu contraseña.");
+    }
+
+    @PostMapping("/reset-password")
+    public org.springframework.http.ResponseEntity<?> resetPassword(@RequestBody java.util.Map<String, String> payload) {
+        String token = payload.get("token");
+        String newPassword = payload.get("password");
+
+        if (token == null || newPassword == null) {
+            return org.springframework.http.ResponseEntity.badRequest().body("Token y contraseña son requeridos.");
+        }
+
+        User user = userRepository.findByResetPasswordToken(token).orElse(null);
+        if (user == null) {
+            return org.springframework.http.ResponseEntity.badRequest().body("Token inválido o expirado.");
+        }
+
+        if (user.getResetPasswordTokenExpiry() != null && user.getResetPasswordTokenExpiry().isBefore(java.time.LocalDateTime.now())) {
+            return org.springframework.http.ResponseEntity.badRequest().body("El enlace de restablecimiento ha expirado.");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setResetPasswordToken(null);
+        user.setResetPasswordTokenExpiry(null);
+        userRepository.save(user);
+
+        return org.springframework.http.ResponseEntity.ok("Contraseña actualizada con éxito.");
+    }
+
     @GetMapping("/{id}")
     public org.springframework.http.ResponseEntity<User> getUserById(@PathVariable Long id) {
         return userRepository.findById(id)

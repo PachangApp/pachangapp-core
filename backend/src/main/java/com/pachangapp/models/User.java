@@ -29,6 +29,9 @@ public class User {
     private boolean enabled = false;
     private String verificationToken;
     private java.time.LocalDate fechaVerificacion;
+    
+    private String resetPasswordToken;
+    private java.time.LocalDateTime resetPasswordTokenExpiry;
 
 
     public User() {
@@ -106,4 +109,10 @@ public class User {
 
     public java.time.LocalDate getFechaVerificacion() { return fechaVerificacion; }
     public void setFechaVerificacion(java.time.LocalDate fechaVerificacion) { this.fechaVerificacion = fechaVerificacion; }
+
+    public String getResetPasswordToken() { return resetPasswordToken; }
+    public void setResetPasswordToken(String resetPasswordToken) { this.resetPasswordToken = resetPasswordToken; }
+
+    public java.time.LocalDateTime getResetPasswordTokenExpiry() { return resetPasswordTokenExpiry; }
+    public void setResetPasswordTokenExpiry(java.time.LocalDateTime resetPasswordTokenExpiry) { this.resetPasswordTokenExpiry = resetPasswordTokenExpiry; }
 }

@@ -283,7 +283,7 @@ const Auth = () => {
                     <div>
                       <div className="flex justify-between items-center mb-2">
                         <label className="block text-sm font-black text-gray-700 uppercase tracking-wider">Contraseña</label>
-                        <a href="#" className="text-xs text-emerald-600 font-bold hover:underline">¿Olvidaste tu contraseña?</a>
+                        <button type="button" onClick={() => navigate("/forgot-password")} className="text-xs text-emerald-600 font-bold hover:underline">¿Olvidaste tu contraseña?</button>
                       </div>
                       <input
                         type="password" name="password" required

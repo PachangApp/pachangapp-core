@@ -16,11 +16,27 @@ public class EmailService {
     @Value("${pachangapp.app.baseUrl}")
     private String baseUrl;
 
+    @Value("${pachangapp.app.frontendUrl:http://localhost:8091}")
+    private String frontendUrl;
+
     @Async
     public void sendVerificationEmail(String to, String token) {
         String subject = "Verifica tu cuenta en PachangApp";
         String confirmationUrl = baseUrl + "/api/users/verify?token=" + token;
         String message = "Bienvenido a PachangApp. Haz clic en el siguiente enlace para activar tu cuenta:\n" + confirmationUrl;
+
+        SimpleMailMessage email = new SimpleMailMessage();
+        email.setTo(to);
+        email.setSubject(subject);
+        email.setText(message);
+        mailSender.send(email);
+    }
+
+    @Async
+    public void sendPasswordResetEmail(String to, String token) {
+        String subject = "Restablecer tu contraseña en PachangApp";
+        String resetUrl = frontendUrl + "/#/reset-password?token=" + token;
+        String message = "Has solicitado restablecer tu contraseña. Haz clic en el siguiente enlace para crear una nueva contraseña:\n" + resetUrl + "\n\nSi no fuiste tú, ignora este correo.";
 
         SimpleMailMessage email = new SimpleMailMessage();
         email.setTo(to);

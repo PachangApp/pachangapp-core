@@ -1,5 +1,7 @@
 import { HashRouter as Router, Routes, Route } from "react-router-dom";
 import Auth from "./pages/Auth";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import Inicio from "./pages/Inicio";
 import Perfil from "./pages/Perfil";
 import BuscarPartidos from "./pages/BuscarPartidos";
@@ -31,11 +33,11 @@ const AppContent = () => {
   const storedUser = localStorage.getItem("user");
   
   // No mostrar BottomNav en estas rutas
-  const hideNavPaths = ["/", "/login", "/register"];
+  const hideNavPaths = ["/", "/login", "/register", "/forgot-password", "/reset-password"];
   const shouldShowNav = !hideNavPaths.includes(location.pathname) && storedUser;
 
   // No mostrar PachanBot en login/register o hero antes de entrar
-  const shouldShowBot = storedUser && !["/login", "/register", "/"].includes(location.pathname);
+  const shouldShowBot = storedUser && !["/login", "/register", "/", "/forgot-password", "/reset-password"].includes(location.pathname);
 
   return (
     <>
@@ -44,6 +46,8 @@ const AppContent = () => {
         <Route path="/" element={<Inicio />} />
         <Route path="/register" element={<Auth />} />
         <Route path="/login" element={<Auth />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/inicio" element={<Inicio />} />
         <Route path="/perfil" element={<Perfil />} />
         <Route path="/buscar-partidos" element={<BuscarPartidos />} />
