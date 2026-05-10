@@ -34,6 +34,9 @@ public class UserController {
     @org.springframework.beans.factory.annotation.Value("${pachangapp.app.googleClientId}")
     private String googleClientId;
 
+    @org.springframework.beans.factory.annotation.Value("${pachangapp.app.frontendUrl:http://localhost:5173}")
+    private String frontendUrl;
+
     @GetMapping
     public List<User> getAllUsers() {
         return userRepository.findAll();
