@@ -9,6 +9,7 @@ import Dropdown from "../components/Dropdown";
 import DatePicker from "../components/DatePicker";
 import { getFieldImage } from "../utils/fieldMapping";
 import { formatDate } from "../utils/dateFormatter";
+import Toast from "../components/Toast";
 
 const SubPistaGrid = ({ campoId, fecha, onSelect, timeSlots, submitting }) => {
   const [bookedSlots, setBookedSlots] = useState([]);
@@ -106,6 +107,7 @@ const CrearPartido = () => {
   const [maxJugadores, setMaxJugadores] = useState(10);
   const [submitting, setSubmitting] = useState(false);
   const [paymentData, setPaymentData] = useState({ cardName: "", cardNumber: "", expiry: "", cvc: "" });
+  const [toast, setToast] = useState({ show: false, message: "", type: "success" });
 
   const timeSlots = [
     "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00",
@@ -201,41 +203,8 @@ const CrearPartido = () => {
     setStep(4);
   };
 
-  const handleProcessPayment = async (e) => {
+  const handleProcessPayment = (e) => {
     e.preventDefault();
-    
-    // Validaciones extra manuales
-    if (paymentData.cardName.trim().length < 3) {
-      setMessage({ text: "El nombre en la tarjeta debe tener al menos 3 caracteres", type: "error" });
-      return;
-    }
-
-    if (/\d/.test(paymentData.cardName)) {
-      setMessage({ text: "El nombre en la tarjeta no puede contener números", type: "error" });
-      return;
-    }
-    
-    if (paymentData.cardNumber.replace(/\s/g, "").length < 16) {
-      setMessage({ text: "El número de tarjeta debe tener 16 cifras", type: "error" });
-      return;
-    }
-
-    // Validación de Fecha (MM/AA) - Mes 01-12 y 2 dígitos de año
-    const expiryRegex = /^(0[1-9]|1[0-2])\/\d{2}$/;
-    if (!expiryRegex.test(paymentData.expiry)) {
-      setMessage({
-        text: "La fecha de caducidad debe ser MM/AA (ej: 03/25) con un mes válido (01-12)",
-        type: "error",
-      });
-      return;
-    }
-
-    // Validación de CVV (3 cifras)
-    if (paymentData.cvc.length !== 3) {
-      setMessage({ text: "El CVV debe tener exactamente 3 cifras numéricas", type: "error" });
-      return;
-    }
-
     setSubmitting(true);
     // Simular retraso de pasarela de pago
     setTimeout(() => {
@@ -272,7 +241,7 @@ const CrearPartido = () => {
 
       if (response.ok) {
         const data = await response.json();
-        setMessage({ text: "¡Partido creado con éxito! Entrando al partido...", type: "success" });
+        setToast({ show: true, message: "¡Partido creado con éxito! Entrando al partido...", type: "success" });
         setTimeout(() => {
           navigate(`/partido/${data.id}`);
         }, 1500);
@@ -533,6 +502,8 @@ const CrearPartido = () => {
                                     value={paymentData.cardName}
                                     onChange={(e) => setPaymentData({...paymentData, cardName: e.target.value.toUpperCase()})}
                                     minLength={3}
+                                    pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$"
+                                    title="El nombre solo puede contener letras y espacios"
                                     className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-4 focus:ring-emerald-500/10 font-bold text-gray-700 transition-all font-black placeholder:text-gray-300"
                                 />
                             </div>
@@ -584,11 +555,8 @@ const CrearPartido = () => {
                                         maxLength="5"
                                         pattern="(0[1-9]|1[0-2])\/\d{2}"
                                         value={paymentData.expiry}
-                                        onChange={(e) => {
-                                            let val = e.target.value.replace(/\D/g, '');
-                                            if (val.length >= 2) val = val.slice(0, 2) + '/' + val.slice(2, 4);
-                                            setPaymentData({...paymentData, expiry: val});
-                                        }}
+                                        onChange={(e) => setPaymentData({...paymentData, expiry: e.target.value})}
+                                        title="Formato MM/AA (ej: 03/25)"
                                         className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-4 focus:ring-emerald-500/10 font-black text-gray-700 transition-all placeholder:text-gray-300"
                                     />
                                 </div>
@@ -601,7 +569,8 @@ const CrearPartido = () => {
                                         maxLength="3"
                                         pattern="\d{3}"
                                         value={paymentData.cvc}
-                                        onChange={(e) => setPaymentData({...paymentData, cvc: e.target.value.replace(/\D/g, '')})}
+                                        onChange={(e) => setPaymentData({...paymentData, cvc: e.target.value})}
+                                        title="El CVV debe tener 3 dígitos"
                                         className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-4 focus:ring-emerald-500/10 font-black text-gray-700 transition-all placeholder:text-gray-300"
                                     />
                                 </div>
@@ -802,6 +771,13 @@ const CrearPartido = () => {
           </AnimatePresence>
         </div>
       </main>
+
+      <Toast 
+        show={toast.show} 
+        message={toast.message} 
+        type={toast.type} 
+        onClose={() => setToast({ ...toast, show: false })} 
+      />
     </div>
   );
 };
