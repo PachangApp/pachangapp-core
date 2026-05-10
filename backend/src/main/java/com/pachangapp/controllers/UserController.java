@@ -105,7 +105,7 @@ public class UserController {
             java.util.Map<String, Object> response = new java.util.HashMap<>();
             response.put("token", jwt);
             response.put("id", userDetails.getId());
-            response.put("username", userDetails.getUsername());
+            response.put("username", user.getUsername());
             response.put("email", userDetails.getEmail());
             response.put("role", userDetails.getAuthorities().iterator().next().getAuthority());
             response.put("avatar", user.getAvatar());
