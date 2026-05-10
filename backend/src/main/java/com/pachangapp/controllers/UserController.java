@@ -40,18 +40,21 @@ public class UserController {
     }
 
     @GetMapping("/buscar")
-    public org.springframework.http.ResponseEntity<List<User>> buscarJugadores(
+    public org.springframework.http.ResponseEntity<org.springframework.data.domain.Page<User>> buscarJugadores(
             @RequestParam(required = false) String posicion,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size,
             @org.springframework.security.core.annotation.AuthenticationPrincipal com.pachangapp.security.services.UserDetailsImpl currentUser) {
         
         Long currentUserId = (currentUser != null) ? currentUser.getId() : -1L;
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
 
         if (posicion != null && !posicion.isEmpty() && !posicion.equals("all")) {
-            List<User> usuarios = userRepository.buscarPorPosicion(posicion, currentUserId);
+            org.springframework.data.domain.Page<User> usuarios = userRepository.buscarPorPosicion(posicion, currentUserId, pageable);
             return org.springframework.http.ResponseEntity.ok(usuarios);
         }
         
-        return org.springframework.http.ResponseEntity.ok(userRepository.buscarTodosConPosicion(currentUserId));
+        return org.springframework.http.ResponseEntity.ok(userRepository.buscarTodosConPosicion(currentUserId, pageable));
     }
 
 

@@ -234,13 +234,19 @@ const BuscarJugadores = () => {
   const { t } = useTranslation();
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedPosition, setSelectedPosition] = useState("all");
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [invitePlayer, setInvitePlayer] = useState(null);
   const [userMatches, setUserMatches] = useState([]);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
 
-  const fetchPlayers = async (position) => {
-    setLoading(true);
+  const [selectedPosition, setSelectedPosition] = useState("all");
+
+  const fetchPlayers = async (position, pageNum = 0, isLoadMore = false) => {
+    if (isLoadMore) setLoadingMore(true);
+    else setLoading(true);
+    
     try {
       const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
       const token = storedUser.token;
@@ -248,12 +254,13 @@ const BuscarJugadores = () => {
       if (!token) {
         console.error("No token found in localStorage");
         setLoading(false);
+        setLoadingMore(false);
         return;
       }
 
       const url = position === "all" 
-        ? "/api/users/buscar" 
-        : `/api/users/buscar?posicion=${encodeURIComponent(position)}`;
+        ? `/api/users/buscar?page=${pageNum}&size=8` 
+        : `/api/users/buscar?posicion=${encodeURIComponent(position)}&page=${pageNum}&size=8`;
         
       const response = await fetch(url, {
         headers: {
@@ -263,17 +270,27 @@ const BuscarJugadores = () => {
       
       if (response.ok) {
         const data = await response.json();
-        setPlayers(data);
+        if (isLoadMore) {
+          setPlayers(prev => [...prev, ...data.content]);
+        } else {
+          setPlayers(data.content);
+        }
+        setHasMore(!data.last);
       } else {
         console.error("Failed to fetch players:", response.status, response.statusText);
-        const errorText = await response.text();
-        console.error("Error response body:", errorText);
       }
     } catch (error) {
       console.error("Error fetching players:", error);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
+  };
+
+  const handleLoadMore = () => {
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchPlayers(selectedPosition, nextPage, true);
   };
 
   const fetchUserMatches = async () => {
@@ -293,7 +310,8 @@ const BuscarJugadores = () => {
   };
 
   useEffect(() => {
-    fetchPlayers(selectedPosition);
+    setPage(0);
+    fetchPlayers(selectedPosition, 0, false);
     fetchUserMatches();
   }, [selectedPosition]);
 
@@ -359,6 +377,24 @@ const BuscarJugadores = () => {
             <span className="text-5xl mb-4 block">👻</span>
             <h3 className="text-xl font-bold text-gray-900">{t("search_players.no_players")}</h3>
             <p className="text-gray-500 mt-1">{t("search_players.no_players_desc")}</p>
+          </div>
+        )}
+
+        {/* Botón Ver Más */}
+        {hasMore && players.length > 0 && (
+          <div className="flex justify-center mt-12">
+            <button 
+              onClick={handleLoadMore}
+              disabled={loadingMore}
+              className="px-10 py-4 bg-white border-2 border-emerald-600 text-emerald-600 rounded-2xl font-black text-sm hover:bg-emerald-50 transition-all flex items-center gap-3 shadow-md active:scale-95 disabled:opacity-50"
+            >
+              {loadingMore ? (
+                <span className="loading loading-spinner loading-xs"></span>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7" /></svg>
+              )}
+              {t("search_players.load_more") || "Ver más jugadores"}
+            </button>
           </div>
         )}
 
