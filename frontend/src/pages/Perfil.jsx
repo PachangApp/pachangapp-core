@@ -9,6 +9,7 @@ import Dropdown from "../components/Dropdown";
 import { getFieldImage } from "../utils/fieldMapping";
 import { formatDate } from "../utils/dateFormatter";
 import { useTheme } from "../context/ThemeContext";
+import Toast from "../components/Toast";
 
 const DEFAULT_AVATAR = "https://ui-avatars.com/api/?background=10b981&color=fff";
 
@@ -27,6 +28,11 @@ const Perfil = () => {
   const [historial, setHistorial] = useState([]);
   const [showAllHistory, setShowAllHistory] = useState(false);
   const { theme, setTheme } = useTheme();
+  const [toast, setToast] = useState({ show: false, message: "", type: "success" });
+
+  const showToast = (message, type = "success") => {
+    setToast({ show: true, message, type });
+  };
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -131,7 +137,7 @@ const Perfil = () => {
     if (!file) return;
 
     if (file.size > 5 * 1024 * 1024) {
-      alert("La imagen es demasiado grande. Máximo 5MB.");
+      showToast("La imagen es demasiado grande. Máximo 5MB.", "error");
       return;
     }
 
@@ -157,13 +163,14 @@ const Perfil = () => {
         
         setUser(prev => ({ ...prev, avatar: updatedUser.avatar }));
         window.dispatchEvent(new Event("storage"));
+        showToast("Avatar actualizado con éxito ✨", "success");
       } else {
         const errorMsg = await resp.text();
-        alert(errorMsg || "Error al subir la imagen. Verifica el tamaño y formato.");
+        showToast(errorMsg || "Error al subir la imagen. Verifica el tamaño y formato.", "error");
       }
     } catch (err) {
       console.error(err);
-      alert("Error al cambiar avatar.");
+      showToast("Error al cambiar avatar.", "error");
     } finally {
       setUploadingAvatar(false);
     }
@@ -174,7 +181,7 @@ const Perfil = () => {
     const selected = [positions.p1, positions.p2, positions.p3].filter(p => p !== "");
     const uniqueSelected = new Set(selected);
     if (selected.length !== uniqueSelected.size) {
-      alert("No puedes seleccionar la misma posición varias veces. Por favor, elige posiciones diferentes.");
+      showToast("No puedes seleccionar la misma posición varias veces. Por favor, elige posiciones diferentes.", "error");
       return;
     }
 
@@ -194,10 +201,13 @@ const Perfil = () => {
         })
       });
       if (resp.ok) {
-        alert("Preferencias guardadas correctamente ⚽"); // Keep as string or we can wait, let's keep it simple for alerts or use t if we want, ignoring alerts for now as user requested visual
+        showToast("Preferencias guardadas correctamente ⚽", "success");
+      } else {
+        showToast("Hubo un problema al guardar tus preferencias.", "error");
       }
     } catch (error) {
       console.error(error);
+      showToast("Error de conexión al guardar preferencias.", "error");
     } finally {
       setSaving(false);
     }
@@ -571,6 +581,13 @@ const Perfil = () => {
           </div>
         </motion.div>
       </main>
+
+      <Toast 
+        show={toast.show} 
+        message={toast.message} 
+        type={toast.type} 
+        onClose={() => setToast({ ...toast, show: false })} 
+      />
     </div>
   );
 };
