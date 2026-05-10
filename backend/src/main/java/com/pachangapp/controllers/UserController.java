@@ -60,6 +60,10 @@ public class UserController {
 
     @PostMapping("/register")
     public org.springframework.http.ResponseEntity<?> registerUser(@RequestBody User user) {
+        if (!user.getPassword().matches("^(?=.*[A-Z])(?=.*\\d).{8,}$")) {
+            return org.springframework.http.ResponseEntity.badRequest().body("La contraseña debe tener al menos 8 caracteres, una letra mayúscula y un número.");
+        }
+
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             return org.springframework.http.ResponseEntity.badRequest().body("El correo electrónico ya está registrado.");
         }
@@ -77,13 +81,19 @@ public class UserController {
 
     @GetMapping("/verify")
     public org.springframework.http.ResponseEntity<?> verifyUser(@RequestParam String token) {
-        return userRepository.findByVerificationToken(token).map(user -> {
+        boolean verified = userRepository.findByVerificationToken(token).map(user -> {
             user.setEnabled(true);
             user.setVerificationToken(null);
             user.setFechaVerificacion(java.time.LocalDate.now());
             userRepository.save(user);
-            return org.springframework.http.ResponseEntity.ok("Cuenta activada correctamente. Ya puedes iniciar sesión.");
-        }).orElse(org.springframework.http.ResponseEntity.badRequest().body("Token de verificación inválido."));
+            return true;
+        }).orElse(false);
+
+        String redirectUrl = frontendUrl + "/#/verify?status=" + (verified ? "success" : "error");
+
+        return org.springframework.http.ResponseEntity.status(org.springframework.http.HttpStatus.FOUND)
+                .location(java.net.URI.create(redirectUrl))
+                .build();
     }
 
     @PostMapping("/login")
@@ -144,6 +154,10 @@ public class UserController {
 
         if (token == null || newPassword == null) {
             return org.springframework.http.ResponseEntity.badRequest().body("Token y contraseña son requeridos.");
+        }
+
+        if (!newPassword.matches("^(?=.*[A-Z])(?=.*\\d).{8,}$")) {
+            return org.springframework.http.ResponseEntity.badRequest().body("La nueva contraseña debe tener al menos 8 caracteres, una letra mayúscula y un número.");
         }
 
         User user = userRepository.findByResetPasswordToken(token).orElse(null);

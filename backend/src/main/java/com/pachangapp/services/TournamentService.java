@@ -67,6 +67,14 @@ public class TournamentService {
             throw new RuntimeException("Tournament is already full.");
         }
 
+        if (creator != null && (tournament.getCreator() == null || !creator.getId().equals(tournament.getCreator().getId()))) {
+            boolean alreadyRegistered = teamRepository.findByTournament(tournament).stream()
+                .anyMatch(t -> t.getCreator() != null && t.getCreator().getId().equals(creator.getId()));
+            if (alreadyRegistered) {
+                throw new RuntimeException("Solo puedes registrar un equipo por torneo a menos que seas el creador del torneo.");
+            }
+        }
+
         Team team = new Team();
         team.setTournament(tournament);
         team.setName(teamName);

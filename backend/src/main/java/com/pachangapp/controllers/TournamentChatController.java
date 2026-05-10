@@ -31,7 +31,11 @@ public class TournamentChatController {
     private User getAuthenticatedUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.isAuthenticated() && !auth.getPrincipal().equals("anonymousUser")) {
-            return userRepository.findByUsername(auth.getName()).orElse(null);
+            Object principal = auth.getPrincipal();
+            if (principal instanceof com.pachangapp.security.services.UserDetailsImpl) {
+                com.pachangapp.security.services.UserDetailsImpl userDetails = (com.pachangapp.security.services.UserDetailsImpl) principal;
+                return userRepository.findById(userDetails.getId()).orElse(null);
+            }
         }
         return null;
     }

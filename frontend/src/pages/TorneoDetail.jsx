@@ -74,7 +74,8 @@ const TorneoDetail = () => {
         setJoinName("");
         loadData(); // recargar
       } else {
-        alert(t('tournaments.detail.join_error'));
+        const errorText = await res.text();
+        alert(errorText || t('tournaments.detail.join_error'));
       }
     } catch (e) {
       console.error(e);
@@ -90,6 +91,7 @@ const TorneoDetail = () => {
   if (!tournament) return <div>{t('tournaments.no_tournaments')}</div>;
 
   const isFull = teams.length >= tournament.maxTeams;
+  const hasRegisteredTeam = teams.some(team => team.creator?.id == storedUserForAdmin.id);
 
   return (
     <div className="min-h-screen bg-gray-50 pb-24 overflow-x-hidden text-gray-900">
@@ -169,7 +171,7 @@ const TorneoDetail = () => {
                 <span className="text-2xl font-black text-emerald-600 drop-shadow-sm">{tournament.prize}</span>
               </div>
 
-              {tournament.status === 'OPEN' && !isFull && (
+              {tournament.status === 'OPEN' && !isFull && (isCreator || !hasRegisteredTeam) && (
                 <div className="ml-auto w-full md:w-auto flex flex-col sm:flex-row gap-3 mt-4 md:mt-0 p-2 bg-gray-50 rounded-3xl border border-gray-100">
                   <input 
                     type="text" 
