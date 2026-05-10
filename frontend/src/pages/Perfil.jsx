@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { API_BASE_URL } from "../apiConfig";
 import Navbar from "../components/Navbar";
 import StatCard from "../components/StatCard";
@@ -236,7 +236,7 @@ const Perfil = () => {
           <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-4 text-2xl">⚠️</div>
           <h2 className="text-xl font-bold text-gray-900 mb-2">{t('profile.profile_error')}</h2>
           <p className="text-gray-500 mb-6">{error}</p>
-          <a href="/login" className="bg-emerald-600 text-white px-6 py-2 rounded-xl font-bold shadow-lg">{t('profile.go_to_login')}</a>
+          <Link to="/login" className="bg-emerald-600 text-white px-6 py-2 rounded-xl font-bold shadow-lg">{t('profile.go_to_login')}</Link>
         </div>
       </div>
     );

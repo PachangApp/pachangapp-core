@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import Dropdown from "../components/Dropdown";
-
+import { API_BASE_URL } from "../apiConfig";
 import Navbar from "../components/Navbar";
 
 // Componente para mostrar la información del jugador en cuadrícula
@@ -220,7 +221,7 @@ const InviteModal = ({ player, isOpen, onClose, userMatches }) => {
               <div className="text-center py-10">
                 <span className="text-4xl mb-3 block">🏟️</span>
                 <p className="text-gray-500 font-medium">No tienes partidos abiertos creados en este momento.</p>
-                <a href="/crear-partido" className="inline-block mt-4 text-emerald-600 font-bold hover:underline">Crear un partido nuevo</a>
+                <Link to="/crear-partido" className="inline-block mt-4 text-emerald-600 font-bold hover:underline">Crear un partido nuevo</Link>
               </div>
             )}
           </div>
@@ -259,8 +260,8 @@ const BuscarJugadores = () => {
       }
 
       const url = position === "all" 
-        ? `/api/users/buscar?page=${pageNum}&size=8` 
-        : `/api/users/buscar?posicion=${encodeURIComponent(position)}&page=${pageNum}&size=8`;
+        ? `${API_BASE_URL}/users/buscar?page=${pageNum}&size=8` 
+        : `${API_BASE_URL}/users/buscar?posicion=${encodeURIComponent(position)}&page=${pageNum}&size=8`;
         
       const response = await fetch(url, {
         headers: {
@@ -297,7 +298,7 @@ const BuscarJugadores = () => {
     try {
       const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
       if (!storedUser.id || !storedUser.token) return;
-      const resp = await fetch(`/api/partidos/mis-partidos?userId=${storedUser.id}&page=0`, {
+      const resp = await fetch(`${API_BASE_URL}/partidos/mis-partidos?userId=${storedUser.id}&page=0`, {
         headers: { 'Authorization': `Bearer ${storedUser.token}` }
       });
       if (resp.ok) {
