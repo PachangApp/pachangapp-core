@@ -361,6 +361,16 @@
     "matches": "Matches",
     "wins": "Wins",
     "losses": "Losses",
-    "preferred_positions": "Preferred positions"
+    "preferred_positions": "Preferred positions",
+    "view_profile": "View profile",
+    "invite": "Invite",
+    "no_preferences": "No preferences defined",
+    "invite_to": "Invite @{{username}}",
+    "select_match_invite": "Select the match you want to invite them to",
+    "match_fallback": "Match",
+    "invitation_sent": "Invitation sent to {{username}}!",
+    "no_user_matches": "You don't have any open matches created at this moment.",
+    "create_new_match": "Create a new match",
+    "load_more": "View more players"
   }
 }

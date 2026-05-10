@@ -10,8 +10,26 @@ import Navbar from "../components/Navbar";
 const PlayerCard = ({ player, onShowProfile, onInvite }) => {
   const { t } = useTranslation();
   
-  // Posición principal a mostrar en la tarjeta
-  const mainPosition = player.posicion1 || t("search_players.all_positions");
+  // Función para traducir la posición que viene de la BD
+  const getTranslatedPosition = (pos) => {
+    if (!pos) return t("search_players.all_positions");
+    
+    // Mapeo de nombres en BD (español) a claves de traducción
+    const positionMap = {
+      "Portero": "goalkeeper",
+      "Defensa Central": "center_back",
+      "Lateral": "fullback",
+      "Mediocentro": "midfielder",
+      "Extremo": "winger",
+      "Delantero Centro": "striker",
+      "Polivalente": "versatile"
+    };
+    
+    const key = positionMap[pos];
+    return key ? t(`profile.positions.${key}`) : pos;
+  };
+
+  const mainPosition = getTranslatedPosition(player.posicion1);
   
   return (
     <motion.div
@@ -47,13 +65,13 @@ const PlayerCard = ({ player, onShowProfile, onInvite }) => {
             onClick={() => onShowProfile(player)}
             className="flex-1 py-2 bg-emerald-600 text-white rounded-xl font-bold text-[11px] hover:bg-emerald-700 transition-colors whitespace-nowrap"
           >
-            Ver perfil
+            {t("search_players.view_profile")}
           </button>
           <button 
             onClick={() => onInvite(player)}
             className="flex-1 py-2 bg-white border-2 border-emerald-600 text-emerald-600 rounded-xl font-bold text-[11px] hover:bg-emerald-50 transition-colors whitespace-nowrap"
           >
-            Invitar
+            {t("search_players.invite")}
           </button>
         </div>
       </div>
@@ -142,12 +160,48 @@ const PlayerProfileModal = ({ player, isOpen, onClose }) => {
               <div>
                 <h3 className="text-xs font-black text-gray-400 uppercase tracking-wider mb-3">{t("search_players.preferred_positions")}</h3>
                 <div className="flex flex-wrap gap-2">
-                  {player.posicion1 && <span className="bg-gray-100 text-gray-700 px-3 py-1.5 rounded-xl text-sm font-medium border border-gray-200">{player.posicion1}</span>}
-                  {player.posicion2 && <span className="bg-gray-50 text-gray-600 px-3 py-1.5 rounded-xl text-sm font-medium border border-gray-100">{player.posicion2}</span>}
-                  {player.posicion3 && <span className="bg-gray-50 text-gray-600 px-3 py-1.5 rounded-xl text-sm font-medium border border-gray-100">{player.posicion3}</span>}
+                  {player.posicion1 && (
+                    <span className="bg-gray-100 text-gray-700 px-3 py-1.5 rounded-xl text-sm font-medium border border-gray-200">
+                      {t(`profile.positions.${{
+                        "Portero": "goalkeeper",
+                        "Defensa Central": "center_back",
+                        "Lateral": "fullback",
+                        "Mediocentro": "midfielder",
+                        "Extremo": "winger",
+                        "Delantero Centro": "striker",
+                        "Polivalente": "versatile"
+                      }[player.posicion1] || "versatile"}`)}
+                    </span>
+                  )}
+                  {player.posicion2 && (
+                    <span className="bg-gray-50 text-gray-600 px-3 py-1.5 rounded-xl text-sm font-medium border border-gray-100">
+                      {t(`profile.positions.${{
+                        "Portero": "goalkeeper",
+                        "Defensa Central": "center_back",
+                        "Lateral": "fullback",
+                        "Mediocentro": "midfielder",
+                        "Extremo": "winger",
+                        "Delantero Centro": "striker",
+                        "Polivalente": "versatile"
+                      }[player.posicion2] || "versatile"}`)}
+                    </span>
+                  )}
+                  {player.posicion3 && (
+                    <span className="bg-gray-50 text-gray-600 px-3 py-1.5 rounded-xl text-sm font-medium border border-gray-100">
+                      {t(`profile.positions.${{
+                        "Portero": "goalkeeper",
+                        "Defensa Central": "center_back",
+                        "Lateral": "fullback",
+                        "Mediocentro": "midfielder",
+                        "Extremo": "winger",
+                        "Delantero Centro": "striker",
+                        "Polivalente": "versatile"
+                      }[player.posicion3] || "versatile"}`)}
+                    </span>
+                  )}
                   
                   {!player.posicion1 && !player.posicion2 && !player.posicion3 && (
-                    <span className="text-sm text-gray-400 italic">No ha definido preferencias</span>
+                    <span className="text-sm text-gray-400 italic">{t("search_players.no_preferences")}</span>
                   )}
                 </div>
               </div>
@@ -161,6 +215,7 @@ const PlayerProfileModal = ({ player, isOpen, onClose }) => {
 
 // Componente Modal para Invitar a Partido
 const InviteModal = ({ player, isOpen, onClose, userMatches }) => {
+  const { t } = useTranslation();
   if (!isOpen || !player) return null;
 
   return (
@@ -189,10 +244,10 @@ const InviteModal = ({ player, isOpen, onClose, userMatches }) => {
               ✕
             </button>
             <h2 className="text-2xl font-black text-white drop-shadow-sm">
-              Invitar a @{player.username}
+              {t("search_players.invite_to", { username: player.username })}
             </h2>
             <p className="text-emerald-50 font-medium mt-1 opacity-90">
-              Selecciona el partido al que quieres invitarle
+              {t("search_players.select_match_invite")}
             </p>
           </div>
 
@@ -202,17 +257,17 @@ const InviteModal = ({ player, isOpen, onClose, userMatches }) => {
                 {userMatches.map(match => (
                   <div key={match.id} className="flex items-center justify-between p-4 border border-gray-100 rounded-2xl hover:border-emerald-200 transition-colors">
                     <div>
-                      <h4 className="font-bold text-gray-900">{match.reserva?.campo?.nombre || "Partido"}</h4>
+                      <h4 className="font-bold text-gray-900">{match.reserva?.campo?.nombre || t("search_players.match_fallback")}</h4>
                       <p className="text-sm text-gray-500">{match.reserva?.fecha} • {match.reserva?.horaInicio?.substring(0,5)}</p>
                     </div>
                     <button 
                       onClick={() => {
-                        alert("¡Invitación enviada a " + player.username + "!");
+                        alert(t("search_players.invitation_sent", { username: player.username }));
                         onClose();
                       }}
                       className="px-4 py-2 bg-emerald-100 text-emerald-700 hover:bg-emerald-200 rounded-xl font-bold text-sm transition-colors"
                     >
-                      Invitar
+                      {t("search_players.invite")}
                     </button>
                   </div>
                 ))}
@@ -220,8 +275,8 @@ const InviteModal = ({ player, isOpen, onClose, userMatches }) => {
             ) : (
               <div className="text-center py-10">
                 <span className="text-4xl mb-3 block">🏟️</span>
-                <p className="text-gray-500 font-medium">No tienes partidos abiertos creados en este momento.</p>
-                <Link to="/crear-partido" className="inline-block mt-4 text-emerald-600 font-bold hover:underline">Crear un partido nuevo</Link>
+                <p className="text-gray-500 font-medium">{t("search_players.no_user_matches")}</p>
+                <Link to="/crear-partido" className="inline-block mt-4 text-emerald-600 font-bold hover:underline">{t("search_players.create_new_match")}</Link>
               </div>
             )}
           </div>
@@ -394,7 +449,7 @@ const BuscarJugadores = () => {
               ) : (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7" /></svg>
               )}
-              {t("search_players.load_more") || "Ver más jugadores"}
+              {t("search_players.load_more")}
             </button>
           </div>
         )}

@@ -180,27 +180,28 @@ const Navbar = () => {
 
       {/* 2. DESKTOP: Navegación Completa (xl en adelante) */}
       <div className="hidden xl:block w-full px-4 xl:px-8">
-        <div className="flex justify-between h-20 items-center relative">
+        {/* Usamos un grid de 3 columnas para asegurar que el centro esté centrado sin solaparse */}
+        <div className="grid grid-cols-[1fr_auto_1fr] h-20 items-center gap-4">
           
           {/* BLOQUE IZQUIERDA: Logo */}
-          <div className="flex-shrink-0 w-[250px]">
-            <Link to="/inicio" className="flex items-center gap-2 group">
-              <img src={logo} alt="Logo" className="w-[120px] h-[120px] xl:w-[120px] xl:h-[120px] object-contain transition-transform group-hover:scale-110" />
-              <div className="flex flex-col">
-                <span className="text-emerald-600 font-black text-lg xl:text-xl tracking-tighter leading-none">PachangApp</span>
-              </div>
+          <div className="flex items-center justify-start min-w-0">
+            <Link to="/inicio" className="flex items-center gap-2 group flex-shrink-0">
+              <img src={logo} alt="Logo" className="w-16 h-16 object-contain transition-transform group-hover:scale-110" />
+              <span className="text-emerald-600 font-black text-lg xl:text-xl tracking-tighter leading-none hidden 2xl:block">
+                PachangApp
+              </span>
             </Link>
           </div>
 
-          {/* BLOQUE CENTRO: Links con Iconos sin fondo (Centrado absoluto) */}
-          <div className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center gap-2">
+          {/* BLOQUE CENTRO: Links (Ahora fluyen naturalmente) */}
+          <div className="flex items-center justify-center gap-1 2xl:gap-2 min-w-0">
             {navLinks.map((link) => (
               link.isDropdown ? (
                 <div key={link.name} className="relative group">
-                  <button className="flex items-center gap-1 xl:gap-2 px-2 xl:px-4 py-2 text-xs xl:text-sm font-bold text-gray-500 hover:text-emerald-600 transition-all rounded-xl hover:bg-gray-50 dark:hover:bg-slate-900">
-                    <span className="text-base xl:text-lg opacity-70">{link.icon}</span>
-                    {link.name}
-                    <svg className="w-3 h-3 xl:w-4 xl:h-4 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                  <button className="flex items-center gap-1 px-2 2xl:px-4 py-2 text-[10px] 2xl:text-sm font-bold text-gray-500 hover:text-emerald-600 transition-all rounded-xl hover:bg-gray-50 dark:hover:bg-slate-900 whitespace-nowrap">
+                    <span className="text-base 2xl:text-lg opacity-70">{link.icon}</span>
+                    <span className="hidden xl:inline">{link.name}</span>
+                    <svg className="w-3 h-3 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg>
                   </button>
                   <div className="absolute top-full left-1/2 -translate-x-1/2 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                     <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-gray-100 dark:border-slate-800 p-2 min-w-[200px] flex flex-col gap-1">
@@ -225,51 +226,33 @@ const Navbar = () => {
                 <Link
                   key={link.name}
                   to={link.path}
-                  className={`px-2 xl:px-4 py-2 rounded-xl text-xs xl:text-sm transition-all whitespace-nowrap flex items-center gap-1 xl:gap-2 group ${
+                  className={`px-2 2xl:px-4 py-2 rounded-xl text-[10px] 2xl:text-sm transition-all whitespace-nowrap flex items-center gap-1 2xl:gap-2 group ${
                     isActive(link.path)
                       ? "bg-gray-50 dark:bg-slate-800 text-emerald-600 shadow-sm font-black"
                       : "text-gray-500 hover:text-emerald-600 font-bold hover:bg-gray-50 dark:hover:bg-slate-900"
                   }`}
                 >
-                  <span className={`text-base xl:text-lg transition-transform group-hover:scale-110 ${isActive(link.path) ? "text-emerald-600" : "opacity-60"}`}>{link.icon}</span>
-                  {link.name}
+                  <span className={`text-base 2xl:text-lg transition-transform group-hover:scale-110 ${isActive(link.path) ? "text-emerald-600" : "opacity-60"}`}>{link.icon}</span>
+                  <span className="hidden xl:inline">{link.name}</span>
                 </Link>
               )
             ))}
           </div>
 
-          {/* BLOQUE DERECHA: Herramientas y Usuario */}
-          <div className="flex items-center justify-end gap-4 w-[250px]">
-              <div className="flex items-center gap-2 pr-4 border-r border-gray-100 dark:border-slate-800">
+          {/* BLOQUE DERECHA: Herramientas */}
+          <div className="flex items-center justify-end gap-2 2xl:gap-4 min-w-0">
+              <div className="flex items-center gap-1 2xl:gap-2 pr-2 2xl:pr-4 border-r border-gray-100 dark:border-slate-800">
                 <ThemeToggle />
                 <LanguageSelector />
               </div>
               
               <div className="flex items-center gap-1 xl:gap-3">
-                <Link 
-                  to="/perfil" 
-                  className={`group relative flex items-center gap-3 pl-1 pr-1 xl:pr-3 py-1 rounded-full border-2 transition-all ${
-                    isActive("/perfil") ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10" : "border-transparent hover:bg-gray-50 dark:hover:bg-slate-900"
-                  }`}
-                >
-                  <div className="w-8 h-8 xl:w-9 xl:h-9 rounded-full overflow-hidden border-2 border-white dark:border-slate-800 shadow-sm">
-                    <img 
-                        src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.username || 'U'}&background=10b981&color=fff`} 
-                        alt="Profile" 
-                        className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <span className={`text-sm font-bold hidden xl:block ${isActive("/perfil") ? "text-emerald-700 dark:text-emerald-400" : "text-gray-700 dark:text-gray-300"}`}>
-                    {user?.username}
-                  </span>
-                </Link>
-
                 <button
                   onClick={handleLogout}
-                  className="w-8 h-8 xl:w-10 xl:h-10 flex items-center justify-center rounded-xl text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all group"
+                  className="w-8 h-8 2xl:w-10 xl:h-10 flex items-center justify-center rounded-xl text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all group"
                   title={t("navbar.logout")}
                 >
-                  <svg className="w-5 h-5 xl:w-6 xl:h-6 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 2xl:w-6 2xl:h-6 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                   </svg>
                 </button>

@@ -360,6 +360,16 @@
     "matches": "Partidos",
     "wins": "Victorias",
     "losses": "Derrotas",
-    "preferred_positions": "Posiciones preferidas"
+    "preferred_positions": "Posiciones preferidas",
+    "view_profile": "Ver perfil",
+    "invite": "Invitar",
+    "no_preferences": "No ha definido preferencias",
+    "invite_to": "Invitar a @{{username}}",
+    "select_match_invite": "Selecciona el partido al que quieres invitarle",
+    "match_fallback": "Partido",
+    "invitation_sent": "¡Invitación enviada a {{username}}!",
+    "no_user_matches": "No tienes partidos abiertos creados en este momento.",
+    "create_new_match": "Crear un partido nuevo",
+    "load_more": "Ver más jugadores"
   }
 }
