@@ -221,7 +221,7 @@
     "community_sub": "PachangApp is not just for playing, it's for competing. Every match counts, every goal adds up, and your assists will make you lead your local ranking.",
     "feature_1": "Detailed personal stats",
     "feature_2": "Monthly local rankings",
-    "feature_3": "Badges and rewards for activity",
+    "feature_3": "Automatic match coordination",
     "view_rankings": "View Rankings",
     "top_players": "Top Players",
     "cta_title": "Ready to go down and play?",
@@ -392,5 +392,9 @@
     "no_user_matches": "You don't have any open matches created at this moment.",
     "create_new_match": "Create a new match",
     "load_more": "View more players"
+  },
+  "match_detail": {
+    "finalize_success": "Match finalized and stats distributed! 🏆",
+    "finalize_error": "Error finalizing match"
   }
 }

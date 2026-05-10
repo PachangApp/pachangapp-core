@@ -49,8 +49,7 @@ const PlayerCard = ({ player, onShowProfile, onInvite }) => {
               onError={(e) => { e.target.src = "https://api.dicebear.com/7.x/avataaars/svg?seed=" + player.username; }}
             />
           </div>
-          <div className="absolute -bottom-2 -right-2 bg-emerald-100 text-emerald-800 text-[10px] font-black px-2 py-1 rounded-lg border-2 border-white shadow-sm">
-            Lv.{Math.floor(player.ranking / 100)}
+          <div className="absolute -bottom-2 -right-2">
           </div>
         </div>
 
@@ -134,9 +133,6 @@ const PlayerProfileModal = ({ player, isOpen, onClose }) => {
             <div className="ml-[96px] flex items-center gap-2 mb-6">
               <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider bg-gray-100 px-2 py-1 rounded-lg">
                 {t("search_players.ranking")} {player.ranking}
-              </span>
-              <span className="text-[10px] font-black text-emerald-600 uppercase tracking-wider bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-100">
-                Lv.{Math.floor(player.ranking / 100)}
               </span>
             </div>
 

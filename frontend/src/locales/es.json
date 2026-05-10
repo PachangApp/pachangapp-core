@@ -222,7 +222,7 @@
     "community_sub": "PachangApp no es solo para jugar, es para competir. Cada partido cuenta, cada gol suma, y tus asistencias te harán liderar el ranking de tu zona.",
     "feature_1": "Estadísticas personales detalladas",
     "feature_2": "Rankings locales mensuales",
-    "feature_3": "Insignias y recompensas por actividad",
+    "feature_3": "Gestión automática de convocatorias",
     "view_rankings": "Ver Rankings",
     "top_players": "Top Jugadores",
     "cta_title": "¿Listo para bajar a jugar?",
@@ -391,5 +391,9 @@
     "no_user_matches": "No tienes partidos abiertos creados en este momento.",
     "create_new_match": "Crear un partido nuevo",
     "load_more": "Ver más jugadores"
+  },
+  "match_detail": {
+    "finalize_success": "¡Partido finalizado y estadísticas repartidas! 🏆",
+    "finalize_error": "Error al finalizar el partido"
   }
 }

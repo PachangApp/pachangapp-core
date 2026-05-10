@@ -237,9 +237,6 @@ const Home = () => {
                           <motion.div variants={fadeInUp} className="h-full">
                               <StatCard label={t('home.stats_assists')} value="5" icon={<span className="text-2xl">👟</span>} color="amber" />
                           </motion.div>
-                          <motion.div variants={fadeInUp} className="h-full">
-                              <StatCard label={t('home.stats_level')} value={t('home.level_pro')} icon={<span className="text-2xl">⚡</span>} color="emerald" />
-                          </motion.div>
                       </motion.div>
                   </div>
               </div>

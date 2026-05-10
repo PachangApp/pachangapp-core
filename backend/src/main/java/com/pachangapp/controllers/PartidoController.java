@@ -52,7 +52,7 @@ public class PartidoController {
             @RequestParam(required = false) String lugar,
             @RequestParam(required = false) String fecha,
             @RequestParam(defaultValue = "0") int page) {
-        
+
         java.time.LocalDate localDate = null;
         if (fecha != null && !fecha.isEmpty()) {
             try {
@@ -61,8 +61,9 @@ public class PartidoController {
                 // Ignorar error de parseo
             }
         }
-        
-        org.springframework.data.domain.Page<Partido> partidos = partidoRepository.searchPartidos(lugar, localDate, org.springframework.data.domain.PageRequest.of(page, 20));
+
+        org.springframework.data.domain.Page<Partido> partidos = partidoRepository.searchPartidos(lugar, localDate,
+                org.springframework.data.domain.PageRequest.of(page, 20));
 
         return partidos.getContent().stream().map(p -> {
             java.util.Map<String, Object> map = new java.util.HashMap<>();
@@ -86,19 +87,21 @@ public class PartidoController {
 
     @GetMapping("/mis-partidos")
     public ResponseEntity<?> getMisPartidos(
-            @RequestParam Long userId, 
+            @RequestParam Long userId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "4") int size) {
         User user = userRepository.findById(userId).orElse(null);
         if (user == null) {
             return ResponseEntity.badRequest().body("Usuario no encontrado");
         }
-        Page<Partido> partidos = partidoRepository.findProximosPartidosUsuario(userId, PageRequest.of(page, size, Sort.by("id").descending()));
+        Page<Partido> partidos = partidoRepository.findProximosPartidosUsuario(userId,
+                PageRequest.of(page, size, Sort.by("id").descending()));
         return ResponseEntity.ok(partidos);
     }
 
     @GetMapping("/historial")
-    public ResponseEntity<?> getHistorialPartidos(@RequestParam Long userId, @RequestParam(defaultValue = "0") int page) {
+    public ResponseEntity<?> getHistorialPartidos(@RequestParam Long userId,
+            @RequestParam(defaultValue = "0") int page) {
         User user = userRepository.findById(userId).orElse(null);
         if (user == null) {
             return ResponseEntity.badRequest().body("Usuario no encontrado");
@@ -125,9 +128,9 @@ public class PartidoController {
 
             // Validar disponibilidad jerárquica
             if (!reservaService.isHoraDisponible(campoId, LocalDate.parse(fechaStr), horaStr)) {
-                return ResponseEntity.badRequest().body("Esta hora no está disponible (campo ocupado total o parcialmente).");
+                return ResponseEntity.badRequest()
+                        .body("Esta hora no está disponible (campo ocupado total o parcialmente).");
             }
-
 
             // 1. Crear la Reserva primero
             Reserva reserva = new Reserva(campo, user, LocalDate.parse(fechaStr), LocalTime.parse(horaStr + ":00"));
@@ -168,7 +171,7 @@ public class PartidoController {
 
         com.pachangapp.models.Participacion p = new com.pachangapp.models.Participacion(user, partido);
         participacionRepository.save(p);
-        
+
         // Recargar partido para ver cambios en participaciones
         partido = partidoRepository.findById(id).get();
 
@@ -176,12 +179,13 @@ public class PartidoController {
             partido.setEstado("LLENO");
             partidoRepository.save(partido);
         }
-        
+
         return ResponseEntity.ok(partido);
     }
 
     @PostMapping("/{id}/asignar-equipo")
-    public ResponseEntity<?> asignarEquipo(@PathVariable Long id, @RequestParam Long userId, @RequestParam String equipo, @RequestParam(required = false) String colorRgb) {
+    public ResponseEntity<?> asignarEquipo(@PathVariable Long id, @RequestParam Long userId,
+            @RequestParam String equipo, @RequestParam(required = false) String colorRgb) {
         Participacion participacion = participacionRepository.findByUserIdAndPartidoId(userId, id).orElse(null);
         if (participacion == null) {
             return ResponseEntity.badRequest().body("El usuario no está inscrito en este partido");
@@ -195,10 +199,12 @@ public class PartidoController {
     }
 
     @PostMapping("/{id}/finalizar")
-    public ResponseEntity<?> finalizarPartido(@PathVariable Long id, @RequestParam int marcadorA, @RequestParam int marcadorB) {
+    public ResponseEntity<?> finalizarPartido(@PathVariable Long id, @RequestParam int marcadorA,
+            @RequestParam int marcadorB) {
         Partido partido = partidoRepository.findById(id).orElse(null);
-        if (partido == null) return ResponseEntity.badRequest().body("Partido no encontrado");
-        
+        if (partido == null)
+            return ResponseEntity.badRequest().body("Partido no encontrado");
+
         if ("FINALIZADO".equals(partido.getEstado())) {
             return ResponseEntity.badRequest().body("El partido ya está finalizado");
         }
@@ -209,8 +215,10 @@ public class PartidoController {
 
         // Lógica de ELO y Estadísticas
         String equipoGanador = "EMPATE";
-        if (marcadorA > marcadorB) equipoGanador = "BLANCO";
-        else if (marcadorB > marcadorA) equipoGanador = "NEGRO";
+        if (marcadorA > marcadorB)
+            equipoGanador = "BLANCO";
+        else if (marcadorB > marcadorA)
+            equipoGanador = "NEGRO";
 
         for (com.pachangapp.models.Participacion p : partido.getParticipaciones()) {
             User user = p.getUser();
@@ -236,10 +244,12 @@ public class PartidoController {
     }
 
     @PostMapping("/{id}/cambiar-color")
-    public ResponseEntity<?> cambiarColor(@PathVariable Long id, @RequestParam String equipo, @RequestParam String color) {
+    public ResponseEntity<?> cambiarColor(@PathVariable Long id, @RequestParam String equipo,
+            @RequestParam String color) {
         Partido partido = partidoRepository.findById(id).orElse(null);
-        if (partido == null) return ResponseEntity.notFound().build();
-        
+        if (partido == null)
+            return ResponseEntity.notFound().build();
+
         for (Participacion p : partido.getParticipaciones()) {
             if (p.getEquipo().equalsIgnoreCase(equipo)) {
                 p.setColorRgb(color);

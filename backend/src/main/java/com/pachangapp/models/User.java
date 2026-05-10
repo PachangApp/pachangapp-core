@@ -14,7 +14,7 @@ public class User {
     private String email;
     private String password;
     private String avatar;
-    
+
     private int partidosJugados = 0;
     private int victorias = 0;
     private int derrotas = 0;
@@ -29,10 +29,9 @@ public class User {
     private boolean enabled = false;
     private String verificationToken;
     private java.time.LocalDate fechaVerificacion;
-    
+
     private String resetPasswordToken;
     private java.time.LocalDateTime resetPasswordTokenExpiry;
-
 
     public User() {
     }
@@ -77,42 +76,107 @@ public class User {
         this.avatar = avatar;
     }
 
-    public int getPartidosJugados() { return partidosJugados; }
-    public void setPartidosJugados(int partidosJugados) { this.partidosJugados = partidosJugados; }
+    public int getPartidosJugados() {
+        return partidosJugados;
+    }
 
-    public int getVictorias() { return victorias; }
-    public void setVictorias(int victorias) { this.victorias = victorias; }
+    public void setPartidosJugados(int partidosJugados) {
+        this.partidosJugados = partidosJugados;
+    }
 
-    public int getDerrotas() { return derrotas; }
-    public void setDerrotas(int derrotas) { this.derrotas = derrotas; }
+    public int getVictorias() {
+        return victorias;
+    }
 
-    public int getRanking() { return ranking; }
-    public void setRanking(int ranking) { this.ranking = ranking; }
+    public void setVictorias(int victorias) {
+        this.victorias = victorias;
+    }
 
-    public String getPosicion1() { return posicion1; }
-    public void setPosicion1(String posicion1) { this.posicion1 = posicion1; }
+    public int getDerrotas() {
+        return derrotas;
+    }
 
-    public String getPosicion2() { return posicion2; }
-    public void setPosicion2(String posicion2) { this.posicion2 = posicion2; }
+    public void setDerrotas(int derrotas) {
+        this.derrotas = derrotas;
+    }
 
-    public String getPosicion3() { return posicion3; }
-    public void setPosicion3(String posicion3) { this.posicion3 = posicion3; }
+    public int getRanking() {
+        return ranking;
+    }
 
-    public Role getRole() { return role; }
-    public void setRole(Role role) { this.role = role; }
+    public void setRanking(int ranking) {
+        this.ranking = ranking;
+    }
 
-    public boolean isEnabled() { return enabled; }
-    public void setEnabled(boolean enabled) { this.enabled = enabled; }
+    public String getPosicion1() {
+        return posicion1;
+    }
 
-    public String getVerificationToken() { return verificationToken; }
-    public void setVerificationToken(String verificationToken) { this.verificationToken = verificationToken; }
+    public void setPosicion1(String posicion1) {
+        this.posicion1 = posicion1;
+    }
 
-    public java.time.LocalDate getFechaVerificacion() { return fechaVerificacion; }
-    public void setFechaVerificacion(java.time.LocalDate fechaVerificacion) { this.fechaVerificacion = fechaVerificacion; }
+    public String getPosicion2() {
+        return posicion2;
+    }
 
-    public String getResetPasswordToken() { return resetPasswordToken; }
-    public void setResetPasswordToken(String resetPasswordToken) { this.resetPasswordToken = resetPasswordToken; }
+    public void setPosicion2(String posicion2) {
+        this.posicion2 = posicion2;
+    }
 
-    public java.time.LocalDateTime getResetPasswordTokenExpiry() { return resetPasswordTokenExpiry; }
-    public void setResetPasswordTokenExpiry(java.time.LocalDateTime resetPasswordTokenExpiry) { this.resetPasswordTokenExpiry = resetPasswordTokenExpiry; }
+    public String getPosicion3() {
+        return posicion3;
+    }
+
+    public void setPosicion3(String posicion3) {
+        this.posicion3 = posicion3;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public String getVerificationToken() {
+        return verificationToken;
+    }
+
+    public void setVerificationToken(String verificationToken) {
+        this.verificationToken = verificationToken;
+    }
+
+    public java.time.LocalDate getFechaVerificacion() {
+        return fechaVerificacion;
+    }
+
+    public void setFechaVerificacion(java.time.LocalDate fechaVerificacion) {
+        this.fechaVerificacion = fechaVerificacion;
+    }
+
+    public String getResetPasswordToken() {
+        return resetPasswordToken;
+    }
+
+    public void setResetPasswordToken(String resetPasswordToken) {
+        this.resetPasswordToken = resetPasswordToken;
+    }
+
+    public java.time.LocalDateTime getResetPasswordTokenExpiry() {
+        return resetPasswordTokenExpiry;
+    }
+
+    public void setResetPasswordTokenExpiry(java.time.LocalDateTime resetPasswordTokenExpiry) {
+        this.resetPasswordTokenExpiry = resetPasswordTokenExpiry;
+    }
 }
