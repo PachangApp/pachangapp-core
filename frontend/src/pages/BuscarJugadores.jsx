@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Dropdown from "../components/Dropdown";
 import { API_BASE_URL } from "../apiConfig";
 import Navbar from "../components/Navbar";
+import Toast from "../components/Toast";
 
 // Componente para mostrar la información del jugador en cuadrícula
 const PlayerCard = ({ player, onShowProfile, onInvite }) => {
@@ -63,13 +64,13 @@ const PlayerCard = ({ player, onShowProfile, onInvite }) => {
         <div className="w-full flex flex-row gap-2 border-t border-gray-50 pt-4 mt-2">
           <button 
             onClick={() => onShowProfile(player)}
-            className="flex-1 py-2 bg-emerald-600 text-white rounded-xl font-bold text-[11px] hover:bg-emerald-700 transition-colors whitespace-nowrap"
+            className="flex-1 py-2 bg-emerald-600 text-white rounded-xl font-bold text-[11px] hover:bg-emerald-700 transition-colors whitespace-nowrap cursor-pointer"
           >
             {t("search_players.view_profile")}
           </button>
           <button 
             onClick={() => onInvite(player)}
-            className="flex-1 py-2 bg-white border-2 border-emerald-600 text-emerald-600 rounded-xl font-bold text-[11px] hover:bg-emerald-50 transition-colors whitespace-nowrap"
+            className="flex-1 py-2 bg-white border-2 border-emerald-600 text-emerald-600 rounded-xl font-bold text-[11px] hover:bg-emerald-50 transition-colors whitespace-nowrap cursor-pointer"
           >
             {t("search_players.invite")}
           </button>
@@ -106,7 +107,7 @@ const PlayerProfileModal = ({ player, isOpen, onClose }) => {
           <div className="h-28 bg-gradient-to-br from-emerald-500 to-teal-600 relative">
             <button 
               onClick={onClose}
-              className="absolute top-4 right-4 w-8 h-8 bg-white/20 hover:bg-white/40 rounded-full flex items-center justify-center text-white backdrop-blur-md transition-colors z-30"
+              className="absolute top-4 right-4 w-8 h-8 bg-white/20 hover:bg-white/40 rounded-full flex items-center justify-center text-white backdrop-blur-md transition-colors z-30 cursor-pointer"
             >
               ✕
             </button>
@@ -214,7 +215,7 @@ const PlayerProfileModal = ({ player, isOpen, onClose }) => {
 };
 
 // Componente Modal para Invitar a Partido
-const InviteModal = ({ player, isOpen, onClose, userMatches }) => {
+const InviteModal = ({ player, isOpen, onClose, userMatches, onSendInvite }) => {
   const { t } = useTranslation();
   if (!isOpen || !player) return null;
 
@@ -239,7 +240,7 @@ const InviteModal = ({ player, isOpen, onClose, userMatches }) => {
           <div className="p-8 bg-gradient-to-br from-emerald-500 to-teal-600 relative">
             <button 
               onClick={onClose} 
-              className="absolute top-4 right-4 w-8 h-8 bg-white/20 hover:bg-white/40 rounded-full flex items-center justify-center text-white backdrop-blur-md transition-colors"
+              className="absolute top-4 right-4 w-8 h-8 bg-white/20 hover:bg-white/40 rounded-full flex items-center justify-center text-white backdrop-blur-md transition-colors cursor-pointer"
             >
               ✕
             </button>
@@ -261,11 +262,8 @@ const InviteModal = ({ player, isOpen, onClose, userMatches }) => {
                       <p className="text-sm text-gray-500">{match.reserva?.fecha} • {match.reserva?.horaInicio?.substring(0,5)}</p>
                     </div>
                     <button 
-                      onClick={() => {
-                        alert(t("search_players.invitation_sent", { username: player.username }));
-                        onClose();
-                      }}
-                      className="px-4 py-2 bg-emerald-100 text-emerald-700 hover:bg-emerald-200 rounded-xl font-bold text-sm transition-colors"
+                      onClick={() => onSendInvite(match.id)}
+                      className="px-4 py-2 bg-emerald-100 text-emerald-700 hover:bg-emerald-200 rounded-xl font-bold text-sm transition-colors cursor-pointer"
                     >
                       {t("search_players.invite")}
                     </button>
@@ -296,6 +294,11 @@ const BuscarJugadores = () => {
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [toast, setToast] = useState({ show: false, message: "", type: "success" });
+
+  const showToast = (message, type = "success") => {
+    setToast({ show: true, message, type });
+  };
 
   const [selectedPosition, setSelectedPosition] = useState("all");
 
@@ -353,7 +356,7 @@ const BuscarJugadores = () => {
     try {
       const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
       if (!storedUser.id || !storedUser.token) return;
-      const resp = await fetch(`${API_BASE_URL}/partidos/mis-partidos?userId=${storedUser.id}&page=0`, {
+      const resp = await fetch(`${API_BASE_URL}/partidos/mis-partidos?userId=${storedUser.id}&page=0&size=20`, {
         headers: { 'Authorization': `Bearer ${storedUser.token}` }
       });
       if (resp.ok) {
@@ -362,6 +365,41 @@ const BuscarJugadores = () => {
       }
     } catch (err) {
       console.error("Error fetching user matches:", err);
+    }
+  };
+
+  const handleSendInvitation = async (matchId) => {
+    if (!invitePlayer) return;
+    try {
+      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+      const resp = await fetch(`${API_BASE_URL}/invitaciones`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${storedUser.token}` 
+        },
+        body: JSON.stringify({
+          partidoId: matchId,
+          invitadorId: storedUser.id,
+          invitadoId: invitePlayer.id
+        })
+      });
+
+      if (resp.ok) {
+        showToast(t("search_players.invitation_sent", { username: invitePlayer.username }), "success");
+        setInvitePlayer(null);
+      } else {
+        const errorMsg = await resp.text();
+        // Si el backend devuelve una clave de error, la traducimos
+        const translatedError = t(`search_players.${errorMsg}`);
+        const finalMessage = translatedError !== `search_players.${errorMsg}` 
+          ? translatedError 
+          : (errorMsg || t("search_players.invitation_error"));
+        
+        showToast(finalMessage, "error");
+      }
+    } catch (err) {
+      showToast(t("search_players.invitation_error"), "error");
     }
   };
 
@@ -442,7 +480,7 @@ const BuscarJugadores = () => {
             <button 
               onClick={handleLoadMore}
               disabled={loadingMore}
-              className="px-10 py-4 bg-white border-2 border-emerald-600 text-emerald-600 rounded-2xl font-black text-sm hover:bg-emerald-50 transition-all flex items-center gap-3 shadow-md active:scale-95 disabled:opacity-50"
+              className="px-10 py-4 bg-white border-2 border-emerald-600 text-emerald-600 rounded-2xl font-black text-sm hover:bg-emerald-50 transition-all flex items-center gap-3 shadow-md active:scale-95 disabled:opacity-50 cursor-pointer"
             >
               {loadingMore ? (
                 <span className="loading loading-spinner loading-xs"></span>
@@ -467,6 +505,14 @@ const BuscarJugadores = () => {
           player={invitePlayer}
           onClose={() => setInvitePlayer(null)}
           userMatches={userMatches}
+          onSendInvite={handleSendInvitation}
+        />
+
+        <Toast 
+          show={toast.show} 
+          message={toast.message} 
+          type={toast.type} 
+          onClose={() => setToast({ ...toast, show: false })} 
         />
 
       </div>

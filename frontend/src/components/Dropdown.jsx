@@ -32,7 +32,7 @@ const Dropdown = ({ label, options, value, onChange, placeholder = "Seleccionar"
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full flex items-center justify-between px-5 py-3.5 bg-gray-50 border-2 transition-all rounded-2xl group ${
+        className={`w-full flex items-center justify-between px-5 py-3.5 bg-gray-50 border-2 transition-all rounded-2xl group cursor-pointer ${
           isOpen ? "border-emerald-500 bg-white shadow-lg shadow-emerald-500/5" : "border-transparent hover:border-gray-200"
         }`}
       >
@@ -68,7 +68,7 @@ const Dropdown = ({ label, options, value, onChange, placeholder = "Seleccionar"
                   key={idx}
                   type="button"
                   onClick={() => handleSelect(opValue)}
-                  className={`w-full text-left px-4 py-3 rounded-xl text-sm font-bold transition-all flex items-center justify-between group ${
+                  className={`w-full text-left px-4 py-3 rounded-xl text-sm font-bold transition-all flex items-center justify-between group cursor-pointer ${
                     value === opValue 
                       ? "bg-emerald-50 text-emerald-600" 
                       : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"

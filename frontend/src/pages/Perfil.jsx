@@ -29,6 +29,7 @@ const Perfil = () => {
   const [showAllHistory, setShowAllHistory] = useState(false);
   const { theme, setTheme } = useTheme();
   const [toast, setToast] = useState({ show: false, message: "", type: "success" });
+  const [invitaciones, setInvitaciones] = useState([]);
 
   const showToast = (message, type = "success") => {
     setToast({ show: true, message, type });
@@ -83,6 +84,9 @@ const Perfil = () => {
         // Cargar Historial
         await fetchHistorial(id, token);
 
+        // Cargar Invitaciones
+        await fetchInvitaciones();
+
       } catch (err) {
         setError(err.message);
       } finally {
@@ -128,6 +132,42 @@ const Perfil = () => {
       }
     } catch (err) {
       console.error("Error fetching historial:", err);
+    }
+  };
+
+  const fetchInvitaciones = async () => {
+    try {
+      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+      const resp = await fetch(`${API_BASE_URL}/invitaciones/pendientes?userId=${storedUser.id}`, {
+        headers: { "Authorization": `Bearer ${storedUser.token}` }
+      });
+      if (resp.ok) {
+        const data = await resp.json();
+        setInvitaciones(data);
+      }
+    } catch (err) {
+      console.error("Error fetching invitations:", err);
+    }
+  };
+
+  const handleResponderInvitacion = async (invitacionId, accion) => {
+    try {
+      const { token } = JSON.parse(localStorage.getItem("user") || "{}");
+      const resp = await fetch(`${API_BASE_URL}/invitaciones/${invitacionId}/responder?accion=${accion}`, {
+        method: 'PUT',
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (resp.ok) {
+        showToast(accion === "ACEPTAR" ? t("profile.accept_success") : t("profile.reject_success"), "success");
+        fetchInvitaciones();
+        if (accion === "ACEPTAR") fetchMisPartidos(0);
+        window.dispatchEvent(new Event("storage")); 
+      } else {
+        const msg = await resp.text();
+        showToast(msg, "error");
+      }
+    } catch (err) {
+      showToast("Error al responder invitación", "error");
     }
   };
 
@@ -335,6 +375,67 @@ const Perfil = () => {
           </div>
         </motion.section>
 
+        {/* 1.5 Invitaciones Pendientes (NUEVO) */}
+        {invitaciones.length > 0 && (
+          <motion.section 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="mb-12 p-8 bg-emerald-600 rounded-[2.5rem] shadow-xl shadow-emerald-600/20 text-white relative overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl"></div>
+            <div className="relative z-10">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-2xl">
+                  📩
+                </div>
+                <div>
+                  <h2 className="text-2xl font-black">{t('profile.pending_invitations') || 'Invitaciones Pendientes'}</h2>
+                  <p className="text-emerald-100 text-sm font-medium">{t('profile.pending_invitations_desc') || '¡Tus amigos quieren que juegues con ellos!'}</p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {invitaciones.map((inv) => (
+                  <motion.div 
+                    key={inv.id}
+                    layout
+                    className="bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/20 flex flex-col md:flex-row items-center justify-between gap-6"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-full border-2 border-white/30 overflow-hidden shrink-0">
+                        <img src={inv.invitador.avatar || DEFAULT_AVATAR} alt="Invitador" className="w-full h-full object-cover" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-lg">
+                          <span className="text-emerald-200">@{inv.invitador.username}</span> {t('profile.invited_you') || 'te ha invitado a:'}
+                        </p>
+                        <h4 className="font-black text-xl">{inv.partido.reserva.campo.nombre}</h4>
+                        <p className="text-sm font-bold text-emerald-100/80 uppercase tracking-widest mt-1">
+                          {formatDate(inv.partido.reserva.fecha)} • {inv.partido.reserva.horaInicio.substring(0,5)}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex gap-3 w-full md:w-auto">
+                      <button 
+                        onClick={() => handleResponderInvitacion(inv.id, 'ACEPTAR')}
+                        className="flex-1 md:flex-none px-8 py-3 bg-white text-emerald-700 font-black rounded-2xl hover:bg-emerald-50 transition-all active:scale-95 shadow-lg cursor-pointer"
+                      >
+                        {t('profile.accept') || 'Aceptar'}
+                      </button>
+                      <button 
+                        onClick={() => handleResponderInvitacion(inv.id, 'RECHAZAR')}
+                        className="flex-1 md:flex-none px-8 py-3 bg-emerald-700/50 text-white font-black rounded-2xl hover:bg-emerald-700/80 transition-all border border-white/10 cursor-pointer"
+                      >
+                        {t('profile.decline') || 'Rechazar'}
+                      </button>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </motion.section>
+        )}
+
         {/* 2. Mis Partidos (Nueva Sección) */}
         {misPartidos.length > 0 && (
           <motion.section 
@@ -389,7 +490,7 @@ const Perfil = () => {
                 <button 
                   onClick={() => fetchMisPartidos(matchesPage + 1, true)}
                   disabled={loadingMatches}
-                  className="px-8 py-3 bg-white border-2 border-emerald-100 text-emerald-600 font-black rounded-2xl hover:bg-emerald-50 transition-all shadow-sm flex items-center gap-2 mx-auto disabled:opacity-50"
+                  className="px-8 py-3 bg-white border-2 border-emerald-100 text-emerald-600 font-black rounded-2xl hover:bg-emerald-50 transition-all shadow-sm flex items-center gap-2 mx-auto disabled:opacity-50 cursor-pointer"
                 >
                   {loadingMatches ? t('search_matches.loading') : t('search_matches.load_more')}
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" /></svg>

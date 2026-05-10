@@ -12,6 +12,7 @@ import com.pachangapp.repositories.CampoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -84,12 +85,15 @@ public class PartidoController {
     }
 
     @GetMapping("/mis-partidos")
-    public ResponseEntity<?> getMisPartidos(@RequestParam Long userId, @RequestParam(defaultValue = "0") int page) {
+    public ResponseEntity<?> getMisPartidos(
+            @RequestParam Long userId, 
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "4") int size) {
         User user = userRepository.findById(userId).orElse(null);
         if (user == null) {
             return ResponseEntity.badRequest().body("Usuario no encontrado");
         }
-        Page<Partido> partidos = partidoRepository.findProximosPartidosUsuario(userId, PageRequest.of(page, 4));
+        Page<Partido> partidos = partidoRepository.findProximosPartidosUsuario(userId, PageRequest.of(page, size, Sort.by("id").descending()));
         return ResponseEntity.ok(partidos);
     }
 

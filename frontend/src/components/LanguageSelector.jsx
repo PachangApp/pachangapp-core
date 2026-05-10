@@ -35,7 +35,7 @@ const LanguageSelector = () => {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-white border border-gray-100 hover:border-emerald-200 transition-all shadow-sm group"
+        className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-white border border-gray-100 hover:border-emerald-200 transition-all shadow-sm group cursor-pointer"
       >
         <span className={`fi ${currentLanguage.flagClass} rounded-sm shrink-0 shadow-sm`}></span>
         <span className="hidden md:inline text-[13px] font-black text-gray-700 uppercase tracking-tight">
@@ -56,7 +56,7 @@ const LanguageSelector = () => {
               <button
                 key={lng.code}
                 onClick={() => changeLanguage(lng.code)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 text-xs rounded-xl transition-all ${
+                className={`w-full flex items-center gap-3 px-3 py-2.5 text-xs rounded-xl transition-all cursor-pointer ${
                   currentLanguage.code === lng.code 
                     ? 'bg-emerald-50 text-emerald-700 font-black' 
                     : 'text-gray-600 hover:bg-gray-50 font-bold'

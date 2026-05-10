@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import logo from "../assets/logo_pachangapp.png";
 import LanguageSelector from "./LanguageSelector";
 import ThemeToggle from "./ThemeToggle";
+import { API_BASE_URL } from "../apiConfig";
 
 const Navbar = () => {
   const { t } = useTranslation();
@@ -14,6 +15,28 @@ const Navbar = () => {
   const [showLogoutModal, setShowLogoutModal] = React.useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const [isExploreOpen, setIsExploreOpen] = React.useState(false);
+  const [invitationCount, setInvitationCount] = React.useState(0);
+
+  const fetchInvitationCount = React.useCallback(async () => {
+    if (!user) return;
+    try {
+      const response = await fetch(`${API_BASE_URL}/invitaciones/count?userId=${user.id}`, {
+        headers: { "Authorization": `Bearer ${user.token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setInvitationCount(data.count);
+      }
+    } catch (err) {
+      console.error("Error fetching invitation count:", err);
+    }
+  }, [user]);
+
+  React.useEffect(() => {
+    fetchInvitationCount();
+    const interval = setInterval(fetchInvitationCount, 30000); // Polling cada 30s
+    return () => clearInterval(interval);
+  }, [fetchInvitationCount]);
 
   React.useEffect(() => {
     const syncUser = () => {
@@ -117,7 +140,7 @@ const Navbar = () => {
                     <div className="flex flex-col gap-1">
                       <button 
                         onClick={() => setIsExploreOpen(!isExploreOpen)}
-                        className={`px-4 py-3 rounded-xl text-sm font-bold flex items-center justify-between transition-colors hover:bg-gray-50 dark:hover:bg-slate-900`}
+                        className={`px-4 py-3 rounded-xl text-sm font-bold flex items-center justify-between transition-colors hover:bg-gray-50 dark:hover:bg-slate-900 cursor-pointer`}
                       >
                         <div className="flex items-center gap-3 text-gray-600 dark:text-gray-300">
                            <span className="text-xl opacity-70">{link.icon}</span>
@@ -153,16 +176,21 @@ const Navbar = () => {
                       </AnimatePresence>
                     </div>
                   ) : (
-                    <Link
-                      to={link.path}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className={`px-4 py-3 rounded-xl text-sm font-bold flex items-center gap-3 transition-colors ${
-                        isActive(link.path) ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-900 hover:text-emerald-600"
-                      }`}
-                    >
-                      <span className="text-xl opacity-70">{link.icon}</span>
-                      {link.name}
-                    </Link>
+                      <Link
+                        to={link.path}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className={`px-4 py-3 rounded-xl text-sm font-bold flex items-center gap-3 transition-colors relative ${
+                          isActive(link.path) ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-900 hover:text-emerald-600"
+                        }`}
+                      >
+                        <span className="text-xl opacity-70">{link.icon}</span>
+                        {link.name}
+                        {link.path === "/perfil" && invitationCount > 0 && (
+                          <span className="absolute left-7 top-2 w-5 h-5 bg-red-500 text-white text-[10px] flex items-center justify-center rounded-full border-2 border-white dark:border-slate-900 animate-pulse">
+                            {invitationCount}
+                          </span>
+                        )}
+                      </Link>
                   )}
                 </div>
               ))}
@@ -198,7 +226,7 @@ const Navbar = () => {
             {navLinks.map((link) => (
               link.isDropdown ? (
                 <div key={link.name} className="relative group">
-                  <button className="flex items-center gap-1 px-2 2xl:px-4 py-2 text-[10px] 2xl:text-sm font-bold text-gray-500 hover:text-emerald-600 transition-all rounded-xl hover:bg-gray-50 dark:hover:bg-slate-900 whitespace-nowrap">
+                  <button className="flex items-center gap-1 px-2 2xl:px-4 py-2 text-[10px] 2xl:text-sm font-bold text-gray-500 hover:text-emerald-600 transition-all rounded-xl hover:bg-gray-50 dark:hover:bg-slate-900 whitespace-nowrap cursor-pointer">
                     <span className="text-base 2xl:text-lg opacity-70">{link.icon}</span>
                     <span className="hidden xl:inline">{link.name}</span>
                     <svg className="w-3 h-3 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg>
@@ -223,18 +251,23 @@ const Navbar = () => {
                   </div>
                 </div>
               ) : (
-                <Link
-                  key={link.name}
-                  to={link.path}
-                  className={`px-2 2xl:px-4 py-2 rounded-xl text-[10px] 2xl:text-sm transition-all whitespace-nowrap flex items-center gap-1 2xl:gap-2 group ${
-                    isActive(link.path)
-                      ? "bg-gray-50 dark:bg-slate-800 text-emerald-600 shadow-sm font-black"
-                      : "text-gray-500 hover:text-emerald-600 font-bold hover:bg-gray-50 dark:hover:bg-slate-900"
-                  }`}
-                >
-                  <span className={`text-base 2xl:text-lg transition-transform group-hover:scale-110 ${isActive(link.path) ? "text-emerald-600" : "opacity-60"}`}>{link.icon}</span>
-                  <span className="hidden xl:inline">{link.name}</span>
-                </Link>
+                  <Link
+                    key={link.name}
+                    to={link.path}
+                    className={`px-2 2xl:px-4 py-2 rounded-xl text-[10px] 2xl:text-sm transition-all whitespace-nowrap flex items-center gap-1 2xl:gap-2 group relative ${
+                      isActive(link.path)
+                        ? "bg-gray-50 dark:bg-slate-800 text-emerald-600 shadow-sm font-black"
+                        : "text-gray-500 hover:text-emerald-600 font-bold hover:bg-gray-50 dark:hover:bg-slate-900"
+                    }`}
+                  >
+                    <span className={`text-base 2xl:text-lg transition-transform group-hover:scale-110 ${isActive(link.path) ? "text-emerald-600" : "opacity-60"}`}>{link.icon}</span>
+                    <span className="hidden xl:inline">{link.name}</span>
+                    {link.path === "/perfil" && invitationCount > 0 && (
+                      <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] flex items-center justify-center rounded-full border-2 border-white dark:border-slate-900 shadow-sm animate-bounce">
+                        {invitationCount}
+                      </span>
+                    )}
+                  </Link>
               )
             ))}
           </div>
