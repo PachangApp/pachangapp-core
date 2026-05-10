@@ -44,9 +44,10 @@ const ResetPassword = () => {
       return;
     }
 
-    if (password.length < 6) {
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+    if (!passwordRegex.test(password)) {
       setError(true);
-      setMessage("La contraseña debe tener al menos 6 caracteres.");
+      setMessage("La contraseña debe tener al menos 8 caracteres, una letra mayúscula y un número.");
       return;
     }
 

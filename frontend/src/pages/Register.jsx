@@ -68,6 +68,13 @@ const Register = () => {
       return;
     }
 
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+    if (!passwordRegex.test(formData.password)) {
+      setError(true);
+      setMessage("La contraseña debe tener al menos 8 caracteres, una letra mayúscula y un número.");
+      return;
+    }
+
     setLoading(true);
     try {
       const response = await fetch(`${API_BASE_URL}/users/register`, {

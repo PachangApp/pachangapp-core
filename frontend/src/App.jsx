@@ -15,6 +15,7 @@ import Conocenos from "./pages/Conocenos";
 import ChatBot from "./components/ChatBot";
 import MatchDetail from "./pages/MatchDetail";
 import Admin from "./pages/Admin";
+import VerifyEmail from "./pages/VerifyEmail";
 import BottomNav from "./components/home/BottomNav";
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
@@ -35,11 +36,11 @@ const AppContent = () => {
   const storedUser = localStorage.getItem("user");
   
   // No mostrar BottomNav en estas rutas
-  const hideNavPaths = ["/", "/login", "/register", "/forgot-password", "/reset-password"];
+  const hideNavPaths = ["/", "/login", "/register", "/forgot-password", "/reset-password", "/verify"];
   const shouldShowNav = !hideNavPaths.includes(location.pathname) && storedUser;
 
   // No mostrar PachanBot en login/register o hero antes de entrar
-  const shouldShowBot = storedUser && !["/login", "/register", "/", "/forgot-password", "/reset-password"].includes(location.pathname);
+  const shouldShowBot = storedUser && !["/login", "/register", "/", "/forgot-password", "/reset-password", "/verify"].includes(location.pathname);
 
   return (
     <>
@@ -50,6 +51,7 @@ const AppContent = () => {
         <Route path="/login" element={<Auth />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/verify" element={<VerifyEmail />} />
         <Route path="/inicio" element={<Inicio />} />
         <Route path="/perfil" element={<Perfil />} />
         <Route path="/explorar" element={<Explorar />} />

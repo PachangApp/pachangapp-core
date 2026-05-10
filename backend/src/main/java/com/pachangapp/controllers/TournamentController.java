@@ -37,7 +37,11 @@ public class TournamentController {
     private User getAuthenticatedUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null && auth.isAuthenticated() && !auth.getPrincipal().equals("anonymousUser")) {
-            return userRepository.findByUsername(auth.getName()).orElse(null);
+            Object principal = auth.getPrincipal();
+            if (principal instanceof com.pachangapp.security.services.UserDetailsImpl) {
+                com.pachangapp.security.services.UserDetailsImpl userDetails = (com.pachangapp.security.services.UserDetailsImpl) principal;
+                return userRepository.findById(userDetails.getId()).orElse(null);
+            }
         }
         return null;
     }
@@ -67,14 +71,18 @@ public class TournamentController {
     // ── Teams ─────────────────────────────────────
 
     @PostMapping("/{id}/join")
-    public ResponseEntity<Team> joinTournament(@PathVariable Long id, @RequestBody Map<String, Object> body) {
-        User user = getAuthenticatedUser();
-        if (user == null) {
-            user = userRepository.findById(1L).orElse(null);
+    public ResponseEntity<?> joinTournament(@PathVariable Long id, @RequestBody Map<String, Object> body) {
+        try {
+            User user = getAuthenticatedUser();
+            if (user == null) {
+                user = userRepository.findById(1L).orElse(null);
+            }
+            String teamName = (String) body.get("name");
+            List<User> players = List.of();
+            return ResponseEntity.ok(tournamentService.joinTournament(id, teamName, user, players));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-        String teamName = (String) body.get("name");
-        List<User> players = List.of();
-        return ResponseEntity.ok(tournamentService.joinTournament(id, teamName, user, players));
     }
 
     @GetMapping("/{id}/teams")
