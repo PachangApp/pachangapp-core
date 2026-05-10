@@ -25,13 +25,13 @@ const ThemeToggle = () => {
     <div
       onClick={toggleTheme}
       className={`
-        relative w-22 h-10 flex items-center px-1 rounded-full cursor-pointer transition-all duration-500
+        relative md:w-22 w-10 h-10 flex items-center justify-center md:justify-start px-1 rounded-full cursor-pointer transition-all duration-500
         ${isDark ? "bg-slate-900 border-slate-800 shadow-[inset_0_2px_8px_rgba(0,0,0,0.5)]" : "bg-gray-100 border-gray-200 shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)]"}
         border
       `}
     >
-      {/* Texto de fondo */}
-      <div className="absolute inset-0 flex items-center justify-between px-2.5 pointer-events-none select-none">
+      {/* Texto de fondo - Solo en escritorio */}
+      <div className="absolute inset-0 hidden md:flex items-center justify-between px-2.5 pointer-events-none select-none">
         <div 
           className={`text-[8px] font-black leading-tight transition-all duration-500 w-12 text-center
           ${isDark ? "opacity-0 -translate-x-2" : "opacity-100 translate-x-0 text-gray-400"}`}
@@ -49,7 +49,7 @@ const ThemeToggle = () => {
       {/* Círculo deslizante */}
       <motion.div
         animate={{
-          x: isDark ? 0 : 48,
+          x: typeof window !== 'undefined' && window.innerWidth < 768 ? 0 : (isDark ? 0 : 48),
         }}
         transition={{
           type: "spring",

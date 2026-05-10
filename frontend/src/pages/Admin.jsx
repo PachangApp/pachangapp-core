@@ -62,6 +62,7 @@ const Admin = () => {
   }, [token]);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     fetchData();
   }, [fetchData]);
 
@@ -121,7 +122,7 @@ const Admin = () => {
 
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pb-32 md:pb-0">
       <Navbar />
       <main className="max-w-6xl mx-auto px-4 py-12">
         <h1 className="text-3xl font-black text-gray-900 mb-8">{t('admin.panel_title')}</h1>
@@ -130,19 +131,19 @@ const Admin = () => {
         <div className="flex gap-4 mb-8 bg-gray-200 p-1 rounded-2xl w-fit">
           <button 
             onClick={() => setActiveTab("campos")}
-            className={`px-6 py-2 rounded-xl font-bold transition-all ${activeTab === 'campos' ? 'bg-white text-emerald-600 shadow-sm' : 'text-gray-500'}`}
+            className={`cursor-pointer px-6 py-2 rounded-xl font-bold transition-all ${activeTab === 'campos' ? 'bg-white text-emerald-600 shadow-sm' : 'text-gray-500'}`}
           >
             {t('admin.tabs.manage_fields')}
           </button>
           <button 
             onClick={() => setActiveTab("usuarios")}
-            className={`px-6 py-2 rounded-xl font-bold transition-all ${activeTab === 'usuarios' ? 'bg-white text-emerald-600 shadow-sm' : 'text-gray-500'}`}
+            className={`cursor-pointer px-6 py-2 rounded-xl font-bold transition-all ${activeTab === 'usuarios' ? 'bg-white text-emerald-600 shadow-sm' : 'text-gray-500'}`}
           >
             {t('admin.tabs.manage_users')}
           </button>
           <button 
             onClick={() => setActiveTab("archivos")}
-            className={`px-6 py-2 rounded-xl font-bold transition-all ${activeTab === 'archivos' ? 'bg-white text-emerald-600 shadow-sm' : 'text-gray-500'}`}
+            className={`cursor-pointer px-6 py-2 rounded-xl font-bold transition-all ${activeTab === 'archivos' ? 'bg-white text-emerald-600 shadow-sm' : 'text-gray-500'}`}
           >
             {t('admin.tabs.manage_files')}
           </button>
@@ -196,7 +197,7 @@ const Admin = () => {
                   value={newCampo.parentCampoId}
                   onChange={val => setNewCampo({...newCampo, parentCampoId: val})}
                 />
-                <button type="submit" className="w-full py-3 bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-100">{t('admin.fields.create_field')}</button>
+                <button type="submit" className="cursor-pointer w-full py-3 bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-100">{t('admin.fields.create_field')}</button>
               </form>
             </div>
 
@@ -216,7 +217,7 @@ const Admin = () => {
                   </div>
                   <button 
                     onClick={() => handleDeleteCampo(campo.id)}
-                    className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-all"
+                    className="cursor-pointer p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-all"
                   >
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                   </button>
@@ -249,9 +250,9 @@ const Admin = () => {
                     </td>
                     <td className="px-6 py-4 text-right">
                       {u.role === 'USER' ? (
-                        <button onClick={() => handleChangeRole(u.id, 'ADMIN')} className="text-emerald-600 font-bold text-sm hover:underline">{t('admin.users.make_admin')}</button>
+                        <button onClick={() => handleChangeRole(u.id, 'ADMIN')} className="cursor-pointer text-emerald-600 font-bold text-sm hover:underline">{t('admin.users.make_admin')}</button>
                       ) : (
-                        <button onClick={() => handleChangeRole(u.id, 'USER')} className="text-gray-400 font-bold text-sm hover:underline">{t('admin.users.make_user')}</button>
+                        <button onClick={() => handleChangeRole(u.id, 'USER')} className="cursor-pointer text-gray-400 font-bold text-sm hover:underline">{t('admin.users.make_user')}</button>
                       )}
                     </td>
                   </tr>
@@ -272,7 +273,7 @@ const Admin = () => {
                 <p className="text-gray-500 text-sm mb-6">{t('admin.files.export_desc')}</p>
                 <button 
                   onClick={() => handleDownload("/admin/reservas/export", "reservas.csv")}
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-gray-900 text-white font-bold rounded-2xl hover:bg-black transition-all shadow-lg shadow-gray-200"
+                  className="inline-flex items-center gap-2 px-6 py-3 cursor-pointer bg-emerald-600 text-white font-bold rounded-2xl hover:bg-emerald-800 transition-all shadow-lg shadow-gray-200"
                 >
                   {t('admin.files.download_csv')}
                 </button>
@@ -286,7 +287,7 @@ const Admin = () => {
                 <p className="text-emerald-50/80 text-sm mb-6">{t('admin.files.report_desc')}</p>
                 <button 
                   onClick={() => handleDownload("/admin/reservas/report", "informe_pachangapp.pdf")}
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-white text-emerald-700 font-bold rounded-2xl hover:bg-emerald-50 transition-all shadow-xl shadow-emerald-900/20"
+                  className="cursor-pointer inline-flex items-center gap-2 px-6 py-3 bg-white text-emerald-700 font-bold rounded-2xl hover:bg-emerald-50 transition-all shadow-xl shadow-emerald-900/20"
                 >
                   {t('admin.files.generate_pdf')}
                 </button>
@@ -341,7 +342,7 @@ const Admin = () => {
                       setImportLoading(false);
                     }
                   }}
-                  className="w-full py-4 bg-blue-600 text-white font-bold rounded-2xl shadow-lg shadow-blue-100 disabled:opacity-50 disabled:shadow-none transition-all"
+                  className="cursor-pointer w-full py-4 bg-blue-600 text-white font-bold rounded-2xl shadow-lg shadow-blue-100 disabled:opacity-50 disabled:shadow-none transition-all"
                 >
                   {importLoading ? t('admin.files.importing') : t('admin.files.upload_import')}
                 </button>

@@ -12,6 +12,8 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [user, setUser] = React.useState(JSON.parse(localStorage.getItem("user") || "null"));
   const [showLogoutModal, setShowLogoutModal] = React.useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+  const [isExploreOpen, setIsExploreOpen] = React.useState(false);
 
   React.useEffect(() => {
     const syncUser = () => {
@@ -33,89 +35,183 @@ const Navbar = () => {
   };
 
   const navLinks = [
-    { name: t("navbar.home"), path: "/inicio" },
-    { name: t("navbar.profile"), path: "/perfil" },
+    { 
+      name: t("navbar.home"), 
+      path: "/inicio", 
+      icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg> 
+    },
+    { 
+      name: t("navbar.profile"), 
+      path: "/perfil", 
+      icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg> 
+    },
     { 
       name: t("navbar.explore"), 
       isDropdown: true,
+      icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>,
       children: [
         { name: t("navbar.search_matches"), path: "/buscar-partidos" },
         { name: t("navbar.search_players"), path: "/buscar-jugadores" }
       ]
     },
-    { name: t("navbar.create_match"), path: "/crear-partido" },
-    { name: t("navbar.torneos"), path: "/torneos" },
-    { name: t("navbar.about_us"), path: "/conocenos" },
-    ...(user?.role === 'ROLE_ADMIN' ? [{ name: t("navbar.admin"), path: "/admin" }] : []),
+    { 
+      name: t("navbar.create_match"), 
+      path: "/crear-partido", 
+      icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"/></svg> 
+    },
+    { 
+      name: t("navbar.torneos"), 
+      path: "/torneos", 
+      icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg> 
+    },
+    { 
+      name: t("navbar.about_us"), 
+      path: "/conocenos", 
+      icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> 
+    },
+    ...(user?.role === 'ROLE_ADMIN' ? [{ 
+      name: t("navbar.admin"), 
+      path: "/admin",
+      icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+    }] : []),
   ];
 
   const isActive = (path) => location.pathname === path;
 
   return (
     <>
-    <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 pt-[env(safe-area-inset-top)] transition-all">
-      {/* 1. MÓVIL: Header Corto y Limpio (Replicado de Inicio) */}
-      <div className="md:hidden flex justify-between items-center px-4 py-1">
-        <Link to="/inicio" className="flex items-center">
-          <img src={logo} alt="PachangApp Logo" className="w-[80px] h-[80px] object-contain" />
+    {/* EL FONDO DE LA NAVBAR SE CAMBIA EN ESTA LÍNEA (className de <nav>) */}
+    <nav className="sticky top-0 z-50 bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800 pt-[env(safe-area-inset-top)] transition-all">
+      {/* 1. MÓVIL Y TABLET: Header con Menú Hamburguesa */}
+      <div className="xl:hidden flex justify-between items-center px-4 py-2 relative z-50">
+        <Link to="/inicio" className="flex items-center gap-2">
+          <img src={logo} alt="PachangApp Logo" className="w-[60px] h-[60px] object-contain" />
+          <span className="text-emerald-600 font-black text-xl tracking-tighter leading-none">PachangApp</span>
         </Link>
         <div className="flex items-center gap-3">
             <ThemeToggle />
             <LanguageSelector />
-            {user?.role === 'ROLE_ADMIN' && (
-              <Link to="/admin" className="p-2 bg-red-50 text-red-600 rounded-full hover:bg-red-100 transition-all">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-              </Link>
-            )}
-            <Link to="/perfil" className="w-9 h-9 rounded-full overflow-hidden border-2 border-emerald-100 shadow-sm">
-                <img 
-                    src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.username || 'U'}&background=10b981&color=fff`} 
-                    className="w-full h-full object-cover"
-                    alt="Perfil"
-                />
-            </Link>
-            
             <button
-                onClick={handleLogout}
-                className="w-9 h-9 flex items-center justify-center rounded-full bg-red-50 text-red-600 transition-all active:scale-95"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="p-2 text-gray-500 hover:text-emerald-600 transition-all rounded-lg bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-800"
             >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d={isMobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
+              </svg>
             </button>
         </div>
       </div>
 
-      {/* 2. DESKTOP: Navegación Completa */}
-      <div className="hidden md:block max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16 items-center">
-          {/* Logo */}
-          <Link to="/inicio" className="flex items-center gap-3">
-            <img src={logo} alt="Logo" className="w-[72px] h-[72px] object-contain transition-transform hover:scale-110" />
-            <span className="text-emerald-600 font-black text-xl tracking-tight">
-              PachangApp
-            </span>
-          </Link>
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="xl:hidden absolute w-full left-0 top-[100%] bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-900 overflow-hidden shadow-2xl z-40"
+          >
+            <div className="flex flex-col p-4 gap-2">
+              {navLinks.map((link) => (
+                <div key={link.name}>
+                  {link.isDropdown ? (
+                    <div className="flex flex-col gap-1">
+                      <button 
+                        onClick={() => setIsExploreOpen(!isExploreOpen)}
+                        className={`px-4 py-3 rounded-xl text-sm font-bold flex items-center justify-between transition-colors hover:bg-gray-50 dark:hover:bg-slate-900`}
+                      >
+                        <div className="flex items-center gap-3 text-gray-600 dark:text-gray-300">
+                           <span className="text-xl opacity-70">{link.icon}</span>
+                           {link.name}
+                        </div>
+                        <svg className={`w-4 h-4 transition-transform ${isExploreOpen ? 'rotate-180' : ''} text-gray-400`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                      </button>
+                      <AnimatePresence>
+                        {isExploreOpen && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="overflow-hidden"
+                          >
+                            <div className="flex flex-col gap-1 pt-1 pb-2">
+                              {link.children.map(child => (
+                                <Link
+                                  key={child.name}
+                                  to={child.path}
+                                  onClick={() => setIsMobileMenuOpen(false)}
+                                  className={`ml-12 mr-4 py-2 px-3 rounded-xl text-sm font-bold flex items-center gap-3 transition-colors ${
+                                    isActive(child.path) ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-900 hover:text-emerald-600"
+                                  }`}
+                                >
+                                  <span className="text-lg opacity-70">{child.path === "/buscar-partidos" ? "⚽" : "👥"}</span>
+                                  {child.name}
+                                </Link>
+                              ))}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  ) : (
+                    <Link
+                      to={link.path}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={`px-4 py-3 rounded-xl text-sm font-bold flex items-center gap-3 transition-colors ${
+                        isActive(link.path) ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-900 hover:text-emerald-600"
+                      }`}
+                    >
+                      <span className="text-xl opacity-70">{link.icon}</span>
+                      {link.name}
+                    </Link>
+                  )}
+                </div>
+              ))}
+              
+              <div className="border-t border-gray-100 dark:border-slate-800 my-2 pt-4 flex flex-col gap-2">
+                <button onClick={() => { setIsMobileMenuOpen(false); handleLogout(); }} className="w-full text-left px-4 py-3 rounded-xl text-sm font-bold flex items-center gap-3 text-red-600 hover:bg-red-50 dark:hover:bg-slate-900/50 transition-colors">
+                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                   {t("navbar.logout")}
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-          {/* Links para Desktop */}
-          <div className="flex items-center gap-6">
+      {/* 2. DESKTOP: Navegación Completa (xl en adelante) */}
+      <div className="hidden xl:block w-full px-4 xl:px-8">
+        <div className="flex justify-between h-20 items-center relative">
+          
+          {/* BLOQUE IZQUIERDA: Logo */}
+          <div className="flex-shrink-0 w-[250px]">
+            <Link to="/inicio" className="flex items-center gap-2 group">
+              <img src={logo} alt="Logo" className="w-[120px] h-[120px] xl:w-[120px] xl:h-[120px] object-contain transition-transform group-hover:scale-110" />
+              <div className="flex flex-col">
+                <span className="text-emerald-600 font-black text-lg xl:text-xl tracking-tighter leading-none">PachangApp</span>
+              </div>
+            </Link>
+          </div>
+
+          {/* BLOQUE CENTRO: Links con Iconos sin fondo (Centrado absoluto) */}
+          <div className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center gap-2">
             {navLinks.map((link) => (
               link.isDropdown ? (
                 <div key={link.name} className="relative group">
-                  <button className="flex items-center gap-1 text-sm font-medium text-gray-500 hover:text-emerald-600 transition-colors">
+                  <button className="flex items-center gap-1 xl:gap-2 px-2 xl:px-4 py-2 text-xs xl:text-sm font-bold text-gray-500 hover:text-emerald-600 transition-all rounded-xl hover:bg-gray-50 dark:hover:bg-slate-900">
+                    <span className="text-base xl:text-lg opacity-70">{link.icon}</span>
                     {link.name}
-                    <svg className="w-4 h-4 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                    <svg className="w-3 h-3 xl:w-4 xl:h-4 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg>
                   </button>
                   <div className="absolute top-full left-1/2 -translate-x-1/2 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                    <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-2 min-w-[200px] flex flex-col gap-1">
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-gray-100 dark:border-slate-800 p-2 min-w-[200px] flex flex-col gap-1">
                       {link.children.map(child => (
                         <Link
                           key={child.name}
                           to={child.path}
-                          className={`px-4 py-3 rounded-xl text-sm font-medium transition-colors flex items-center gap-3 ${
+                          className={`px-4 py-3 rounded-xl text-sm font-bold transition-colors flex items-center gap-3 ${
                             isActive(child.path) 
-                              ? "bg-emerald-50 text-emerald-700 font-bold" 
-                              : "text-gray-600 hover:bg-gray-50 hover:text-emerald-600"
+                              ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400" 
+                              : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-emerald-600"
                           }`}
                         >
                           {child.path === "/buscar-partidos" ? "⚽" : "👥"}
@@ -129,50 +225,55 @@ const Navbar = () => {
                 <Link
                   key={link.name}
                   to={link.path}
-                  className={`${
+                  className={`px-2 xl:px-4 py-2 rounded-xl text-xs xl:text-sm transition-all whitespace-nowrap flex items-center gap-1 xl:gap-2 group ${
                     isActive(link.path)
-                      ? "text-emerald-600 font-bold"
-                      : "text-gray-500 hover:text-emerald-600 font-medium"
-                  } text-sm transition-colors relative group whitespace-nowrap`}
+                      ? "bg-gray-50 dark:bg-slate-800 text-emerald-600 shadow-sm font-black"
+                      : "text-gray-500 hover:text-emerald-600 font-bold hover:bg-gray-50 dark:hover:bg-slate-900"
+                  }`}
                 >
+                  <span className={`text-base xl:text-lg transition-transform group-hover:scale-110 ${isActive(link.path) ? "text-emerald-600" : "opacity-60"}`}>{link.icon}</span>
                   {link.name}
-                  {isActive(link.path) && (
-                    <motion.div 
-                      layoutId="nav-active"
-                      className="absolute -bottom-5.5 left-0 right-0 h-0.5 bg-emerald-600"
-                    />
-                  )}
                 </Link>
               )
             ))}
           </div>
 
-          <div className="flex items-center gap-3">
-              <ThemeToggle />
-              <LanguageSelector />
+          {/* BLOQUE DERECHA: Herramientas y Usuario */}
+          <div className="flex items-center justify-end gap-4 w-[250px]">
+              <div className="flex items-center gap-2 pr-4 border-r border-gray-100 dark:border-slate-800">
+                <ThemeToggle />
+                <LanguageSelector />
+              </div>
               
-              <Link 
-                to="/perfil" 
-                className={`w-9 h-9 rounded-full flex items-center justify-center overflow-hidden border-2 transition-all ${
-                  isActive("/perfil") ? "border-emerald-500 bg-emerald-50" : "border-gray-100 bg-gray-50 hover:border-emerald-200"
-                }`}
-              >
-                <img 
-                    src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.username || 'U'}&background=10b981&color=fff`} 
-                    alt="Profile" 
-                    className="w-full h-full object-cover"
-                />
-              </Link>
+              <div className="flex items-center gap-1 xl:gap-3">
+                <Link 
+                  to="/perfil" 
+                  className={`group relative flex items-center gap-3 pl-1 pr-1 xl:pr-3 py-1 rounded-full border-2 transition-all ${
+                    isActive("/perfil") ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10" : "border-transparent hover:bg-gray-50 dark:hover:bg-slate-900"
+                  }`}
+                >
+                  <div className="w-8 h-8 xl:w-9 xl:h-9 rounded-full overflow-hidden border-2 border-white dark:border-slate-800 shadow-sm">
+                    <img 
+                        src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.username || 'U'}&background=10b981&color=fff`} 
+                        alt="Profile" 
+                        className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <span className={`text-sm font-bold hidden xl:block ${isActive("/perfil") ? "text-emerald-700 dark:text-emerald-400" : "text-gray-700 dark:text-gray-300"}`}>
+                    {user?.username}
+                  </span>
+                </Link>
 
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-gray-500 hover:text-red-600 hover:bg-red-50 transition-all font-bold text-sm"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-                <span>{t("navbar.logout")}</span>
-              </button>
+                <button
+                  onClick={handleLogout}
+                  className="w-8 h-8 xl:w-10 xl:h-10 flex items-center justify-center rounded-xl text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all group"
+                  title={t("navbar.logout")}
+                >
+                  <svg className="w-5 h-5 xl:w-6 xl:h-6 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                </button>
+              </div>
           </div>
         </div>
       </div>

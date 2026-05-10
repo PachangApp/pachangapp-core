@@ -1,6 +1,9 @@
 @import "tailwindcss";
 @plugin "daisyui";
 
+/* Forzar a Tailwind v4 a usar la clase .dark en lugar de la preferencia de Windows/Sistema */
+@custom-variant dark (&:where(.dark, [data-theme="dark"], [data-theme="dark"] *));
+
 @theme {
   --color-white: var(--color-white);
   --color-gray-50: var(--color-gray-50);

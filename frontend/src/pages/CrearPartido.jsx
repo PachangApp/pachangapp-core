@@ -69,7 +69,7 @@ const SubPistaGrid = ({ campoId, fecha, onSelect, timeSlots, submitting }) => {
             className={`py-4 rounded-2xl font-black text-sm transition-all relative border-2 ${
               isBooked 
                 ? "bg-red-50 text-red-200 border-red-50 cursor-not-allowed" 
-                : "bg-gray-50 text-gray-700 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 border-gray-100 shadow-sm"
+                : "cursor-pointer bg-gray-50 text-gray-700 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 border-gray-100 shadow-sm"
             }`}
           >
             {hora}
@@ -209,9 +209,30 @@ const CrearPartido = () => {
       setMessage({ text: "El nombre en la tarjeta debe tener al menos 3 caracteres", type: "error" });
       return;
     }
+
+    if (/\d/.test(paymentData.cardName)) {
+      setMessage({ text: "El nombre en la tarjeta no puede contener números", type: "error" });
+      return;
+    }
     
-    if (paymentData.cardNumber.replace(/\s/g, '').length < 16) {
-      setMessage({ text: "El número de tarjeta no es válido", type: "error" });
+    if (paymentData.cardNumber.replace(/\s/g, "").length < 16) {
+      setMessage({ text: "El número de tarjeta debe tener 16 cifras", type: "error" });
+      return;
+    }
+
+    // Validación de Fecha (MM/AA) - Mes 01-12 y 2 dígitos de año
+    const expiryRegex = /^(0[1-9]|1[0-2])\/\d{2}$/;
+    if (!expiryRegex.test(paymentData.expiry)) {
+      setMessage({
+        text: "La fecha de caducidad debe ser MM/AA (ej: 03/25) con un mes válido (01-12)",
+        type: "error",
+      });
+      return;
+    }
+
+    // Validación de CVV (3 cifras)
+    if (paymentData.cvc.length !== 3) {
+      setMessage({ text: "El CVV debe tener exactamente 3 cifras numéricas", type: "error" });
       return;
     }
 
@@ -418,7 +439,7 @@ const CrearPartido = () => {
               <div className="mt-12">
                 <button 
                   onClick={handleNextStep}
-                  className="w-full py-6 bg-gray-900 hover:bg-black text-white font-black rounded-3xl transition-all shadow-xl hover:scale-[1.02] active:scale-[0.98] text-xl tracking-tight"
+                  className="w-full py-6 cursor-pointer bg-emerald-600 hover:bg-emerald-800 hover:text-white text-white font-black rounded-3xl transition-all shadow-xl hover:scale-[1.02] active:scale-[0.98] text-xl tracking-tight"
                 >
                   {t("create_match.continue_to_selection")}
                 </button>
@@ -462,7 +483,7 @@ const CrearPartido = () => {
             </div>
           )}
 
-          {/* PASO 4: PASARELA DE PAGO FICTICIA */}
+          {/* PASO 4: PASARELA DE PAGO */}
           {step === 4 && selectedCampo && (
             <div className="max-w-4xl mx-auto">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -533,8 +554,23 @@ const CrearPartido = () => {
                                         className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-4 focus:ring-emerald-500/10 font-black text-gray-700 transition-all font-mono placeholder:text-gray-300"
                                     />
                                     <div className="absolute right-4 top-1/2 -translate-y-1/2 flex gap-2">
-                                        <div className="w-8 h-5 bg-gray-200 rounded"></div>
-                                        <div className="w-8 h-5 bg-gray-300 rounded"></div>
+                                        {paymentData.cardNumber.startsWith('4') ? (
+                                            <div className="flex items-center bg-white px-2 py-1 rounded shadow-sm border border-gray-100">
+                                                <span className="text-[10px] font-black text-blue-700 italic">VISA</span>
+                                            </div>
+                                        ) : paymentData.cardNumber.startsWith('5') ? (
+                                            <div className="flex items-center bg-white px-2 py-1 rounded shadow-sm border border-gray-100">
+                                                <div className="flex -space-x-1.5">
+                                                    <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                                                    <div className="w-3 h-3 rounded-full bg-amber-500 opacity-80"></div>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <div className="w-8 h-5 bg-gray-200 rounded"></div>
+                                                <div className="w-8 h-5 bg-gray-300 rounded"></div>
+                                            </>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -546,6 +582,7 @@ const CrearPartido = () => {
                                         required
                                         placeholder="MM/AA"
                                         maxLength="5"
+                                        pattern="(0[1-9]|1[0-2])\/\d{2}"
                                         value={paymentData.expiry}
                                         onChange={(e) => {
                                             let val = e.target.value.replace(/\D/g, '');
@@ -562,6 +599,7 @@ const CrearPartido = () => {
                                         required
                                         placeholder="123"
                                         maxLength="3"
+                                        pattern="\d{3}"
                                         value={paymentData.cvc}
                                         onChange={(e) => setPaymentData({...paymentData, cvc: e.target.value.replace(/\D/g, '')})}
                                         className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-4 focus:ring-emerald-500/10 font-black text-gray-700 transition-all placeholder:text-gray-300"
@@ -721,7 +759,7 @@ const CrearPartido = () => {
                                 className={`group py-6 rounded-3xl font-black text-lg transition-all relative overflow-hidden border-2 ${
                                   isBooked 
                                     ? "bg-red-50 text-red-300 border-red-50 cursor-not-allowed opacity-60" 
-                                    : "bg-gray-50 text-gray-700 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 border-gray-100 hover:shadow-xl hover:shadow-emerald-200"
+                                    : "cursor-pointer bg-gray-50 text-gray-700 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 border-gray-100 hover:shadow-xl hover:shadow-emerald-200"
                                 }`}
                               >
                                 {isThisSubmitting ? (
