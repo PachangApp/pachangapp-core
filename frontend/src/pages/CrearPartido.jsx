@@ -100,6 +100,13 @@ const CrearPartido = () => {
     deporte: "Fútbol 7",
     fecha: new Date().toISOString().split('T')[0]
   });
+
+  // Efecto para ajustar el máximo de jugadores según el deporte (Smart Defaults)
+  useEffect(() => {
+    if (filters.deporte === "Fútbol 11") setMaxJugadores(22);
+    else if (filters.deporte === "Fútbol 7") setMaxJugadores(14);
+    else if (filters.deporte === "Fútbol Sala") setMaxJugadores(10);
+  }, [filters.deporte]);
   
   const [selectedCampo, setSelectedCampo] = useState(null);
   const [selectedSubPista, setSelectedSubPista] = useState(null);
@@ -651,27 +658,53 @@ const CrearPartido = () => {
                   </div>
                 </div>
 
-                <div className="bg-emerald-900 text-white p-8 rounded-[2.5rem] shadow-xl relative overflow-hidden group">
-                  <div className="absolute -right-4 -bottom-4 w-32 h-32 bg-emerald-800 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-700"></div>
-                  <h4 className="text-sm font-black uppercase tracking-widest text-emerald-300 mb-4 relative z-10">{t("create_match.settings")}</h4>
-                  <div className="relative z-10">
-                    <label className="block text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-3">{t("create_match.max_players")}: {maxJugadores}</label>
-                    <input 
-                      type="range" 
-                      min="2" 
-                      max="22" 
-                      value={maxJugadores}
-                      onChange={(e) => setMaxJugadores(e.target.value)}
-                      className="w-full accent-emerald-500 mb-4"
-                    />
-                    <p className="text-[10px] text-emerald-200/60 leading-relaxed font-medium">{t("create_match.max_players_desc")}</p>
-                  </div>
-                </div>
+
               </div>
 
-              {/* Grid de Horarios */}
+              {/* Grid de Horarios y Configuración */}
               <div className={filters.deporte === 'Fútbol 7' ? 'lg:col-span-3' : 'lg:col-span-2'}>
+                
+                {/* CONFIGURACIÓN DE JUGADORES (UNIFICADA) */}
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="mb-10 p-8 bg-white rounded-[2.5rem] shadow-xl shadow-emerald-600/5 border border-emerald-100 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden group"
+                >
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-full -mr-16 -mt-16 opacity-50 group-hover:scale-110 transition-transform duration-700"></div>
+                  <div className="relative z-10">
+                    <h4 className="text-gray-900 font-black text-xl mb-1 flex items-center gap-2">
+                      <span className="text-emerald-600">
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                      </span>
+                      {t("create_match.max_players")}
+                    </h4>
+                    <p className="text-gray-500 text-xs font-medium max-w-sm">{t("create_match.max_players_desc")}</p>
+                  </div>
+
+                  <div className="flex items-center gap-6 bg-gray-50 p-3 rounded-3xl border border-gray-100 relative z-10">
+                    <motion.button 
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => setMaxJugadores(prev => Math.max(2, prev - 1))}
+                      className="w-14 h-14 flex items-center justify-center bg-white text-gray-400 hover:text-emerald-600 rounded-2xl shadow-sm hover:shadow-md transition-all font-black text-2xl border border-gray-100"
+                    >-</motion.button>
+                    
+                    <div className="flex flex-col items-center min-w-[4rem]">
+                      <span className="text-4xl font-black text-gray-900 leading-none">{maxJugadores}</span>
+                      <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mt-1">{t("create_match.players_label") || "JUGADORES"}</span>
+                    </div>
+
+                    <motion.button 
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => setMaxJugadores(prev => Math.min(30, prev + 1))}
+                      className="w-14 h-14 flex items-center justify-center bg-emerald-600 text-white rounded-2xl shadow-lg shadow-emerald-200 hover:bg-emerald-700 transition-all font-black text-2xl"
+                    >+</motion.button>
+                  </div>
+                </motion.div>
+
                 {filters.deporte === 'Fútbol 7' ? (
+
                     /* VISTA DUAL PARA FÚTBOL 7 */
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         {selectedCampo.subPistas?.map((subPista, index) => (

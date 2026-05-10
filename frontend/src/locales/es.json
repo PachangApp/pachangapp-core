@@ -61,6 +61,7 @@
     "settings": "Configuración",
     "max_players": "Máx Jugadores",
     "max_players_desc": "Este será el número máximo de personas que podrán apuntarse a tu partido público.",
+    "players_label": "Jugadores",
     "checking_availability": "Consultando disponibilidad en tiempo real...",
     "available_schedules": "Horarios Disponibles",
     "occupied": "Ocupado",
@@ -117,6 +118,13 @@
     "view_result": "Ver Resultado",
     "enter_match": "Entrar al Partido",
     "join_match": "Unirse al partido"
+  },
+  "field_card": {
+    "available": "Disponible",
+    "booked": "Reservado",
+    "book_now": "Reservar Hora",
+    "price_label": "Precio",
+    "no_image": "Sin imagen"
   },
   "sports": {
     "futbol_7": "Fútbol 7",

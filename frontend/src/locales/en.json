@@ -61,6 +61,7 @@
     "settings": "Settings",
     "max_players": "Max Players",
     "max_players_desc": "This will be the maximum number of people who can join your public match.",
+    "players_label": "Players",
     "checking_availability": "Checking availability in real time...",
     "available_schedules": "Available Schedules",
     "occupied": "Occupied",
@@ -116,6 +117,13 @@
     "view_result": "View Result",
     "enter_match": "Enter Match",
     "join_match": "Join match"
+  },
+  "field_card": {
+    "available": "Available",
+    "booked": "Booked",
+    "book_now": "Book Now",
+    "price_label": "Price",
+    "no_image": "No image"
   },
   "sports": {
     "futbol_7": "Football 7",
