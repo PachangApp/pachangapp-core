@@ -30,9 +30,9 @@ const ChatBot = () => {
 
   // ---- URL de n8n ----
   // Local (pruebas):     http://localhost:5678/webhook-test/pachanbot-chat
-  // Producción (activo): http://<IP_AWS>:30678/webhook/pachanbot-chat
+  // Producción (activo): http://34.197.214.53:30678/webhook/pachanbot-chat
   // https://n8n.pachangapp.es/webhook-test/pachanbot-chat
-  const N8N_WEBHOOK_URL = "https://n8n.pachangapp.es/webhook-test/pachanbot-chat";
+  const N8N_WEBHOOK_URL = "https://n8n.pachangapp.es/webhook/pachanbot-chat"
 
   const processBotResponse = async (actionOrText) => {
     // Definimos si es una acción de botón o texto libre
