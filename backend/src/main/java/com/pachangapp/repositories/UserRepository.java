@@ -16,5 +16,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     
     Optional<User> findByResetPasswordToken(String token);
 
-    java.util.List<User> findByPosicion1OrPosicion2OrPosicion3(String p1, String p2, String p3);
+    @org.springframework.data.jpa.repository.Query("SELECT u FROM User u WHERE u.enabled = true AND u.id != :currentUserId AND (u.posicion1 IS NOT NULL OR u.posicion2 IS NOT NULL OR u.posicion3 IS NOT NULL) AND (u.posicion1 != '' OR u.posicion2 != '' OR u.posicion3 != '')")
+    java.util.List<User> buscarTodosConPosicion(@org.springframework.data.repository.query.Param("currentUserId") Long currentUserId);
+
+    @org.springframework.data.jpa.repository.Query("SELECT u FROM User u WHERE u.enabled = true AND u.id != :currentUserId AND (u.posicion1 = :posicion OR u.posicion2 = :posicion OR u.posicion3 = :posicion)")
+    java.util.List<User> buscarPorPosicion(@org.springframework.data.repository.query.Param("posicion") String posicion, @org.springframework.data.repository.query.Param("currentUserId") Long currentUserId);
 }

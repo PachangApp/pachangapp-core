@@ -89,7 +89,8 @@
       "fullback": "Lateral",
       "midfielder": "Mediocentro",
       "winger": "Extremo",
-      "striker": "Delantero Centro"
+      "striker": "Delantero Centro",
+      "versatile": "Polivalente"
     },
     "theme_preferences": "Preferencia de Tema",
     "theme_light": "Modo Normal",

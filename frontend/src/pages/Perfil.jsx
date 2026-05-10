@@ -170,6 +170,14 @@ const Perfil = () => {
   };
 
   const handleSavePositions = async () => {
+    // Validate duplicates
+    const selected = [positions.p1, positions.p2, positions.p3].filter(p => p !== "");
+    const uniqueSelected = new Set(selected);
+    if (selected.length !== uniqueSelected.size) {
+      alert("No puedes seleccionar la misma posición varias veces. Por favor, elige posiciones diferentes.");
+      return;
+    }
+
     setSaving(true);
     const { token } = JSON.parse(localStorage.getItem("user") || "{}");
     try {
@@ -230,7 +238,8 @@ const Perfil = () => {
     t('profile.positions.fullback'),
     t('profile.positions.midfielder'),
     t('profile.positions.winger'),
-    t('profile.positions.striker')
+    t('profile.positions.striker'),
+    t('profile.positions.versatile')
   ];
 
   return (

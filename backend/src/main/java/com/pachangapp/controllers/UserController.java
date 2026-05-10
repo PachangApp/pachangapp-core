@@ -40,12 +40,18 @@ public class UserController {
     }
 
     @GetMapping("/buscar")
-    public org.springframework.http.ResponseEntity<List<User>> buscarJugadores(@RequestParam(required = false) String posicion) {
+    public org.springframework.http.ResponseEntity<List<User>> buscarJugadores(
+            @RequestParam(required = false) String posicion,
+            @org.springframework.security.core.annotation.AuthenticationPrincipal com.pachangapp.security.services.UserDetailsImpl currentUser) {
+        
+        Long currentUserId = (currentUser != null) ? currentUser.getId() : -1L;
+
         if (posicion != null && !posicion.isEmpty() && !posicion.equals("all")) {
-            List<User> usuarios = userRepository.findByPosicion1OrPosicion2OrPosicion3(posicion, posicion, posicion);
+            List<User> usuarios = userRepository.buscarPorPosicion(posicion, currentUserId);
             return org.springframework.http.ResponseEntity.ok(usuarios);
         }
-        return org.springframework.http.ResponseEntity.ok(userRepository.findAll());
+        
+        return org.springframework.http.ResponseEntity.ok(userRepository.buscarTodosConPosicion(currentUserId));
     }
 
 

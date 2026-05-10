@@ -6,7 +6,7 @@ import Dropdown from "../components/Dropdown";
 import Navbar from "../components/Navbar";
 
 // Componente para mostrar la información del jugador en cuadrícula
-const PlayerCard = ({ player, onClick }) => {
+const PlayerCard = ({ player, onShowProfile, onInvite }) => {
   const { t } = useTranslation();
   
   // Posición principal a mostrar en la tarjeta
@@ -15,8 +15,7 @@ const PlayerCard = ({ player, onClick }) => {
   return (
     <motion.div
       whileHover={{ y: -5 }}
-      onClick={() => onClick(player)}
-      className="bg-white rounded-3xl p-5 border border-gray-100 shadow-sm hover:shadow-xl hover:border-emerald-200 transition-all cursor-pointer relative overflow-hidden group"
+      className="bg-white rounded-3xl p-5 border border-gray-100 shadow-sm hover:shadow-xl hover:border-emerald-200 transition-all relative overflow-hidden group"
     >
       <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-emerald-400 to-teal-500 transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
       
@@ -42,16 +41,19 @@ const PlayerCard = ({ player, onClick }) => {
           </p>
         </div>
 
-        <div className="w-full flex justify-around border-t border-gray-50 pt-4 mt-2">
-          <div className="text-center">
-            <span className="block text-gray-400 text-[10px] font-bold uppercase">{t("search_players.ranking")}</span>
-            <span className="block font-black text-gray-700">{player.ranking}</span>
-          </div>
-          <div className="w-px bg-gray-100"></div>
-          <div className="text-center">
-            <span className="block text-gray-400 text-[10px] font-bold uppercase">{t("search_players.matches")}</span>
-            <span className="block font-black text-gray-700">{player.partidosJugados}</span>
-          </div>
+        <div className="w-full flex flex-row gap-2 border-t border-gray-50 pt-4 mt-2">
+          <button 
+            onClick={() => onShowProfile(player)}
+            className="flex-1 py-2 bg-emerald-600 text-white rounded-xl font-bold text-[11px] hover:bg-emerald-700 transition-colors whitespace-nowrap"
+          >
+            Ver perfil
+          </button>
+          <button 
+            onClick={() => onInvite(player)}
+            className="flex-1 py-2 bg-white border-2 border-emerald-600 text-emerald-600 rounded-xl font-bold text-[11px] hover:bg-emerald-50 transition-colors whitespace-nowrap"
+          >
+            Invitar
+          </button>
         </div>
       </div>
     </motion.div>
@@ -82,18 +84,16 @@ const PlayerProfileModal = ({ player, isOpen, onClose }) => {
           className="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm relative z-10 overflow-hidden"
         >
           {/* Cabecera decorativa */}
-          <div className="h-24 bg-gradient-to-r from-emerald-500 to-teal-600 relative">
+          <div className="h-28 bg-gradient-to-br from-emerald-500 to-teal-600 relative">
             <button 
               onClick={onClose}
-              className="absolute top-4 right-4 w-8 h-8 bg-white/20 hover:bg-white/40 rounded-full flex items-center justify-center text-white backdrop-blur-md transition-colors"
+              className="absolute top-4 right-4 w-8 h-8 bg-white/20 hover:bg-white/40 rounded-full flex items-center justify-center text-white backdrop-blur-md transition-colors z-30"
             >
               ✕
             </button>
-          </div>
-
-          <div className="px-6 pb-6 pt-0 relative">
+            
             {/* Foto flotante */}
-            <div className="absolute -top-12 left-6 w-24 h-24 rounded-2xl overflow-hidden border-4 border-white shadow-lg bg-white">
+            <div className="absolute -bottom-10 left-6 w-20 h-20 rounded-2xl overflow-hidden border-4 border-white shadow-xl bg-white z-20">
               <img 
                 src={player.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=" + player.username} 
                 alt={player.username} 
@@ -101,16 +101,26 @@ const PlayerProfileModal = ({ player, isOpen, onClose }) => {
               />
             </div>
 
-            <div className="mt-14 space-y-6">
-              <div>
-                <h2 className="text-2xl font-black text-gray-900">@{player.username}</h2>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-sm font-bold text-gray-500 uppercase tracking-wider">{t("search_players.ranking")} {player.ranking}</span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                  <span className="text-sm font-bold text-emerald-600">Lv.{Math.floor(player.ranking / 100)}</span>
-                </div>
-              </div>
+            {/* Username en la parte del gradiente */}
+            <div className="absolute bottom-4 left-[120px] right-6">
+              <h2 className="text-xl font-black text-white drop-shadow-sm truncate">
+                @{player.username}
+              </h2>
+            </div>
+          </div>
 
+          <div className="px-6 pb-6 pt-2 relative">
+            {/* Ranking y Nivel en la parte blanca */}
+            <div className="ml-[96px] flex items-center gap-2 mb-6">
+              <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider bg-gray-100 px-2 py-1 rounded-lg">
+                {t("search_players.ranking")} {player.ranking}
+              </span>
+              <span className="text-[10px] font-black text-emerald-600 uppercase tracking-wider bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-100">
+                Lv.{Math.floor(player.ranking / 100)}
+              </span>
+            </div>
+
+            <div className="space-y-6">
               {/* Estadísticas Reales */}
               <div className="grid grid-cols-3 gap-3">
                 <div className="bg-gray-50 rounded-2xl p-3 text-center border border-gray-100">
@@ -148,29 +158,116 @@ const PlayerProfileModal = ({ player, isOpen, onClose }) => {
   );
 };
 
+// Componente Modal para Invitar a Partido
+const InviteModal = ({ player, isOpen, onClose, userMatches }) => {
+  if (!isOpen || !player) return null;
+
+  return (
+    <AnimatePresence>
+      <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm"
+          onClick={onClose}
+        ></motion.div>
+        
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.9, y: 20 }}
+          className="bg-white rounded-[2rem] shadow-2xl w-full max-w-md relative z-10 overflow-hidden flex flex-col max-h-[80vh]"
+        >
+          {/* Cabecera con estilo PachangApp */}
+          <div className="p-8 bg-gradient-to-br from-emerald-500 to-teal-600 relative">
+            <button 
+              onClick={onClose} 
+              className="absolute top-4 right-4 w-8 h-8 bg-white/20 hover:bg-white/40 rounded-full flex items-center justify-center text-white backdrop-blur-md transition-colors"
+            >
+              ✕
+            </button>
+            <h2 className="text-2xl font-black text-white drop-shadow-sm">
+              Invitar a @{player.username}
+            </h2>
+            <p className="text-emerald-50 font-medium mt-1 opacity-90">
+              Selecciona el partido al que quieres invitarle
+            </p>
+          </div>
+
+          <div className="p-6 overflow-y-auto grow">
+            {userMatches && userMatches.length > 0 ? (
+              <div className="space-y-4">
+                {userMatches.map(match => (
+                  <div key={match.id} className="flex items-center justify-between p-4 border border-gray-100 rounded-2xl hover:border-emerald-200 transition-colors">
+                    <div>
+                      <h4 className="font-bold text-gray-900">{match.reserva?.campo?.nombre || "Partido"}</h4>
+                      <p className="text-sm text-gray-500">{match.reserva?.fecha} • {match.reserva?.horaInicio?.substring(0,5)}</p>
+                    </div>
+                    <button 
+                      onClick={() => {
+                        alert("¡Invitación enviada a " + player.username + "!");
+                        onClose();
+                      }}
+                      className="px-4 py-2 bg-emerald-100 text-emerald-700 hover:bg-emerald-200 rounded-xl font-bold text-sm transition-colors"
+                    >
+                      Invitar
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-10">
+                <span className="text-4xl mb-3 block">🏟️</span>
+                <p className="text-gray-500 font-medium">No tienes partidos abiertos creados en este momento.</p>
+                <a href="/crear-partido" className="inline-block mt-4 text-emerald-600 font-bold hover:underline">Crear un partido nuevo</a>
+              </div>
+            )}
+          </div>
+        </motion.div>
+      </div>
+    </AnimatePresence>
+  );
+};
+
 const BuscarJugadores = () => {
   const { t } = useTranslation();
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedPosition, setSelectedPosition] = useState("all");
   const [selectedPlayer, setSelectedPlayer] = useState(null);
+  const [invitePlayer, setInvitePlayer] = useState(null);
+  const [userMatches, setUserMatches] = useState([]);
 
   const fetchPlayers = async (position) => {
     setLoading(true);
     try {
+      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+      const token = storedUser.token;
+
+      if (!token) {
+        console.error("No token found in localStorage");
+        setLoading(false);
+        return;
+      }
+
       const url = position === "all" 
         ? "/api/users/buscar" 
         : `/api/users/buscar?posicion=${encodeURIComponent(position)}`;
         
       const response = await fetch(url, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         }
       });
       
       if (response.ok) {
         const data = await response.json();
         setPlayers(data);
+      } else {
+        console.error("Failed to fetch players:", response.status, response.statusText);
+        const errorText = await response.text();
+        console.error("Error response body:", errorText);
       }
     } catch (error) {
       console.error("Error fetching players:", error);
@@ -179,8 +276,25 @@ const BuscarJugadores = () => {
     }
   };
 
+  const fetchUserMatches = async () => {
+    try {
+      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+      if (!storedUser.id || !storedUser.token) return;
+      const resp = await fetch(`/api/partidos/mis-partidos?userId=${storedUser.id}&page=0`, {
+        headers: { 'Authorization': `Bearer ${storedUser.token}` }
+      });
+      if (resp.ok) {
+        const data = await resp.json();
+        setUserMatches(data.content || []);
+      }
+    } catch (err) {
+      console.error("Error fetching user matches:", err);
+    }
+  };
+
   useEffect(() => {
     fetchPlayers(selectedPosition);
+    fetchUserMatches();
   }, [selectedPosition]);
 
   const positionOptions = [
@@ -190,7 +304,8 @@ const BuscarJugadores = () => {
     { value: t("profile.positions.fullback"), label: t("profile.positions.fullback") },
     { value: t("profile.positions.midfielder"), label: t("profile.positions.midfielder") },
     { value: t("profile.positions.winger"), label: t("profile.positions.winger") },
-    { value: t("profile.positions.striker"), label: t("profile.positions.striker") }
+    { value: t("profile.positions.striker"), label: t("profile.positions.striker") },
+    { value: t("profile.positions.versatile"), label: t("profile.positions.versatile") }
   ];
 
   return (
@@ -234,7 +349,8 @@ const BuscarJugadores = () => {
               <PlayerCard 
                 key={player.id} 
                 player={player} 
-                onClick={setSelectedPlayer} 
+                onShowProfile={setSelectedPlayer} 
+                onInvite={setInvitePlayer}
               />
             ))}
           </motion.div>
@@ -251,6 +367,14 @@ const BuscarJugadores = () => {
           isOpen={!!selectedPlayer} 
           player={selectedPlayer} 
           onClose={() => setSelectedPlayer(null)} 
+        />
+
+        {/* Modal de Invitación */}
+        <InviteModal
+          isOpen={!!invitePlayer}
+          player={invitePlayer}
+          onClose={() => setInvitePlayer(null)}
+          userMatches={userMatches}
         />
 
       </div>
