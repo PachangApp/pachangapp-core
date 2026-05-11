@@ -3,6 +3,7 @@
   "appName": "PachangApp",
   "webDir": "dist",
   "server": {
+    "url": "https://www.pachangapp.es",
     "cleartext": true,
     "allowMixedContent": true
   },

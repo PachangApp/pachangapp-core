@@ -2,7 +2,7 @@ name: CI/CD PachangApp
 
 on:
   push:
-    branches: [ "feature-despliegue", "testing", "developer" ]
+    branches: [ "main" ]
   workflow_dispatch:
 
 jobs:
