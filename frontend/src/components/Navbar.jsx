@@ -226,7 +226,7 @@ const Navbar = () => {
             {navLinks.map((link) => (
               link.isDropdown ? (
                 <div key={link.name} className="relative group">
-                  <button className="flex items-center gap-1 px-2 2xl:px-4 py-2 text-[10px] 2xl:text-sm font-bold text-gray-500 hover:text-emerald-600 transition-all rounded-xl hover:bg-gray-50 dark:hover:bg-slate-900 whitespace-nowrap cursor-pointer">
+                  <button className="flex items-center gap-1 px-2 2xl:px-4 py-2 text-sm font-bold text-gray-500 hover:text-emerald-600 transition-all rounded-xl hover:bg-gray-50 dark:hover:bg-slate-900 whitespace-nowrap cursor-pointer">
                     <span className="text-base 2xl:text-lg opacity-70">{link.icon}</span>
                     <span className="hidden xl:inline">{link.name}</span>
                     <svg className="w-3 h-3 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg>
@@ -254,7 +254,7 @@ const Navbar = () => {
                   <Link
                     key={link.name}
                     to={link.path}
-                    className={`px-2 2xl:px-4 py-2 rounded-xl text-[10px] 2xl:text-sm transition-all whitespace-nowrap flex items-center gap-1 2xl:gap-2 group relative ${
+                    className={`px-2 2xl:px-4 py-2 rounded-xl text-sm transition-all whitespace-nowrap flex items-center gap-1 2xl:gap-2 group relative ${
                       isActive(link.path)
                         ? "bg-gray-50 dark:bg-slate-800 text-emerald-600 shadow-sm font-black"
                         : "text-gray-500 hover:text-emerald-600 font-bold hover:bg-gray-50 dark:hover:bg-slate-900"
