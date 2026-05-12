@@ -22,15 +22,19 @@ public class UploadController {
     @PostMapping("/upload")
     public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file, HttpServletRequest request) {
         try {
-            String filename = fileService.saveFile(file);
+            String result = fileService.saveFile(file);
             
-            // Construir la URL completa (ej: http://localhost:8091/uploads/uuid_archivo.jpg)
-            String baseUrl = ServletUriComponentsBuilder.fromRequestUri(request)
-                    .replacePath(null)
-                    .build()
-                    .toUriString();
-                    
-            String fileUrl = baseUrl + "/uploads/" + filename;
+            String fileUrl;
+            if (result.startsWith("http")) {
+                fileUrl = result;
+            } else {
+                // Construir la URL completa para almacenamiento local
+                String baseUrl = ServletUriComponentsBuilder.fromRequestUri(request)
+                        .replacePath(null)
+                        .build()
+                        .toUriString();
+                fileUrl = baseUrl + "/uploads/" + result;
+            }
 
             return ResponseEntity.ok(fileUrl);
             

@@ -72,6 +72,7 @@ public class AdminController {
             campo.setPrecioPorHora(campoDetails.getPrecioPorHora());
             campo.setParentCampoId(campoDetails.getParentCampoId());
             campo.setDisponible(campoDetails.isDisponible());
+            campo.setImagenUrl(campoDetails.getImagenUrl()); // Añadido soporte para imagen
             return ResponseEntity.ok(campoRepository.save(campo));
         }).orElse(ResponseEntity.notFound().build());
     }

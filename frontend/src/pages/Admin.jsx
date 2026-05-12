@@ -16,10 +16,40 @@ const Admin = () => {
     deporte: "Fútbol 7",
     precioPorHora: 25.0,
     disponible: true,
-    parentCampoId: ""
+    parentCampoId: "",
+    imagenUrl: ""
   });
   const [importFile, setImportFile] = useState(null);
   const [importLoading, setImportLoading] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploadingImage(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const resp = await fetch(`${API_BASE_URL}/upload`, {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token}` },
+        body: formData
+      });
+      
+      if (resp.ok) {
+        const url = await resp.text();
+        setNewCampo(prev => ({ ...prev, imagenUrl: url }));
+      } else {
+        alert(t('admin.fields.upload_error') || "Error al subir imagen");
+      }
+    } catch (error) {
+      console.error("Error uploading field image:", error);
+    } finally {
+      setUploadingImage(false);
+    }
+  };
 
   const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
   const token = storedUser.token;
@@ -82,7 +112,7 @@ const Admin = () => {
       });
       if (resp.ok) {
         alert(t('admin.fields.field_created'));
-        setNewCampo({ nombre: "", zona: "Granada Centro", deporte: "Fútbol 7", precioPorHora: 25.0, disponible: true, parentCampoId: "" });
+        setNewCampo({ nombre: "", zona: "Granada Centro", deporte: "Fútbol 7", precioPorHora: 25.0, disponible: true, parentCampoId: "", imagenUrl: "" });
         fetchData();
       }
     } catch {
@@ -164,6 +194,25 @@ const Admin = () => {
                     onChange={e => setNewCampo({...newCampo, nombre: e.target.value})}
                   />
                 </div>
+
+                {/* Selector de Imagen */}
+                <div>
+                  <label className="block text-xs font-bold text-gray-400 uppercase mb-1">{t('admin.fields.image') || "Imagen de la pista"}</label>
+                  <div className="flex items-center gap-3">
+                    <label className="flex-1 cursor-pointer bg-gray-50 border-2 border-dashed border-gray-200 hover:border-emerald-400 p-3 rounded-xl text-center transition-all">
+                      <span className="text-xs font-bold text-gray-500">
+                        {uploadingImage ? "Subiendo..." : (newCampo.imagenUrl ? "✓ Imagen lista" : "Hacer clic para subir")}
+                      </span>
+                      <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
+                    </label>
+                    {newCampo.imagenUrl && (
+                      <div className="w-12 h-12 rounded-lg overflow-hidden border border-gray-100">
+                        <img src={newCampo.imagenUrl} alt="preview" className="w-full h-full object-cover" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <Dropdown
                     label={t('admin.fields.sport')}
@@ -197,7 +246,13 @@ const Admin = () => {
                   value={newCampo.parentCampoId}
                   onChange={val => setNewCampo({...newCampo, parentCampoId: val})}
                 />
-                <button type="submit" className="cursor-pointer w-full py-3 bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-100">{t('admin.fields.create_field')}</button>
+                <button 
+                  type="submit" 
+                  disabled={uploadingImage}
+                  className="cursor-pointer w-full py-3 bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-100 disabled:opacity-50"
+                >
+                  {t('admin.fields.create_field')}
+                </button>
               </form>
             </div>
 

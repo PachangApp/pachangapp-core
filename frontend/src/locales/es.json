@@ -148,6 +148,7 @@
     "fields": {
       "new_field": "Nuevo Campo",
       "name": "Nombre",
+      "image": "Imagen de la pista",
       "sport": "Deporte",
       "price_per_hour": "Precio/h",
       "parent_field": "Campo Padre (Opcional)",
@@ -156,6 +157,7 @@
       "child_of": "Hijo de ID: {{id}}",
       "delete_confirm": "¿Seguro que quieres borrar este campo? Borrarás también su disponibilidad.",
       "field_created": "Campo creado con éxito",
+      "upload_error": "Error al subir la imagen",
       "create_error": "Error al crear campo",
       "delete_error": "Error al borrar"
     },
