@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { AnimatePresence, motion } from "framer-motion";
 import Navbar from "../components/Navbar";
 import { API_BASE_URL } from "../apiConfig";
 import Dropdown from "../components/Dropdown";
@@ -17,13 +18,16 @@ const Admin = () => {
     precioPorHora: 25.0,
     disponible: true,
     parentCampoId: "",
-    imagenUrl: ""
+    imagenUrl: "",
+    locationUrl: ""
   });
   const [importFile, setImportFile] = useState(null);
   const [importLoading, setImportLoading] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingCampo, setEditingCampo] = useState(null);
 
-  const handleImageUpload = async (e) => {
+  const handleImageUpload = async (e, isEdit = false) => {
     const file = e.target.files[0];
     if (!file) return;
 
@@ -40,7 +44,11 @@ const Admin = () => {
       
       if (resp.ok) {
         const url = await resp.text();
-        setNewCampo(prev => ({ ...prev, imagenUrl: url }));
+        if (isEdit) {
+          setEditingCampo(prev => ({ ...prev, imagenUrl: url }));
+        } else {
+          setNewCampo(prev => ({ ...prev, imagenUrl: url }));
+        }
       } else {
         alert(t('admin.fields.upload_error') || "Error al subir imagen");
       }
@@ -112,11 +120,35 @@ const Admin = () => {
       });
       if (resp.ok) {
         alert(t('admin.fields.field_created'));
-        setNewCampo({ nombre: "", zona: "Granada Centro", deporte: "Fútbol 7", precioPorHora: 25.0, disponible: true, parentCampoId: "", imagenUrl: "" });
+        setNewCampo({ nombre: "", zona: "Granada Centro", deporte: "Fútbol 7", precioPorHora: 25.0, disponible: true, parentCampoId: "", imagenUrl: "", locationUrl: "" });
         fetchData();
       }
     } catch {
       alert(t('admin.fields.create_error'));
+    }
+  };
+
+  const handleUpdateCampo = async (e) => {
+    e.preventDefault();
+    try {
+      const resp = await fetch(`${API_BASE_URL}/admin/campos/${editingCampo.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          ...editingCampo,
+          parentCampoId: editingCampo.parentCampoId === "" ? null : parseInt(editingCampo.parentCampoId)
+        })
+      });
+      if (resp.ok) {
+        alert(t('admin.fields.field_updated') || "Campo actualizado");
+        setShowEditModal(false);
+        fetchData();
+      }
+    } catch {
+      alert(t('admin.fields.update_error') || "Error al actualizar");
     }
   };
 
@@ -200,17 +232,29 @@ const Admin = () => {
                   <label className="block text-xs font-bold text-gray-400 uppercase mb-1">{t('admin.fields.image') || "Imagen de la pista"}</label>
                   <div className="flex items-center gap-3">
                     <label className="flex-1 cursor-pointer bg-gray-50 border-2 border-dashed border-gray-200 hover:border-emerald-400 p-3 rounded-xl text-center transition-all">
-                      <span className="text-xs font-bold text-gray-500">
+                      <span className="text-sm font-bold text-gray-500">
                         {uploadingImage ? "Subiendo..." : (newCampo.imagenUrl ? "✓ Imagen lista" : "Hacer clic para subir")}
                       </span>
-                      <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
+                      <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, false)} />
                     </label>
                     {newCampo.imagenUrl && (
-                      <div className="w-12 h-12 rounded-lg overflow-hidden border border-gray-100">
+                      <div className="w-12 h-12 rounded-lg overflow-hidden border border-gray-100 shadow-sm">
                         <img src={newCampo.imagenUrl} alt="preview" className="w-full h-full object-cover" />
                       </div>
                     )}
                   </div>
+                </div>
+
+                {/* Campo de Ubicación */}
+                <div>
+                  <label className="block text-xs font-bold text-gray-400 uppercase mb-1">{t('admin.fields.location') || "Enlace de Ubicación (Google Maps)"}</label>
+                  <input 
+                    type="text"
+                    placeholder="https://maps.app.goo.gl/..."
+                    className="w-full p-3 bg-gray-50 text-gray-900 font-bold rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+                    value={newCampo.locationUrl}
+                    onChange={e => setNewCampo({...newCampo, locationUrl: e.target.value})}
+                  />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -259,23 +303,43 @@ const Admin = () => {
 
             <div className="lg:col-span-2 space-y-4">
               {campos.map(campo => (
-                <div key={campo.id} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex justify-between items-center">
-                  <div>
-                    <h3 className="font-bold text-gray-900">{campo.nombre}</h3>
-                    <div className="flex gap-2 mt-1">
-                      <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-full font-bold text-gray-500 uppercase">{campo.deporte}</span>
-                      <span className="text-xs bg-emerald-100 px-2 py-0.5 rounded-full font-bold text-emerald-600 tracking-tight">{campo.precioPorHora}€/h</span>
-                      {campo.parentCampoId && (
-                        <span className="text-xs bg-blue-100 px-2 py-0.5 rounded-full font-bold text-blue-600">{t('admin.fields.child_of', { id: campo.parentCampoId })}</span>
-                      )}
+                <div key={campo.id} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex justify-between items-center group/item hover:border-emerald-200 transition-colors">
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 rounded-2xl overflow-hidden bg-gray-50 border border-gray-100">
+                        {campo.imagenUrl ? (
+                            <img src={campo.imagenUrl} className="w-full h-full object-cover" alt={campo.nombre} />
+                        ) : (
+                            <div className="w-full h-full flex items-center justify-center text-gray-200 uppercase font-black text-xl">{campo.nombre.charAt(0)}</div>
+                        )}
+                    </div>
+                    <div>
+                        <h3 className="font-bold text-gray-900">{campo.nombre}</h3>
+                        <div className="flex gap-2 mt-1">
+                        <span className="text-[10px] bg-gray-100 px-2 py-0.5 rounded-full font-bold text-gray-500 uppercase tracking-tight">{campo.deporte}</span>
+                        <span className="text-[10px] bg-emerald-100 px-2 py-0.5 rounded-full font-bold text-emerald-600 tracking-tight">{campo.precioPorHora}€/h</span>
+                        {campo.parentCampoId && (
+                            <span className="text-[10px] bg-blue-100 px-2 py-0.5 rounded-full font-bold text-blue-600 uppercase tracking-tighter">Hijo de ID: {campo.parentCampoId}</span>
+                        )}
+                        </div>
                     </div>
                   </div>
-                  <button 
-                    onClick={() => handleDeleteCampo(campo.id)}
-                    className="cursor-pointer p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-all"
-                  >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                  </button>
+                  <div className="flex gap-2">
+                    <button 
+                        onClick={() => {
+                            setEditingCampo({...campo, parentCampoId: campo.parentCampoId || ""});
+                            setShowEditModal(true);
+                        }}
+                        className="cursor-pointer p-2 text-blue-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all"
+                    >
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                    </button>
+                    <button 
+                        onClick={() => handleDeleteCampo(campo.id)}
+                        className="cursor-pointer p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-all"
+                    >
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -406,6 +470,107 @@ const Admin = () => {
           </div>
         )}
       </main>
+
+      {/* Modal de Edición */}
+      <AnimatePresence>
+        {showEditModal && editingCampo && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 backdrop-blur-md bg-black/40">
+                <motion.div 
+                    initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                    animate={{ scale: 1, opacity: 1, y: 0 }}
+                    exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                    className="bg-white rounded-4xl p-8 max-w-xl w-full shadow-2xl relative overflow-hidden"
+                >
+                    <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-2xl font-black text-gray-900">Editar <span className="text-emerald-600">{editingCampo.nombre}</span></h2>
+                        <button onClick={() => setShowEditModal(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                            <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                    </div>
+
+                    <form onSubmit={handleUpdateCampo} className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Nombre de la pista</label>
+                                    <input 
+                                        type="text" required
+                                        className="w-full p-3 bg-gray-50 text-gray-900 font-bold rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"
+                                        value={editingCampo.nombre}
+                                        onChange={e => setEditingCampo({...editingCampo, nombre: e.target.value})}
+                                    />
+                                </div>
+                                <Dropdown
+                                    label="Deporte"
+                                    options={[
+                                        { label: "Fútbol 11", value: "Fútbol 11" },
+                                        { label: "Fútbol 7", value: "Fútbol 7" },
+                                        { label: "Fútbol Sala", value: "Fútbol Sala" },
+                                        { label: "Pádel", value: "Pádel" }
+                                    ]}
+                                    value={editingCampo.deporte}
+                                    onChange={val => setEditingCampo({...editingCampo, deporte: val})}
+                                />
+                                <Counter
+                                    label="Precio por Hora (€)"
+                                    value={editingCampo.precioPorHora}
+                                    onChange={val => setEditingCampo({...editingCampo, precioPorHora: val})}
+                                    step={1}
+                                    min={0}
+                                />
+                            </div>
+
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Imagen (S3)</label>
+                                    <div className="flex flex-col gap-3">
+                                        <div className="w-full h-32 rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 relative group">
+                                            {editingCampo.imagenUrl ? (
+                                                <img src={editingCampo.imagenUrl} className="w-full h-full object-cover" alt="preview" />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center text-gray-300 text-xs font-bold uppercase tracking-widest">Sin imagen</div>
+                                            )}
+                                            <label className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
+                                                <span className="text-white text-xs font-bold uppercase tracking-widest">{uploadingImage ? 'Subiendo...' : 'Cambiar Foto'}</span>
+                                                <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, true)} />
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Enlace Google Maps</label>
+                                    <input 
+                                        type="text"
+                                        placeholder="https://maps.app.goo.gl/..."
+                                        className="w-full p-3 bg-gray-50 text-gray-900 font-bold rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 text-xs"
+                                        value={editingCampo.locationUrl || ""}
+                                        onChange={e => setEditingCampo({...editingCampo, locationUrl: e.target.value})}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex gap-4 pt-4 border-t border-gray-50">
+                            <button 
+                                type="button"
+                                onClick={() => setShowEditModal(false)}
+                                className="flex-1 py-4 font-black text-gray-400 hover:text-gray-600 transition-colors uppercase tracking-widest text-xs"
+                            >
+                                Cancelar
+                            </button>
+                            <button 
+                                type="submit"
+                                disabled={uploadingImage}
+                                className="flex-1 bg-emerald-600 text-white font-black py-4 rounded-2xl shadow-xl shadow-emerald-100 uppercase tracking-widest text-xs disabled:opacity-50"
+                            >
+                                Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+                </motion.div>
+            </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

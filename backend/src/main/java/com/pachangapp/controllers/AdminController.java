@@ -72,7 +72,8 @@ public class AdminController {
             campo.setPrecioPorHora(campoDetails.getPrecioPorHora());
             campo.setParentCampoId(campoDetails.getParentCampoId());
             campo.setDisponible(campoDetails.isDisponible());
-            campo.setImagenUrl(campoDetails.getImagenUrl()); // Añadido soporte para imagen
+            campo.setImagenUrl(campoDetails.getImagenUrl());
+            campo.setLocationUrl(campoDetails.getLocationUrl()); // Añadido soporte para ubicación
             return ResponseEntity.ok(campoRepository.save(campo));
         }).orElse(ResponseEntity.notFound().build());
     }
@@ -139,6 +140,13 @@ public class AdminController {
                     c.setImagenUrl(nextLine[4].trim());
                 } else {
                     c.setImagenUrl("");
+                }
+
+                // Ubicación (opcional) - Columna 6 (index 6)
+                if (nextLine.length > 6 && nextLine[6] != null) {
+                    c.setLocationUrl(nextLine[6].trim());
+                } else {
+                    c.setLocationUrl("");
                 }
 
                 // Lógica de Padre (opcional)

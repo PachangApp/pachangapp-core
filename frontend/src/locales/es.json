@@ -124,6 +124,7 @@
     "match_at": "Partido en {{campo}}",
     "view_result": "Ver Resultado",
     "enter_match": "Entrar al Partido",
+    "view_map": "Ver mapa",
     "join_match": "Unirse al partido"
   },
   "field_card": {
@@ -157,8 +158,11 @@
       "child_of": "Hijo de ID: {{id}}",
       "delete_confirm": "¿Seguro que quieres borrar este campo? Borrarás también su disponibilidad.",
       "field_created": "Campo creado con éxito",
+      "field_updated": "Campo actualizado con éxito",
       "upload_error": "Error al subir la imagen",
-      "create_error": "Error al crear campo",
+      "location": "Ubicación (Google Maps)",
+      "create_error": "Error al crear el campo",
+      "update_error": "Error al actualizar el campo",
       "delete_error": "Error al borrar"
     },
     "users": {
@@ -396,6 +400,7 @@
   },
   "match_detail": {
     "finalize_success": "¡Partido finalizado y estadísticas repartidas! 🏆",
-    "finalize_error": "Error al finalizar el partido"
+    "finalize_error": "Error al finalizar el partido",
+    "view_location": "Ver Ubicación"
   }
 }

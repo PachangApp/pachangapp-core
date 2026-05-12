@@ -145,9 +145,20 @@ const MatchDetail = () => {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.3 }}
-                className="text-3xl font-black text-gray-900 mb-2"
+                className="text-3xl font-black text-gray-900 mb-2 flex items-center flex-wrap"
             >
-                Partido en <span className="text-emerald-600">{match.reserva.campo.nombre}</span>
+                Partido en <span className="text-emerald-600 ml-2">{match.reserva.campo.nombre}</span>
+                {match.reserva.campo.locationUrl && (
+                    <a 
+                      href={match.reserva.campo.locationUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="ml-4 inline-flex items-center gap-1.5 text-[10px] font-black text-blue-500 hover:text-blue-700 transition-colors uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full border border-blue-100"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                      {t('match_detail.view_location') || "Ver Ubicación"}
+                    </a>
+                )}
             </motion.h1>
             <motion.p 
                 initial={{ opacity: 0, x: -20 }}
