@@ -39,14 +39,11 @@ public class FileService {
             throw new IllegalArgumentException("Solo se permiten imágenes (JPG, PNG).");
         }
 
-        // Si tenemos configurado S3, lo usamos para persistencia real
-        if (awsAccessKey != null && !awsAccessKey.isEmpty()) {
-            try {
-                return s3Service.uploadFile(file);
-            } catch (Exception e) {
-                System.err.println("Error subiendo a S3: " + e.getMessage());
-                // Fallback al almacenamiento local si falla S3 (opcional)
-            }
+        // Intentar subir a S3 primero (Usa LabRole automáticamente si no hay llaves)
+        try {
+            return s3Service.uploadFile(file);
+        } catch (Exception e) {
+            System.err.println("S3 no disponible o no configurado. Usando almacenamiento local: " + e.getMessage());
         }
 
         // Almacenamiento local (Efímero en contenedores)
