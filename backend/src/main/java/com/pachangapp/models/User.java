@@ -19,6 +19,8 @@ public class User {
     private int victorias = 0;
     private int derrotas = 0;
     private int ranking = 1000;
+    private int goles = 0;
+    private int asistencias = 0;
     private String posicion1;
     private String posicion2;
     private String posicion3;
@@ -178,5 +180,21 @@ public class User {
 
     public void setResetPasswordTokenExpiry(java.time.LocalDateTime resetPasswordTokenExpiry) {
         this.resetPasswordTokenExpiry = resetPasswordTokenExpiry;
+    }
+
+    public int getGoles() {
+        return goles;
+    }
+
+    public void setGoles(int goles) {
+        this.goles = goles;
+    }
+
+    public int getAsistencias() {
+        return asistencias;
+    }
+
+    public void setAsistencias(int asistencias) {
+        this.asistencias = asistencias;
     }
 }

@@ -18,6 +18,7 @@ const Home = () => {
   const [user, setUser] = useState(null);
   const [trendingMatches, setTrendingMatches] = useState([]);
   const [userMatches, setUserMatches] = useState([]);
+  const [rankingData, setRankingData] = useState([]);
   const [loading, setLoading] = useState(true);
 
 
@@ -58,6 +59,26 @@ const Home = () => {
             setTrendingMatches(sorted.slice(0, 4));
           }
         } catch(e) { console.warn("Error fetching trending matches", e) }
+        
+        // Fetch Ranking Data
+        try {
+          const rRes = await fetch(`${API_BASE_URL}/users/ranking`);
+          if (rRes.ok) {
+            const rData = await rRes.json();
+            setRankingData(rData);
+          }
+        } catch(e) { console.warn("Error fetching ranking data", e) }
+
+        // Refresh current user data to get real stats
+        if (userId) {
+          try {
+            const uDetailRes = await fetch(`${API_BASE_URL}/users/${userId}`);
+            if (uDetailRes.ok) {
+              const uDetail = await uDetailRes.json();
+              setUser(prev => ({ ...prev, ...uDetail }));
+            }
+          } catch(e) { console.warn("Error refreshing user stats", e) }
+        }
 
       } catch (err) {
         console.error("Error cargando Home:", err);
@@ -229,13 +250,13 @@ const Home = () => {
                         className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-6"
                       >
                           <motion.div variants={fadeInUp} className="h-full">
-                              <StatCard label={t('home.stats_matches')} value={userMatches.length} icon={<span className="text-2xl">⚽</span>} color="emerald" />
+                              <StatCard label={t('home.stats_matches')} value={user?.partidosJugados || 0} icon={<span className="text-2xl">⚽</span>} color="emerald" />
                           </motion.div>
                           <motion.div variants={fadeInUp} className="h-full">
-                              <StatCard label={t('home.stats_goals')} value="12" icon={<span className="text-2xl">🥅</span>} color="blue" />
+                              <StatCard label={t('home.stats_goals')} value={user?.goles || 0} icon={<span className="text-2xl">🥅</span>} color="blue" />
                           </motion.div>
                           <motion.div variants={fadeInUp} className="h-full">
-                              <StatCard label={t('home.stats_assists')} value="5" icon={<span className="text-2xl">👟</span>} color="amber" />
+                              <StatCard label={t('home.stats_assists')} value={user?.asistencias || 0} icon={<span className="text-2xl">👟</span>} color="amber" />
                           </motion.div>
                       </motion.div>
                   </div>
@@ -352,25 +373,46 @@ const Home = () => {
                       </h3>
                       
                       <div className="space-y-4">
-                          {[
-                              { pos: 1, name: "David Ruiz", pts: "2.4k", goals: 24, img: "https://ui-avatars.com/api/?name=David&background=10b981&color=fff" },
-                              { pos: 2, name: "Pablo M.", pts: "1.9k", goals: 18, img: "https://ui-avatars.com/api/?name=Pablo&background=3b82f6&color=fff" },
-                              { pos: 3, name: "Marta G.", pts: "1.5k", goals: 12, img: "https://ui-avatars.com/api/?name=Marta&background=f59e0b&color=fff" },
-                              { pos: 4, name: t('home.you'), pts: "1.2k", goals: 9, img: user?.avatar || "https://ui-avatars.com/api/?name=Tu&background=6366f1&color=fff", isYou: true },
-                          ].map((player, idx) => (
-                              <div key={idx} className={`flex items-center gap-4 p-4 rounded-2xl transition hover:bg-white/5 ${player.isYou ? 'bg-emerald-500/20 border border-emerald-500/50' : 'bg-gray-700/50'}`}>
-                                  <div className="font-black text-xl text-gray-400 w-6 text-center">{player.pos}</div>
-                                  <img src={player.img} alt={player.name} className="w-12 h-12 rounded-full ring-2 ring-transparent"/>
+                          {rankingData.length > 0 ? (
+                            rankingData.map((player, idx) => (
+                              <div key={player.id} className={`flex items-center gap-4 p-4 rounded-2xl transition hover:bg-white/5 ${player.id === user?.id ? 'bg-emerald-500/20 border border-emerald-500/50' : 'bg-gray-700/50'}`}>
+                                  <div className="font-black text-xl text-gray-400 w-6 text-center">{idx + 1}</div>
+                                  <img 
+                                    src={player.avatar || `https://ui-avatars.com/api/?name=${player.username}&background=random&color=fff`} 
+                                    alt={player.username} 
+                                    className="w-12 h-12 rounded-full ring-2 ring-transparent object-cover"
+                                  />
                                   <div className="flex-1">
                                       <div className="font-bold text-lg flex items-center gap-2">
-                                          {player.name}
-                                          {player.pos === 1 && <span className="text-xl">👑</span>}
+                                          {player.username} {player.id === user?.id ? `(${t('home.you')})` : ''}
+                                          {idx === 0 && <span className="text-xl">👑</span>}
                                       </div>
-                                      <div className="text-sm text-gray-400">{player.goals} {t('home.goals_label')}</div>
+                                      <div className="text-sm text-gray-400">{player.goles} {t('home.goals_label')}</div>
                                   </div>
-                                  <div className="font-black text-emerald-400 text-xl">{player.pts}</div>
+                                  <div className="font-black text-emerald-400 text-xl">{(player.ranking / 1000).toFixed(1)}k</div>
                               </div>
-                          ))}
+                            ))
+                          ) : (
+                              [
+                                { pos: 1, name: "David Ruiz", pts: "2.4k", goals: 24, img: "https://ui-avatars.com/api/?name=David&background=10b981&color=fff" },
+                                { pos: 2, name: "Pablo M.", pts: "1.9k", goals: 18, img: "https://ui-avatars.com/api/?name=Pablo&background=3b82f6&color=fff" },
+                                { pos: 3, name: "Marta G.", pts: "1.5k", goals: 12, img: "https://ui-avatars.com/api/?name=Marta&background=f59e0b&color=fff" },
+                                { pos: 4, name: t('home.you'), pts: "1.2k", goals: 9, img: user?.avatar || "https://ui-avatars.com/api/?name=Tu&background=6366f1&color=fff", isYou: true },
+                              ].map((player, idx) => (
+                                <div key={idx} className={`flex items-center gap-4 p-4 rounded-2xl transition hover:bg-white/5 ${player.isYou ? 'bg-emerald-500/20 border border-emerald-500/50' : 'bg-gray-700/50'}`}>
+                                    <div className="font-black text-xl text-gray-400 w-6 text-center">{player.pos}</div>
+                                    <img src={player.img} alt={player.name} className="w-12 h-12 rounded-full ring-2 ring-transparent"/>
+                                    <div className="flex-1">
+                                        <div className="font-bold text-lg flex items-center gap-2">
+                                            {player.name}
+                                            {player.pos === 1 && <span className="text-xl">👑</span>}
+                                        </div>
+                                        <div className="text-sm text-gray-400">{player.goals} {t('home.goals_label')}</div>
+                                    </div>
+                                    <div className="font-black text-emerald-400 text-xl">{player.pts}</div>
+                                </div>
+                              ))
+                          )}
                       </div>
                   </motion.div>
               </div>
