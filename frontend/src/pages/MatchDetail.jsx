@@ -153,11 +153,13 @@ const MatchDetail = () => {
   const teamBlack = match ? match.participaciones.filter(p => p.equipo === 'NEGRO').sort((a, b) => a.user.username.localeCompare(b.user.username)) : [];
   const unassigned = match ? match.participaciones.filter(p => p.equipo === 'NINGUNO' || !p.equipo).sort((a, b) => a.user.username.localeCompare(b.user.username)) : [];
 
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col font-sans overflow-x-hidden">
+    <div className="min-h-screen bg-gray-50 font-sans pb-32 md:pb-0 overflow-x-hidden">
       <Navbar />
       
-      <main className="max-w-6xl mx-auto px-4 py-12 pb-32 md:pb-12 w-full flex-1 overflow-hidden">
+      <main className="max-w-6xl mx-auto px-4 py-12">
         {(loading && !match) ? (
           <LoadingScreen text={t('match_detail.loading')} />
         ) : error ? (
@@ -185,7 +187,7 @@ const MatchDetail = () => {
         ) : match ? (
           <>
         <motion.section 
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: isMobile ? 0 : 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1.0, ease: "easeOut" }}
             className="bg-white rounded-4xl p-8 shadow-xl border border-gray-100 mb-8 relative overflow-hidden"
@@ -202,7 +204,7 @@ const MatchDetail = () => {
             </div>
             
             <motion.h1 
-                initial={{ opacity: 0, x: -20 }}
+                initial={{ opacity: 0, x: isMobile ? 0 : -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.3 }}
                 className="text-3xl font-black text-gray-900 mb-2 flex items-center flex-wrap"
@@ -221,7 +223,7 @@ const MatchDetail = () => {
                 )}
             </motion.h1>
             <motion.p 
-                initial={{ opacity: 0, x: -20 }}
+                initial={{ opacity: 0, x: isMobile ? 0 : -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.4 }}
                 className="text-gray-500 font-bold flex items-center gap-2"
@@ -254,7 +256,7 @@ const MatchDetail = () => {
             <div className="lg:col-span-2 space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <motion.div 
-                        initial={{ opacity: 0, x: -30 }}
+                        initial={{ opacity: 0, x: isMobile ? 0 : -30 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.8, delay: 0.2 }}
                         className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100"
@@ -292,7 +294,7 @@ const MatchDetail = () => {
                     </motion.div>
 
                     <motion.div 
-                        initial={{ opacity: 0, x: 30 }}
+                        initial={{ opacity: 0, x: isMobile ? 0 : 30 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.8, delay: 0.2 }}
                         className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100"
@@ -332,7 +334,7 @@ const MatchDetail = () => {
 
                 {unassigned.length > 0 && match.estado !== 'FINALIZADO' && (
                     <motion.div 
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={{ opacity: 0, y: isMobile ? 0 : 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.5 }}
                         className="bg-white rounded-3xl p-8 shadow-sm border border-emerald-100"
@@ -384,7 +386,7 @@ const MatchDetail = () => {
 
             <div className="space-y-6">
                 <motion.div 
-                    initial={{ opacity: 0, x: 30 }}
+                    initial={{ opacity: 0, x: isMobile ? 0 : 30 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.8, delay: 0.4 }}
                     className="bg-white rounded-3xl p-6 shadow-xl border border-gray-100 h-[450px] flex flex-col"
@@ -481,7 +483,7 @@ const MatchDetail = () => {
 
                 {isOrganizer && match.estado !== 'FINALIZADO' && (
                     <motion.button 
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={{ opacity: 0, y: isMobile ? 0 : 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.6 }}
                         whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
