@@ -493,7 +493,7 @@ const Admin = () => {
                         </button>
                     </div>
 
-                    <form onSubmit={handleUpdateCampo} className="flex-1 overflow-y-auto pr-1 space-y-4 md:space-y-6">
+                    <form onSubmit={handleUpdateCampo} className="flex-1 overflow-y-auto px-1.5 space-y-4 md:space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                             <div className="space-y-4">
                                 <div>
