@@ -4,6 +4,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { API_BASE_URL } from "../apiConfig";
 import Navbar from "../components/Navbar";
+import LoadingScreen from "../components/LoadingScreen";
 import MatchCard from "../components/MatchCard";
 import Dropdown from "../components/Dropdown";
 import DatePicker from "../components/DatePicker";
@@ -220,14 +221,7 @@ const BuscarPartidos = () => {
         </div>
 
         {loading && matches.length === 0 ? (
-          <div className="text-center py-20">
-            <motion.div 
-              animate={{ rotate: 360 }}
-              transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-              className="inline-block w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full mb-4"
-            ></motion.div>
-            <p className="text-gray-500 font-bold">{t('search_matches.searching_matches')}</p>
-          </div>
+          <LoadingScreen text={t('search_matches.searching_matches')} />
         ) : filteredMatches.length > 0 ? (
           <>
             <motion.div 

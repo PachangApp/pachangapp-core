@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useMemo } from "react";
 import { API_BASE_URL, N8N_TRANSLATE_URL } from "../apiConfig";
 import Navbar from "../components/Navbar";
+import LoadingScreen from "../components/LoadingScreen";
 import { formatDate } from "../utils/dateFormatter";
 import Counter from "../components/Counter";
 import { useToast } from "../context/ToastContext";
@@ -150,24 +151,7 @@ const MatchDetail = () => {
   if (loading && !match) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center font-sans">
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="flex flex-col items-center gap-6"
-        >
-          <div className="relative">
-            <div className="w-16 h-16 border-4 border-emerald-100 border-t-emerald-600 rounded-full animate-spin"></div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-8 h-8 bg-emerald-600/10 rounded-full animate-pulse"></div>
-            </div>
-          </div>
-          <div className="flex flex-col items-center gap-2">
-            <h2 className="text-xl font-black text-gray-900 tracking-tight italic uppercase">PachangApp</h2>
-            <p className="text-gray-400 font-bold text-xs uppercase tracking-widest animate-pulse">
-              {t('match_detail.loading')}
-            </p>
-          </div>
-        </motion.div>
+        <LoadingScreen text={t('match_detail.loading')} />
       </div>
     );
   }

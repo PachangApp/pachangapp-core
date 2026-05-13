@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import { API_BASE_URL } from "../apiConfig";
 import Navbar from "../components/Navbar";
+import LoadingScreen from "../components/LoadingScreen";
 import StatCard from "../components/StatCard";
 import Dropdown from "../components/Dropdown";
 import { getFieldImage } from "../utils/fieldMapping";
@@ -254,13 +255,7 @@ const Perfil = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col">
         <Navbar />
-        <div className="grow flex items-center justify-center">
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="w-12 h-12 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin"
-          ></motion.div>
-        </div>
+        <LoadingScreen text={t('search_matches.loading')} />
       </div>
     );
   }
