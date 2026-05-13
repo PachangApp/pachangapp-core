@@ -29,7 +29,7 @@ const MatchDetail = () => {
   const fetchMatch = useCallback(async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/partidos/${id}`, { headers: authHeaders });
-      if (!response.ok) throw new Error("Partido no encontrado");
+      if (!response.ok) throw new Error(t('match_detail.not_found'));
       const data = await response.json();
       setMatch(data);
     } catch (err) {
@@ -147,8 +147,56 @@ const MatchDetail = () => {
     }
   };
 
-  if (loading && !match) return <div className="p-20 text-center">Cargando...</div>;
-  if (error) return <div className="p-20 text-center text-red-500">Error: {error}</div>;
+  if (loading && !match) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center font-sans">
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="flex flex-col items-center gap-6"
+        >
+          <div className="relative">
+            <div className="w-16 h-16 border-4 border-emerald-100 border-t-emerald-600 rounded-full animate-spin"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-8 h-8 bg-emerald-600/10 rounded-full animate-pulse"></div>
+            </div>
+          </div>
+          <div className="flex flex-col items-center gap-2">
+            <h2 className="text-xl font-black text-gray-900 tracking-tight italic uppercase">PachangApp</h2>
+            <p className="text-gray-400 font-bold text-xs uppercase tracking-widest animate-pulse">
+              {t('match_detail.loading')}
+            </p>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center font-sans p-4">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-white p-8 rounded-4xl shadow-xl border border-red-50 text-center max-w-sm w-full"
+        >
+          <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h2 className="text-xl font-black text-gray-900 mb-2 uppercase tracking-tight italic">Error</h2>
+          <p className="text-gray-500 font-medium mb-6">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="w-full bg-gray-900 text-white font-black py-4 rounded-2xl shadow-lg hover:bg-gray-800 transition-all uppercase tracking-widest text-xs"
+          >
+            Reintentar
+          </button>
+        </motion.div>
+      </div>
+    );
+  }
 
   const isOrganizer = currentUser.id === match.organizador.id;
   const teamWhite = match.participaciones.filter(p => p.equipo === 'BLANCO').sort((a, b) => a.user.username.localeCompare(b.user.username));
@@ -173,7 +221,7 @@ const MatchDetail = () => {
                     transition={{ type: "spring", stiffness: 200, delay: 0.5 }}
                     className={`px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest ${match.estado === 'FINALIZADO' ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-600 animate-pulse'}`}
                 >
-                    {match.estado}
+                    {match.estado === 'FINALIZADO' ? t('match_detail.status_finished') : t('match_detail.status_open')}
                 </motion.span>
             </div>
             
@@ -183,7 +231,7 @@ const MatchDetail = () => {
                 transition={{ delay: 0.3 }}
                 className="text-3xl font-black text-gray-900 mb-2 flex items-center flex-wrap"
             >
-                Partido en <span className="text-emerald-600 ml-2">{match.reserva.campo.nombre}</span>
+                {t('match_detail.match_at')} <span className="text-emerald-600 ml-2">{match.reserva.campo.nombre}</span>
                 {match.reserva.campo.locationUrl && (
                     <a 
                       href={match.reserva.campo.locationUrl} 
@@ -203,7 +251,7 @@ const MatchDetail = () => {
                 className="text-gray-500 font-bold flex items-center gap-2"
             >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                {formatDate(match.reserva.fecha)} a las {match.reserva.horaInicio.substring(0,5)}
+                {formatDate(match.reserva.fecha)} {t('match_detail.at_time')} {match.reserva.horaInicio.substring(0,5)}
             </motion.p>
 
             {match.estado === 'FINALIZADO' && (
@@ -214,12 +262,12 @@ const MatchDetail = () => {
                     className="mt-8 flex items-center justify-center gap-12 bg-gray-900 text-white p-8 rounded-3xl"
                 >
                     <div className="text-center">
-                        <p className="text-xs font-bold text-gray-400 mb-2 uppercase tracking-tighter">Equipo Blanco</p>
+                        <p className="text-xs font-bold text-gray-400 mb-2 uppercase tracking-tighter">{t('match_detail.team_white')}</p>
                         <span className="text-6xl font-black">{match.marcadorA}</span>
                     </div>
                     <div className="text-4xl font-black text-emerald-500">VS</div>
                     <div className="text-center">
-                        <p className="text-xs font-bold text-gray-400 mb-2 uppercase tracking-tighter">Equipo Negro</p>
+                        <p className="text-xs font-bold text-gray-400 mb-2 uppercase tracking-tighter">{t('match_detail.team_black')}</p>
                         <span className="text-6xl font-black">{match.marcadorB}</span>
                     </div>
                 </motion.div>
@@ -238,9 +286,9 @@ const MatchDetail = () => {
                         <h3 className="font-black text-gray-900 mb-4 flex items-center justify-between">
                             <div className="flex items-center gap-2">
                                 <div className="w-5 h-5 rounded-full border border-gray-200 shrink-0 bg-white shadow-sm"></div>
-                                Equipo Local
+                                {t('match_detail.local_team')}
                             </div>
-                            <span className="text-xs bg-gray-100 px-2 py-1 rounded-lg">{teamWhite.length} jugadores</span>
+                            <span className="text-xs bg-gray-100 px-2 py-1 rounded-lg">{t('match_detail.players_count', { count: teamWhite.length })}</span>
                         </h3>
                         <div className="space-y-3">
                             {teamWhite.map((p, idx) => (
@@ -260,7 +308,7 @@ const MatchDetail = () => {
                                         <span className="font-bold text-gray-700 text-sm">{p.user.username}</span>
                                     </div>
                                     {isOrganizer && match.estado !== 'FINALIZADO' && (
-                                        <button onClick={() => handleAssignTeam(p.user.id, 'NINGUNO')} className="text-xs text-red-500 font-bold px-2 py-1 hover:bg-red-50 rounded-lg transition-colors"> Quitar</button>
+                                        <button onClick={() => handleAssignTeam(p.user.id, 'NINGUNO')} className="text-xs text-red-500 font-bold px-2 py-1 hover:bg-red-50 rounded-lg transition-colors">{t('match_detail.remove_player')}</button>
                                     )}
                                 </motion.div>
                             ))}
@@ -276,9 +324,9 @@ const MatchDetail = () => {
                         <h3 className="font-black text-gray-900 mb-4 flex items-center justify-between">
                             <div className="flex items-center gap-2">
                                 <div className="w-5 h-5 rounded-full border border-gray-800 shrink-0 bg-gray-900 shadow-sm"></div>
-                                Equipo Visitante
+                                {t('match_detail.visitor_team')}
                             </div>
-                            <span className="text-xs bg-gray-100 px-2 py-1 rounded-lg">{teamBlack.length} jugadores</span>
+                            <span className="text-xs bg-gray-100 px-2 py-1 rounded-lg">{t('match_detail.players_count', { count: teamBlack.length })}</span>
                         </h3>
                         <div className="space-y-3">
                             {teamBlack.map((p, idx) => (
@@ -298,7 +346,7 @@ const MatchDetail = () => {
                                         <span className="font-bold text-sm">{p.user.username}</span>
                                     </div>
                                     {isOrganizer && match.estado !== 'FINALIZADO' && (
-                                        <button onClick={() => handleAssignTeam(p.user.id, 'NINGUNO')} className="text-xs text-emerald-400 font-bold px-2 py-1 hover:bg-white/10 rounded-lg transition-colors"> Quitar</button>
+                                        <button onClick={() => handleAssignTeam(p.user.id, 'NINGUNO')} className="text-xs text-emerald-400 font-bold px-2 py-1 hover:bg-white/10 rounded-lg transition-colors">{t('match_detail.remove_player')}</button>
                                     )}
                                 </motion.div>
                             ))}
@@ -313,7 +361,7 @@ const MatchDetail = () => {
                         transition={{ duration: 0.8, delay: 0.5 }}
                         className="bg-white rounded-3xl p-8 shadow-sm border border-emerald-100"
                     >
-                        <h3 className="font-black text-gray-900 mb-6">Jugadores por asignar ({unassigned.length})</h3>
+                        <h3 className="font-black text-gray-900 mb-6">{t('match_detail.unassigned_players', { count: unassigned.length })}</h3>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                             {unassigned.map((p, idx) => (
                                 <motion.div 
@@ -339,7 +387,7 @@ const MatchDetail = () => {
                                                 onClick={() => handleAssignTeam(p.user.id, 'BLANCO')} 
                                                 className="w-6 h-6 rounded-full border border-gray-200 shadow-sm transition-transform group relative bg-white" 
                                                 title="Asignar al equipo Local">
-                                                <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none transition-opacity z-10">Local</span>
+                                                <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none transition-opacity z-10">{t('match_detail.white')}</span>
                                             </motion.button>
                                             <motion.button 
                                                 whileHover={{ scale: 1.1 }}
@@ -347,7 +395,7 @@ const MatchDetail = () => {
                                                 onClick={() => handleAssignTeam(p.user.id, 'NEGRO')} 
                                                 className="w-6 h-6 rounded-full border border-gray-800 shadow-sm transition-transform group relative bg-gray-900" 
                                                 title="Asignar al equipo Visitante">
-                                                <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px) py-1 px-2 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none transition-opacity z-10">Visitante</span>
+                                                <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none transition-opacity z-10">{t('match_detail.black')}</span>
                                             </motion.button>
                                         </div>
                                     )}
@@ -366,7 +414,7 @@ const MatchDetail = () => {
                     className="bg-white rounded-3xl p-6 shadow-xl border border-gray-100 h-[450px] flex flex-col"
                 >
                     <h3 className="font-black text-gray-900 mb-4 flex items-center gap-2">
-                         Chat del Partido 💬
+                         {t('match_chat.title')}
                     </h3>
                     <div className="flex-1 bg-gray-50 rounded-2xl p-4 overflow-y-auto mb-4 space-y-3">
                         <AnimatePresence>
@@ -441,7 +489,7 @@ const MatchDetail = () => {
                             type="text" 
                             value={newMessage}
                             onChange={(e) => setNewMessage(e.target.value)}
-                            placeholder="Escribe un mensaje..." 
+                            placeholder={t('match_chat.placeholder')}
                             className="flex-1 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-sm text-gray-900 focus:ring-2 focus:ring-emerald-500 font-medium" 
                         />
                         <motion.button 
@@ -466,7 +514,7 @@ const MatchDetail = () => {
                         className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-4 rounded-3xl shadow-xl shadow-emerald-200 transition-all flex items-center justify-center gap-2"
                     >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
-                        FINALIZAR PARTIDO
+                        {t('match_detail.finalize_btn')}
                     </motion.button>
                 )}
             </div>
@@ -482,10 +530,10 @@ const MatchDetail = () => {
               exit={{ scale: 0.9, opacity: 0 }}
               className="bg-white rounded-4xl p-10 max-w-md w-full shadow-2xl overflow-hidden relative"
             >
-              <h2 className="text-2xl font-black text-gray-900 mb-2 text-center">Introducir Resultado</h2>
+              <h2 className="text-2xl font-black text-gray-900 mb-2 text-center">{t('match_detail.enter_result')}</h2>
               <div className="flex items-center justify-around gap-6 mb-10 mt-8">
                 <Counter 
-                    label="Blanco"
+                    label={t('match_detail.white')}
                     value={scores.a} 
                     onChange={(val) => setScores({...scores, a: val})}
                     size="lg"
@@ -494,7 +542,7 @@ const MatchDetail = () => {
                 />
                 <div className="text-4xl font-black text-emerald-500 mt-6">-</div>
                 <Counter 
-                    label="Negro"
+                    label={t('match_detail.black')}
                     value={scores.b} 
                     onChange={(val) => setScores({...scores, b: val})}
                     size="lg"
@@ -509,13 +557,13 @@ const MatchDetail = () => {
                     onClick={() => setShowFinalizeModal(false)}
                     className="flex-1 py-4 font-black text-gray-400 hover:text-gray-600 transition-colors"
                 >
-                    Cancelar
+                    {t('match_detail.cancel')}
                 </button>
                 <button 
                     onClick={handleFinalize}
                     className="flex-1 bg-emerald-600 text-white font-black py-4 rounded-2xl shadow-lg shadow-emerald-200"
                 >
-                    Guardar
+                    {t('match_detail.save')}
                 </button>
               </div>
             </motion.div>
