@@ -230,18 +230,20 @@ const Admin = () => {
                   />
                 </div>
 
-                {/* Selector de Imagen */}
                 <div>
-                  <label className="block text-xs font-bold text-gray-400 uppercase mb-1">{t('admin.fields.image') || "Imagen de la pista"}</label>
+                  <label className="block text-xs font-bold text-gray-400 uppercase mb-1">{t('admin.fields.image')}</label>
                   <div className="flex items-center gap-3">
-                    <label className="flex-1 cursor-pointer bg-gray-50 border-2 border-dashed border-gray-200 hover:border-emerald-400 p-3 rounded-xl text-center transition-all">
-                      <span className="text-sm font-bold text-gray-500">
-                        {uploadingImage ? "Subiendo..." : (newCampo.imagenUrl ? "✓ Imagen lista" : "Hacer clic para subir")}
-                      </span>
+                    <label className="flex-1 cursor-pointer bg-gray-50 border-2 border-dashed border-gray-200 hover:border-emerald-400 h-28 md:h-32 rounded-xl flex items-center justify-center transition-all group">
+                      <div className="flex flex-col items-center">
+                        <svg className="w-6 h-6 text-gray-400 mb-1 group-hover:text-emerald-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                        <span className="text-sm font-bold text-gray-500">
+                          {uploadingImage ? t('admin.fields.uploading') : (newCampo.imagenUrl ? t('admin.fields.image_ready') : t('admin.fields.click_to_upload'))}
+                        </span>
+                      </div>
                       <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, false)} />
                     </label>
                     {newCampo.imagenUrl && (
-                      <div className="w-12 h-12 rounded-lg overflow-hidden border border-gray-100 shadow-sm">
+                      <div className="w-20 h-20 rounded-lg overflow-hidden border border-gray-100 shadow-sm flex-shrink-0">
                         <img src={newCampo.imagenUrl} alt="preview" className="w-full h-full object-cover" />
                       </div>
                     )}
@@ -250,7 +252,7 @@ const Admin = () => {
 
                 {/* Campo de Ubicación */}
                 <div>
-                  <label className="block text-xs font-bold text-gray-400 uppercase mb-1">{t('admin.fields.location') || "Enlace de Ubicación (Google Maps)"}</label>
+                  <label className="block text-xs font-bold text-gray-400 uppercase mb-1">{t('admin.fields.location') || "Ubicación"}</label>
                   <input 
                     type="text"
                     placeholder="https://maps.app.goo.gl/..."
@@ -259,6 +261,16 @@ const Admin = () => {
                     onChange={e => setNewCampo({...newCampo, locationUrl: e.target.value})}
                   />
                 </div>
+
+                {/* Campo de Zona */}
+                  <Dropdown
+                    label={t('admin.fields.zone')}
+                    options={[
+                      "Granada Centro", "Granada Norte", "Zaidín", "Chana", "Albayzín", "Realejo", "Ronda", "Genil", "Armilla", "Maracena"
+                    ]}
+                    value={newCampo.zona}
+                    onChange={val => setNewCampo({...newCampo, zona: val})}
+                  />
 
                 <div className="grid grid-cols-2 gap-4">
                   <Dropdown
@@ -486,89 +498,109 @@ const Admin = () => {
                 >
                     <div className="flex justify-between items-start mb-4 md:mb-6">
                         <h2 className="text-lg md:text-2xl font-black text-gray-900 dark:text-white pr-8">
-                          Editar <span className="text-emerald-600 block sm:inline">{editingCampo.nombre}</span>
+                          {t('admin.fields.edit_title')} <span className="text-emerald-600 block sm:inline">{editingCampo.nombre}</span>
                         </h2>
                         <button onClick={() => setShowEditModal(false)} className="absolute top-4 right-4 p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full transition-colors z-10">
                             <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
                         </button>
                     </div>
 
-                    <form onSubmit={handleUpdateCampo} className="flex-1 overflow-y-auto px-1.5 space-y-4 md:space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Nombre de la pista</label>
-                                    <input 
-                                        type="text" required
-                                        className="w-full p-3 bg-gray-50 dark:bg-slate-800 text-gray-900 dark:text-white font-bold rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 border border-transparent dark:border-slate-700"
-                                        value={editingCampo.nombre}
-                                        onChange={e => setEditingCampo({...editingCampo, nombre: e.target.value})}
-                                    />
-                                </div>
-                                <Dropdown
-                                    label="Deporte"
-                                    options={[
-                                        { label: "Fútbol 11", value: "Fútbol 11" },
-                                        { label: "Fútbol 7", value: "Fútbol 7" },
-                                        { label: "Fútbol Sala", value: "Fútbol Sala" },
-                                        { label: "Pádel", value: "Pádel" }
-                                    ]}
-                                    value={editingCampo.deporte}
-                                    onChange={val => setEditingCampo({...editingCampo, deporte: val})}
-                                />
-                                <Counter
-                                    label="Precio por Hora (€)"
-                                    value={editingCampo.precioPorHora}
-                                    onChange={val => setEditingCampo({...editingCampo, precioPorHora: val})}
-                                    step={1}
-                                    min={0}
-                                />
-                            </div>
+                    <form onSubmit={handleUpdateCampo} className="flex-1 overflow-y-auto px-1.5 space-y-3 md:space-y-4">
+                        {/* NOMBRE */}
+                        <div>
+                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{t('admin.fields.name')}</label>
+                            <textarea 
+                                required
+                                rows="1"
+                                className="w-full p-3 bg-gray-50 dark:bg-slate-800 text-gray-900 dark:text-white font-bold rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 border border-transparent dark:border-slate-700 resize-none text-sm"
+                                value={editingCampo.nombre}
+                                onChange={e => setEditingCampo({...editingCampo, nombre: e.target.value})}
+                            />
+                        </div>
 
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Imagen (S3)</label>
-                                    <div className="flex flex-col gap-3">
-                                        <div className="w-full h-28 md:h-32 rounded-2xl overflow-hidden bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-700 relative group">
-                                            {editingCampo.imagenUrl ? (
-                                                <img src={editingCampo.imagenUrl} className="w-full h-full object-cover" alt="preview" />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center text-gray-300 dark:text-gray-600 text-xs font-bold uppercase tracking-widest">Sin imagen</div>
-                                            )}
-                                            <label className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
-                                                <span className="text-white text-xs font-bold uppercase tracking-widest">{uploadingImage ? 'Subiendo...' : 'Cambiar Foto'}</span>
-                                                <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, true)} />
-                                            </label>
-                                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                            <Dropdown
+                                label={t('admin.fields.sport')}
+                                options={[
+                                    { label: t('sports.futbol_11'), value: "Fútbol 11" },
+                                    { label: t('sports.futbol_7'), value: "Fútbol 7" },
+                                    { label: t('sports.futbol_sala'), value: "Fútbol Sala" },
+                                    { label: "Pádel", value: "Pádel" }
+                                ]}
+                                value={editingCampo.deporte}
+                                onChange={val => setEditingCampo({...editingCampo, deporte: val})}
+                            />
+                            <Counter
+                                label={t('admin.fields.price_per_hour')}
+                                value={editingCampo.precioPorHora}
+                                onChange={val => setEditingCampo({...editingCampo, precioPorHora: val})}
+                                step={1}
+                                min={0}
+                            />
+                        </div>
+
+                        <Dropdown
+                            label={t('admin.fields.zone')}
+                            options={[
+                                "Granada Centro", "Granada Norte", "Zaidín", "Chana", "Albayzín", "Realejo", "Ronda", "Genil", "Armilla", "Maracena"
+                            ]}
+                            value={editingCampo.zona}
+                            onChange={val => setEditingCampo({...editingCampo, zona: val})}
+                        />
+
+                        <div className="grid grid-cols-2 gap-3">
+                            <div>
+                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{t('admin.fields.image')}</label>
+                                <div className="relative group cursor-pointer" onClick={() => document.getElementById('edit-file-input').click()}>
+                                    <div className="h-24 rounded-2xl overflow-hidden bg-gray-100 dark:bg-slate-800 border-2 border-dashed border-gray-200 dark:border-slate-700 group-hover:border-emerald-500 transition-colors">
+                                        {editingCampo.imagenUrl ? (
+                                            <img src={editingCampo.imagenUrl} alt="Field" className="w-full h-full object-cover" />
+                                        ) : (
+                                            <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                                                <svg className="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                                <span className="text-[8px] font-bold uppercase tracking-tighter">{t('admin.fields.click_to_upload')}</span>
+                                            </div>
+                                        )}
+                                        {uploadingImage && (
+                                            <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-2xl">
+                                                <span className="text-white text-[10px] font-bold">{t('admin.fields.uploading')}</span>
+                                            </div>
+                                        )}
                                     </div>
-                                </div>
-                                <div>
-                                    <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Enlace Google Maps</label>
                                     <input 
-                                        type="text"
-                                        placeholder="https://maps.app.goo.gl/..."
-                                        className="w-full p-3 bg-gray-50 dark:bg-slate-800 text-gray-900 dark:text-white font-bold rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 text-xs border border-transparent dark:border-slate-700"
-                                        value={editingCampo.locationUrl || ""}
-                                        onChange={e => setEditingCampo({...editingCampo, locationUrl: e.target.value})}
+                                        id="edit-file-input"
+                                        type="file" 
+                                        className="hidden" 
+                                        accept="image/*" 
+                                        onChange={(e) => handleImageUpload(e, true)} 
                                     />
                                 </div>
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{t('admin.fields.google_maps_link')}</label>
+                                <textarea 
+                                    className="w-full h-24 p-2 bg-gray-50 dark:bg-slate-800 text-gray-900 dark:text-white font-bold rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 border border-transparent dark:border-slate-700 text-[10px] resize-none"
+                                    value={editingCampo.locationUrl}
+                                    onChange={e => setEditingCampo({...editingCampo, locationUrl: e.target.value})}
+                                    placeholder="https://maps.app.goo.gl/..."
+                                />
                             </div>
                         </div>
 
-                        <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-50 dark:border-slate-800">
+                        <div className="flex gap-2 pt-2">
                             <button 
                                 type="button"
                                 onClick={() => setShowEditModal(false)}
-                                className="flex-1 py-3 md:py-4 font-black text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors uppercase tracking-widest text-xs"
+                                className="flex-1 py-3 border border-gray-100 dark:border-slate-800 text-gray-400 font-bold rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors uppercase text-[10px] tracking-widest"
                             >
-                                Cancelar
+                                {t('admin.fields.cancel')}
                             </button>
                             <button 
                                 type="submit"
                                 disabled={uploadingImage}
-                                className="flex-1 bg-emerald-600 text-white font-black py-3 md:py-4 rounded-xl md:rounded-2xl shadow-xl shadow-emerald-500/10 uppercase tracking-widest text-xs disabled:opacity-50"
+                                className="flex-[2] py-3 bg-emerald-600 text-white font-black rounded-xl shadow-lg shadow-emerald-200 dark:shadow-none hover:bg-emerald-700 transition-all transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 uppercase text-[10px] tracking-widest"
                             >
-                                Guardar Cambios
+                                {t('admin.fields.save_changes')}
                             </button>
                         </div>
                     </form>

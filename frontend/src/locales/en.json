@@ -153,6 +153,7 @@
     "fields": {
       "new_field": "New Field",
       "name": "Name",
+      "image": "Field Image",
       "sport": "Sport",
       "price_per_hour": "Price/h",
       "parent_field": "Parent Field (Optional)",
@@ -161,7 +162,18 @@
       "child_of": "Child of ID: {{id}}",
       "delete_confirm": "Are you sure you want to delete this field? Availability records will also be deleted.",
       "field_created": "Field successfully created",
+      "field_updated": "Field successfully updated",
+      "location": "Location",
+      "zone": "Zone",
+      "image_ready": "✓ Image ready",
+      "click_to_upload": "Click to upload",
+      "uploading": "Uploading...",
+      "save_changes": "Save Changes",
+      "cancel": "Cancel",
+      "edit_title": "Edit",
+      "google_maps_link": "Google Maps Link",
       "create_error": "Error creating field",
+      "update_error": "Error updating field",
       "delete_error": "Error deleting field"
     },
     "users": {
