@@ -122,6 +122,10 @@ public class UserController {
             response.put("email", userDetails.getEmail());
             response.put("role", userDetails.getAuthorities().iterator().next().getAuthority());
             response.put("avatar", user.getAvatar());
+            response.put("ranking", user.getRanking());
+            response.put("goles", user.getGoles());
+            response.put("asistencias", user.getAsistencias());
+            response.put("partidosJugados", user.getPartidosJugados());
 
             return org.springframework.http.ResponseEntity.ok(response);
         } catch (org.springframework.security.core.AuthenticationException e) {
@@ -185,6 +189,11 @@ public class UserController {
         return userRepository.findById(id)
                 .map(org.springframework.http.ResponseEntity::ok)
                 .orElse(org.springframework.http.ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/ranking")
+    public java.util.List<User> getRanking() {
+        return userRepository.findTop10ByEnabledTrueOrderByRankingDesc();
     }
 
     @PutMapping("/{id}/preferencias")

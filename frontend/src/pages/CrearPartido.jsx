@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { API_BASE_URL } from "../apiConfig";
 import Navbar from "../components/Navbar";
@@ -88,6 +88,7 @@ const CrearPartido = () => {
   const { t } = useTranslation();
   const { showToast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
   const [step, setStep] = useState(1);
   const [campos, setCampos] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -138,8 +139,27 @@ const CrearPartido = () => {
     } catch (err) {
       console.error("Error al cargar campos:", err);
     }
-
   };
+
+  // Efecto para detectar campoId desde el estado de navegación (Home -> Crear Partido)
+  useEffect(() => {
+    if (location.state?.campoId && campos.length > 0) {
+      const campo = campos.find(c => Number(c.id) === Number(location.state.campoId));
+      if (campo) {
+        console.log("Auto-seleccionando campo desde estado:", campo);
+        const intendedDeporte = campo.deporte;
+        setFilters(prev => ({ 
+          ...prev, 
+          zona: campo.zona, 
+          deporte: intendedDeporte
+        }));
+        // Forzamos el deporte en handleSelectCampo para evitar problemas de asincronía
+        handleSelectCampo(campo, intendedDeporte);
+      }
+    }
+  }, [location.state, campos]);
+
+
 
   const fetchDisponibilidad = useCallback(async (campoId, fecha) => {
     setLoading(true);
@@ -178,13 +198,15 @@ const CrearPartido = () => {
     }
   };
 
-  const handleSelectCampo = async (campo) => {
+  const handleSelectCampo = async (campo, forcedDeporte = null) => {
     window.scrollTo(0, 0);
     console.log("Campo seleccionado:", campo);
     setSelectedCampo(campo);
     
+    const currentDeporte = forcedDeporte || filters.deporte;
+
     // Si es F7, necesitamos la disponibilidad de todos sus hijos
-    if (filters.deporte === "Fútbol 7") {
+    if (currentDeporte === "Fútbol 7") {
         const hijos = campos.filter(h => Number(h.parentCampoId) === Number(campo.id));
         console.log("Subpistas encontradas:", hijos);
         // Guardamos los hijos para usarlos en el paso 3

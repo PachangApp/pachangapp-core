@@ -21,4 +21,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @org.springframework.data.jpa.repository.Query("SELECT u FROM User u WHERE u.enabled = true AND u.id != :currentUserId AND (u.posicion1 = :posicion OR u.posicion2 = :posicion OR u.posicion3 = :posicion)")
     org.springframework.data.domain.Page<User> buscarPorPosicion(@org.springframework.data.repository.query.Param("posicion") String posicion, @org.springframework.data.repository.query.Param("currentUserId") Long currentUserId, org.springframework.data.domain.Pageable pageable);
+
+    java.util.List<User> findTop10ByEnabledTrueOrderByRankingDesc();
 }
