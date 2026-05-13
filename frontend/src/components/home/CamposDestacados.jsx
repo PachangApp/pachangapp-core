@@ -54,7 +54,7 @@ const CamposDestacados = () => {
           return (
           <div 
             key={campo.id} 
-            onClick={() => navigate("/campos-disponibles")}
+            onClick={() => navigate("/crear-partido", { state: { campoId: campo.id } })}
             className="min-w-[260px] sm:min-w-[300px] shrink-0 snap-center rounded-3xl overflow-hidden relative group cursor-pointer shadow-sm hover:shadow-xl transition-all duration-500"
           >
             {/* Imagen del campo con fallback al gradiente */}
