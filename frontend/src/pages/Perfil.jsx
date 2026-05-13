@@ -9,7 +9,7 @@ import Dropdown from "../components/Dropdown";
 import { getFieldImage } from "../utils/fieldMapping";
 import { formatDate } from "../utils/dateFormatter";
 import { useTheme } from "../context/ThemeContext";
-import Toast from "../components/Toast";
+import { useToast } from "../context/ToastContext";
 
 const DEFAULT_AVATAR = "https://ui-avatars.com/api/?background=10b981&color=fff";
 
@@ -28,12 +28,9 @@ const Perfil = () => {
   const [historial, setHistorial] = useState([]);
   const [showAllHistory, setShowAllHistory] = useState(false);
   const { theme, setTheme } = useTheme();
-  const [toast, setToast] = useState({ show: false, message: "", type: "success" });
+  const { showToast } = useToast();
   const [invitaciones, setInvitaciones] = useState([]);
 
-  const showToast = (message, type = "success") => {
-    setToast({ show: true, message, type });
-  };
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -41,7 +38,7 @@ const Perfil = () => {
         setLoading(true);
         const storedUser = localStorage.getItem("user");
         if (!storedUser) {
-          throw new Error("No hay sesión activa. Por favor, inicia sesión.");
+          throw new Error(t("profile.no_session_error"));
         }
 
         const { id, token } = JSON.parse(storedUser);
@@ -50,7 +47,7 @@ const Perfil = () => {
         const userResp = await fetch(`${API_BASE_URL}/users/${id}`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
-        if (!userResp.ok) throw new Error("Error al obtener perfil.");
+        if (!userResp.ok) throw new Error(t("profile.fetch_profile_error"));
         const userData = await userResp.json();
         
         const userSession = JSON.parse(storedUser);
@@ -167,7 +164,7 @@ const Perfil = () => {
         showToast(msg, "error");
       }
     } catch (err) {
-      showToast("Error al responder invitación", "error");
+      showToast(t("profile.respond_invitation_error"), "error");
     }
   };
 
@@ -177,7 +174,7 @@ const Perfil = () => {
     if (!file) return;
 
     if (file.size > 5 * 1024 * 1024) {
-      showToast("La imagen es demasiado grande. Máximo 5MB.", "error");
+      showToast(t("profile.avatar_too_large"), "error");
       return;
     }
 
@@ -203,14 +200,14 @@ const Perfil = () => {
         
         setUser(prev => ({ ...prev, avatar: updatedUser.avatar }));
         window.dispatchEvent(new Event("storage"));
-        showToast("Avatar actualizado con éxito ✨", "success");
+        showToast(t("profile.avatar_update_success"), "success");
       } else {
         const errorMsg = await resp.text();
-        showToast(errorMsg || "Error al subir la imagen. Verifica el tamaño y formato.", "error");
+        showToast(errorMsg || t("profile.avatar_upload_error"), "error");
       }
     } catch (err) {
       console.error(err);
-      showToast("Error al cambiar avatar.", "error");
+      showToast(t("profile.avatar_change_error"), "error");
     } finally {
       setUploadingAvatar(false);
     }
@@ -221,7 +218,7 @@ const Perfil = () => {
     const selected = [positions.p1, positions.p2, positions.p3].filter(p => p !== "");
     const uniqueSelected = new Set(selected);
     if (selected.length !== uniqueSelected.size) {
-      showToast("No puedes seleccionar la misma posición varias veces. Por favor, elige posiciones diferentes.", "error");
+      showToast(t("profile.duplicate_positions_error"), "error");
       return;
     }
 
@@ -241,13 +238,13 @@ const Perfil = () => {
         })
       });
       if (resp.ok) {
-        showToast("Preferencias guardadas correctamente ⚽", "success");
+        showToast(t("profile.save_preferences_success"), "success");
       } else {
-        showToast("Hubo un problema al guardar tus preferencias.", "error");
+        showToast(t("profile.save_preferences_error"), "error");
       }
     } catch (error) {
       console.error(error);
-      showToast("Error de conexión al guardar preferencias.", "error");
+      showToast(t("profile.connection_error_preferences"), "error");
     } finally {
       setSaving(false);
     }
@@ -657,15 +654,15 @@ const Perfil = () => {
                                     </div>
                                     
                                     {isDraw ? (
-                                        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500" title="Empate">
+                                        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500" title={t("profile.draw")}>
                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M20 12H4" /></svg>
                                         </div>
                                     ) : isWin ? (
-                                        <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600" title="Victoria">
+                                        <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600" title={t("profile.win")}>
                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
                                         </div>
                                     ) : (
-                                        <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-600" title="Derrota">
+                                        <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-600" title={t("profile.loss")}>
                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12" /></svg>
                                         </div>
                                     )}
@@ -683,12 +680,6 @@ const Perfil = () => {
         </motion.div>
       </main>
 
-      <Toast 
-        show={toast.show} 
-        message={toast.message} 
-        type={toast.type} 
-        onClose={() => setToast({ ...toast, show: false })} 
-      />
     </div>
   );
 };

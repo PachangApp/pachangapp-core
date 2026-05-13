@@ -7,7 +7,7 @@ import Navbar from "../components/Navbar";
 import MatchCard from "../components/MatchCard";
 import Dropdown from "../components/Dropdown";
 import DatePicker from "../components/DatePicker";
-import Toast from "../components/Toast";
+import { useToast } from "../context/ToastContext";
 
 // Función auxiliar para extraer el "recinto base" de un campo
 const getBaseName = (name) => {
@@ -24,8 +24,7 @@ const getBaseName = (name) => {
 const BuscarPartidos = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [toastConfig, setToastConfig] = useState({ show: false, message: "", type: "success" });
-  const showToast = (message, type = "success") => setToastConfig({ show: true, message, type });
+  const { showToast } = useToast();
   const [matches, setMatches] = useState([]);
   const [allCampos, setAllCampos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -291,12 +290,6 @@ const BuscarPartidos = () => {
             </button>
         </div>
       </main>
-      <Toast 
-        show={toastConfig.show} 
-        message={toastConfig.message} 
-        type={toastConfig.type} 
-        onClose={() => setToastConfig(prev => ({ ...prev, show: false }))} 
-      />
     </div>
   );
 };

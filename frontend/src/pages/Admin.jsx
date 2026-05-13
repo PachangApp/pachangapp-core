@@ -5,12 +5,13 @@ import Navbar from "../components/Navbar";
 import { API_BASE_URL } from "../apiConfig";
 import Dropdown from "../components/Dropdown";
 import Counter from "../components/Counter";
-import Toast from "../components/Toast";
+import { useToast } from "../context/ToastContext";
+import ConfirmModal from "../components/modals/ConfirmModal";
+import EditFieldModal from "../components/modals/EditFieldModal";
 
 const Admin = () => {
   const { t } = useTranslation();
-  const [toastConfig, setToastConfig] = useState({ show: false, message: "", type: "success" });
-  const showToast = (message, type = "success") => { setToastConfig({ show: true, message, type }); };
+  const { showToast } = useToast();
   const [users, setUsers] = useState([]);
   const [campos, setCampos] = useState([]);
   const [activeTab, setActiveTab] = useState("campos");
@@ -28,6 +29,7 @@ const Admin = () => {
   const [importLoading, setImportLoading] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState({ show: false, type: null, id: null });
   const [editingCampo, setEditingCampo] = useState(null);
 
   const handleImageUpload = async (e, isEdit = false) => {
@@ -156,15 +158,36 @@ const Admin = () => {
   };
 
   const handleDeleteCampo = async (id) => {
-    if (!window.confirm(t('admin.fields.delete_confirm'))) return;
     try {
-      await fetch(`${API_BASE_URL}/admin/campos/${id}`, {
+      const resp = await fetch(`${API_BASE_URL}/admin/campos/${id}`, {
         method: "DELETE",
         headers: { "Authorization": `Bearer ${token}` }
       });
-      fetchData();
+      if (resp.ok) {
+        showToast(t('admin.fields.delete_success') || "Campo borrado", "success");
+        fetchData();
+      } else {
+        showToast(t('admin.fields.delete_error'), "error");
+      }
     } catch {
-      showToast(t('admin.fields.delete_error'), "error");
+      showToast(t('admin.errors.network_error'), "error");
+    }
+  };
+
+  const handleDeleteUser = async (id) => {
+    try {
+      const resp = await fetch(`${API_BASE_URL}/admin/users/${id}`, {
+        method: "DELETE",
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (resp.ok) {
+        showToast(t('admin.users.delete_success'), "success");
+        fetchData();
+      } else {
+        showToast(t('admin.users.delete_error'), "error");
+      }
+    } catch {
+      showToast(t('admin.errors.network_error'), "error");
     }
   };
 
@@ -349,7 +372,7 @@ const Admin = () => {
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                     </button>
                     <button 
-                        onClick={() => handleDeleteCampo(campo.id)}
+                        onClick={() => setDeleteConfirm({ show: true, type: 'campo', id: campo.id })}
                         className="cursor-pointer p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-all"
                     >
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
@@ -383,11 +406,20 @@ const Admin = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      {u.role === 'USER' ? (
-                        <button onClick={() => handleChangeRole(u.id, 'ADMIN')} className="cursor-pointer text-emerald-600 font-bold text-sm hover:underline">{t('admin.users.make_admin')}</button>
-                      ) : (
-                        <button onClick={() => handleChangeRole(u.id, 'USER')} className="cursor-pointer text-gray-400 font-bold text-sm hover:underline">{t('admin.users.make_user')}</button>
-                      )}
+                      <div className="flex items-center justify-end gap-3">
+                        {u.role === 'USER' ? (
+                          <button onClick={() => handleChangeRole(u.id, 'ADMIN')} className="cursor-pointer text-emerald-600 font-bold text-sm hover:underline">{t('admin.users.make_admin')}</button>
+                        ) : (
+                          <button onClick={() => handleChangeRole(u.id, 'USER')} className="cursor-pointer text-gray-400 font-bold text-sm hover:underline">{t('admin.users.make_user')}</button>
+                        )}
+                        <button 
+                          onClick={() => setDeleteConfirm({ show: true, type: 'user', id: u.id })}
+                          className="cursor-pointer p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-all"
+                          title={t('admin.users.delete_user')}
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -486,133 +518,29 @@ const Admin = () => {
         )}
       </main>
 
-      {/* Modal de Edición */}
-      <AnimatePresence>
-        {showEditModal && editingCampo && (
-            <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 backdrop-blur-md bg-black/40">
-                <motion.div 
-                    initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                    animate={{ scale: 1, opacity: 1, y: 0 }}
-                    exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                    className="bg-white dark:bg-slate-900 rounded-3xl md:rounded-4xl p-5 md:p-8 max-w-xl w-full shadow-2xl relative flex flex-col max-h-[90vh] border border-gray-100 dark:border-slate-800"
-                >
-                    <div className="flex justify-between items-start mb-4 md:mb-6">
-                        <h2 className="text-lg md:text-2xl font-black text-gray-900 dark:text-white pr-8">
-                          {t('admin.fields.edit_title')} <span className="text-emerald-600 block sm:inline">{editingCampo.nombre}</span>
-                        </h2>
-                        <button onClick={() => setShowEditModal(false)} className="absolute top-4 right-4 p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full transition-colors z-10">
-                            <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
-                        </button>
-                    </div>
+      <EditFieldModal 
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        field={editingCampo}
+        setField={setEditingCampo}
+        onSubmit={handleUpdateCampo}
+        uploadingImage={uploadingImage}
+        onImageUpload={handleImageUpload}
+        t={t}
+      />
 
-                    <form onSubmit={handleUpdateCampo} className="flex-1 overflow-y-auto px-1.5 space-y-3 md:space-y-4">
-                        {/* NOMBRE */}
-                        <div>
-                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{t('admin.fields.name')}</label>
-                            <textarea 
-                                required
-                                rows="1"
-                                className="w-full p-3 bg-gray-50 dark:bg-slate-800 text-gray-900 dark:text-white font-bold rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 border border-transparent dark:border-slate-700 resize-none text-sm"
-                                value={editingCampo.nombre}
-                                onChange={e => setEditingCampo({...editingCampo, nombre: e.target.value})}
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-3">
-                            <Dropdown
-                                label={t('admin.fields.sport')}
-                                options={[
-                                    { label: t('sports.futbol_11'), value: "Fútbol 11" },
-                                    { label: t('sports.futbol_7'), value: "Fútbol 7" },
-                                    { label: t('sports.futbol_sala'), value: "Fútbol Sala" },
-                                    { label: "Pádel", value: "Pádel" }
-                                ]}
-                                value={editingCampo.deporte}
-                                onChange={val => setEditingCampo({...editingCampo, deporte: val})}
-                            />
-                            <Counter
-                                label={t('admin.fields.price_per_hour')}
-                                value={editingCampo.precioPorHora}
-                                onChange={val => setEditingCampo({...editingCampo, precioPorHora: val})}
-                                step={1}
-                                min={0}
-                            />
-                        </div>
-
-                        <Dropdown
-                            label={t('admin.fields.zone')}
-                            options={[
-                                "Granada Centro", "Granada Norte", "Zaidín", "Chana", "Albayzín", "Realejo", "Ronda", "Genil", "Armilla", "Maracena"
-                            ]}
-                            value={editingCampo.zona}
-                            onChange={val => setEditingCampo({...editingCampo, zona: val})}
-                        />
-
-                        <div className="grid grid-cols-2 gap-3">
-                            <div>
-                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{t('admin.fields.image')}</label>
-                                <div className="relative group cursor-pointer" onClick={() => document.getElementById('edit-file-input').click()}>
-                                    <div className="h-24 rounded-2xl overflow-hidden bg-gray-100 dark:bg-slate-800 border-2 border-dashed border-gray-200 dark:border-slate-700 group-hover:border-emerald-500 transition-colors">
-                                        {editingCampo.imagenUrl ? (
-                                            <img src={editingCampo.imagenUrl} alt="Field" className="w-full h-full object-cover" />
-                                        ) : (
-                                            <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                                                <svg className="w-5 h-5 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                                                <span className="text-[8px] font-bold uppercase tracking-tighter">{t('admin.fields.click_to_upload')}</span>
-                                            </div>
-                                        )}
-                                        {uploadingImage && (
-                                            <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-2xl">
-                                                <span className="text-white text-[10px] font-bold">{t('admin.fields.uploading')}</span>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <input 
-                                        id="edit-file-input"
-                                        type="file" 
-                                        className="hidden" 
-                                        accept="image/*" 
-                                        onChange={(e) => handleImageUpload(e, true)} 
-                                    />
-                                </div>
-                            </div>
-                            <div>
-                                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{t('admin.fields.google_maps_link')}</label>
-                                <textarea 
-                                    className="w-full h-24 p-2 bg-gray-50 dark:bg-slate-800 text-gray-900 dark:text-white font-bold rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 border border-transparent dark:border-slate-700 text-[10px] resize-none"
-                                    value={editingCampo.locationUrl}
-                                    onChange={e => setEditingCampo({...editingCampo, locationUrl: e.target.value})}
-                                    placeholder="https://maps.app.goo.gl/..."
-                                />
-                            </div>
-                        </div>
-
-                        <div className="flex gap-2 pt-2">
-                            <button 
-                                type="button"
-                                onClick={() => setShowEditModal(false)}
-                                className="flex-1 py-3 border border-gray-100 dark:border-slate-800 text-gray-400 font-bold rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors uppercase text-[10px] tracking-widest"
-                            >
-                                {t('admin.fields.cancel')}
-                            </button>
-                            <button 
-                                type="submit"
-                                disabled={uploadingImage}
-                                className="flex-[2] py-3 bg-emerald-600 text-white font-black rounded-xl shadow-lg shadow-emerald-200 dark:shadow-none hover:bg-emerald-700 transition-all transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 uppercase text-[10px] tracking-widest"
-                            >
-                                {t('admin.fields.save_changes')}
-                            </button>
-                        </div>
-                    </form>
-                </motion.div>
-            </div>
-        )}
-      </AnimatePresence>
-      <Toast 
-        show={toastConfig.show} 
-        message={toastConfig.message} 
-        type={toastConfig.type} 
-        onClose={() => setToastConfig(prev => ({ ...prev, show: false }))} 
+      <ConfirmModal 
+        isOpen={deleteConfirm.show}
+        onClose={() => setDeleteConfirm({ show: false, type: null, id: null })}
+        onConfirm={() => {
+          if (deleteConfirm.type === 'campo') handleDeleteCampo(deleteConfirm.id);
+          else handleDeleteUser(deleteConfirm.id);
+        }}
+        title={deleteConfirm.type === 'campo' ? t('admin.fields.delete_title') || "Eliminar Pista" : t('admin.users.delete_user')}
+        message={deleteConfirm.type === 'campo' ? t('admin.fields.delete_confirm') : t('admin.users.delete_confirm')}
+        confirmText={t('admin.fields.delete_title') || "Confirmar"}
+        cancelText={t('admin.fields.cancel')}
+        type="danger"
       />
     </div>
   );

@@ -19,6 +19,8 @@ import VerifyEmail from "./pages/VerifyEmail";
 import BottomNav from "./components/home/BottomNav";
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
+import { ToastProvider } from "./context/ToastContext";
+import { ThemeProvider } from "./context/ThemeContext";
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -72,9 +74,13 @@ const AppContent = () => {
 };
 function App() {
   return (
-    <Router>
-      <AppContent />
-    </Router>
+    <ThemeProvider>
+      <ToastProvider>
+        <Router>
+          <AppContent />
+        </Router>
+      </ToastProvider>
+    </ThemeProvider>
   );
 }
 

@@ -7,7 +7,7 @@ import { API_BASE_URL } from "../apiConfig";
 import Navbar from "../components/Navbar";
 import { formatDate } from "../utils/dateFormatter";
 import Counter from "../components/Counter";
-import Toast from "../components/Toast";
+import { useToast } from "../context/ToastContext";
 
 const MatchDetail = () => {
   const { t } = useTranslation();
@@ -19,7 +19,7 @@ const MatchDetail = () => {
   const [scores, setScores] = useState({ a: 0, b: 0 });
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
-  const [toast, setToast] = useState({ show: false, message: "", type: "success" });
+  const { showToast } = useToast();
 
   const currentUser = useMemo(() => JSON.parse(localStorage.getItem("user") || "{}"), []);
   const authHeaders = useMemo(() => currentUser.token ? { "Authorization": `Bearer ${currentUser.token}` } : {}, [currentUser.token]);
@@ -78,13 +78,13 @@ const MatchDetail = () => {
       if (response.ok) {
         setShowFinalizeModal(false);
         fetchMatch();
-        setToast({ show: true, message: t('match_detail.finalize_success'), type: "success" });
+        showToast(t('match_detail.finalize_success'), "success");
       } else {
         const errorMsg = await response.text();
-        setToast({ show: true, message: errorMsg || t('match_detail.finalize_error'), type: "error" });
+        showToast(errorMsg || t('match_detail.finalize_error'), "error");
       }
     } catch (err) {
-      setToast({ show: true, message: t('match_detail.finalize_error'), type: "error" });
+      showToast(t('match_detail.finalize_error'), "error");
     }
   };
 
@@ -443,12 +443,6 @@ const MatchDetail = () => {
         )}
       </AnimatePresence>
 
-      <Toast 
-        show={toast.show} 
-        message={toast.message} 
-        type={toast.type} 
-        onClose={() => setToast({ ...toast, show: false })} 
-      />
     </div>
   );
 };

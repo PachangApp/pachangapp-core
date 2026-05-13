@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Dropdown from "../components/Dropdown";
 import { API_BASE_URL } from "../apiConfig";
 import Navbar from "../components/Navbar";
-import Toast from "../components/Toast";
+import { useToast } from "../context/ToastContext";
 
 // Componente para mostrar la información del jugador en cuadrícula
 const PlayerCard = ({ player, onShowProfile, onInvite }) => {
@@ -290,11 +290,7 @@ const BuscarJugadores = () => {
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [toast, setToast] = useState({ show: false, message: "", type: "success" });
-
-  const showToast = (message, type = "success") => {
-    setToast({ show: true, message, type });
-  };
+  const { showToast } = useToast();
 
   const [selectedPosition, setSelectedPosition] = useState("all");
 
@@ -504,12 +500,6 @@ const BuscarJugadores = () => {
           onSendInvite={handleSendInvitation}
         />
 
-        <Toast 
-          show={toast.show} 
-          message={toast.message} 
-          type={toast.type} 
-          onClose={() => setToast({ ...toast, show: false })} 
-        />
 
       </div>
     </div>
