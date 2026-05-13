@@ -65,7 +65,10 @@
     "checking_availability": "Checking availability in real time...",
     "available_schedules": "Available Schedules",
     "occupied": "Occupied",
-    "field_num": "Field {{number}}"
+    "field_num": "Field {{number}}",
+    "success_popup": "Match created successfully! Entering the match...",
+    "error_login": "You must log in to create a match.",
+    "error_network": "Network error while creating the match."
   },
   "profile": {
     "member_since": "Member since {{date}}",
@@ -115,7 +118,10 @@
     "load_more": "Load more matches",
     "no_matches_found": "No matches found",
     "no_matches_desc": "Try adjusting the search filters or creating a match yourself.",
-    "create_match_btn": "Create Match"
+    "create_match_btn": "Create Match",
+    "login_required": "You must log in to join.",
+    "join_success": "You have successfully joined!",
+    "network_error": "Network error"
   },
   "match_card": {
     "no_image": "No image",
@@ -319,6 +325,9 @@
     "prize": "Prize",
     "teams": "Teams",
     "enter_btn": "Enter",
+    "create_error": "Error creating the tournament.",
+    "create_success": "Tournament created successfully!",
+    "connection_error": "Connection error",
     "filters": {
       "all": "All",
       "open_tournaments": "Open Tournaments",

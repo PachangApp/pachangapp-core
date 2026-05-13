@@ -5,9 +5,12 @@ import Navbar from "../components/Navbar";
 import { API_BASE_URL } from "../apiConfig";
 import Dropdown from "../components/Dropdown";
 import Counter from "../components/Counter";
+import Toast from "../components/Toast";
 
 const Admin = () => {
   const { t } = useTranslation();
+  const [toastConfig, setToastConfig] = useState({ show: false, message: "", type: "success" });
+  const showToast = (message, type = "success") => { setToastConfig({ show: true, message, type }); };
   const [users, setUsers] = useState([]);
   const [campos, setCampos] = useState([]);
   const [activeTab, setActiveTab] = useState("campos");
@@ -50,7 +53,7 @@ const Admin = () => {
           setNewCampo(prev => ({ ...prev, imagenUrl: url }));
         }
       } else {
-        alert(t('admin.fields.upload_error') || "Error al subir imagen");
+        showToast(t('admin.fields.upload_error') || "Error al subir imagen", "error");
       }
     } catch (error) {
       console.error("Error uploading field image:", error);
@@ -79,7 +82,7 @@ const Admin = () => {
       window.URL.revokeObjectURL(url);
       a.remove();
     } catch (error) {
-      alert(`${t('admin.errors.download_error')}: ${error.message}`);
+      showToast(`${t('admin.errors.download_error')}: ${error.message}`, "error");
     }
   };
 
@@ -119,12 +122,12 @@ const Admin = () => {
         })
       });
       if (resp.ok) {
-        alert(t('admin.fields.field_created'));
+        showToast(t('admin.fields.field_created'), "success");
         setNewCampo({ nombre: "", zona: "Granada Centro", deporte: "Fútbol 7", precioPorHora: 25.0, disponible: true, parentCampoId: "", imagenUrl: "", locationUrl: "" });
         fetchData();
       }
     } catch {
-      alert(t('admin.fields.create_error'));
+      showToast(t('admin.fields.create_error'), "error");
     }
   };
 
@@ -143,12 +146,12 @@ const Admin = () => {
         })
       });
       if (resp.ok) {
-        alert(t('admin.fields.field_updated') || "Campo actualizado");
+        showToast(t('admin.fields.field_updated') || "Campo actualizado", "success");
         setShowEditModal(false);
         fetchData();
       }
     } catch {
-      alert(t('admin.fields.update_error') || "Error al actualizar");
+      showToast(t('admin.fields.update_error') || "Error al actualizar", "error");
     }
   };
 
@@ -161,7 +164,7 @@ const Admin = () => {
       });
       fetchData();
     } catch {
-      alert(t('admin.fields.delete_error'));
+      showToast(t('admin.fields.delete_error'), "error");
     }
   };
 
@@ -174,7 +177,7 @@ const Admin = () => {
       });
       fetchData();
     } catch {
-      alert(t('admin.users.role_error'));
+      showToast(t('admin.users.role_error'), "error");
     }
   };
 
@@ -449,14 +452,14 @@ const Admin = () => {
                         body: formData
                       });
                       if (resp.ok) {
-                        alert(t('admin.files.import_success'));
+                        showToast(t('admin.files.import_success'), "success");
                         setImportFile(null);
                         fetchData();
                       } else {
-                        alert(t('admin.files.import_error'));
+                        showToast(t('admin.files.import_error'), "error");
                       }
                     } catch {
-                      alert(t('admin.errors.network_error'));
+                      showToast(t('admin.errors.network_error'), "error");
                     } finally {
                       setImportLoading(false);
                     }
@@ -571,6 +574,12 @@ const Admin = () => {
             </div>
         )}
       </AnimatePresence>
+      <Toast 
+        show={toastConfig.show} 
+        message={toastConfig.message} 
+        type={toastConfig.type} 
+        onClose={() => setToastConfig(prev => ({ ...prev, show: false }))} 
+      />
     </div>
   );
 };

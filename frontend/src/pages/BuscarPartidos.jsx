@@ -7,6 +7,7 @@ import Navbar from "../components/Navbar";
 import MatchCard from "../components/MatchCard";
 import Dropdown from "../components/Dropdown";
 import DatePicker from "../components/DatePicker";
+import Toast from "../components/Toast";
 
 // Función auxiliar para extraer el "recinto base" de un campo
 const getBaseName = (name) => {
@@ -23,6 +24,8 @@ const getBaseName = (name) => {
 const BuscarPartidos = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [toastConfig, setToastConfig] = useState({ show: false, message: "", type: "success" });
+  const showToast = (message, type = "success") => setToastConfig({ show: true, message, type });
   const [matches, setMatches] = useState([]);
   const [allCampos, setAllCampos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -95,7 +98,7 @@ const BuscarPartidos = () => {
   const handleJoin = async (partidoId) => {
     const storedUser = localStorage.getItem("user");
     if (!storedUser) {
-      alert("Debes iniciar sesión para unirte.");
+      showToast(t('search_matches.login_required'), "warning");
       return;
     }
     const { id: userId, token } = JSON.parse(storedUser);
@@ -106,16 +109,16 @@ const BuscarPartidos = () => {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (response.ok) {
-        alert("¡Te has unido con éxito!");
+        showToast(t('search_matches.join_success'), "success");
         fetchMatches(0, false); // Recargar
         setPage(0);
       } else {
         const error = await response.text();
-        alert(error);
+        showToast(error, "error");
       }
     } catch (err) {
       console.error("Error al unirse:", err);
-      alert("Error de red");
+      showToast(t('search_matches.network_error'), "error");
     }
   };
 
@@ -288,6 +291,12 @@ const BuscarPartidos = () => {
             </button>
         </div>
       </main>
+      <Toast 
+        show={toastConfig.show} 
+        message={toastConfig.message} 
+        type={toastConfig.type} 
+        onClose={() => setToastConfig(prev => ({ ...prev, show: false }))} 
+      />
     </div>
   );
 };

@@ -65,7 +65,10 @@
     "checking_availability": "Consultando disponibilidad en tiempo real...",
     "available_schedules": "Horarios Disponibles",
     "occupied": "Ocupado",
-    "field_num": "Campo {{number}}"
+    "field_num": "Campo {{number}}",
+    "success_popup": "¡Partido creado con éxito! Entrando al partido...",
+    "error_login": "Debes iniciar sesión para crear un partido.",
+    "error_network": "Error de red al crear el partido."
   },
   "profile": {
     "member_since": "Miembro desde {{date}}",
@@ -116,7 +119,10 @@
     "load_more": "Cargar más partidos",
     "no_matches_found": "No se encontraron partidos",
     "no_matches_desc": "Prueba ajustando los filtros de búsqueda o abriendo tú un partido.",
-    "create_match_btn": "Crear Partido"
+    "create_match_btn": "Crear Partido",
+    "login_required": "Debes iniciar sesión para unirte.",
+    "join_success": "¡Te has unido con éxito!",
+    "network_error": "Error de red"
   },
   "match_card": {
     "no_image": "Sin imagen",
@@ -324,6 +330,9 @@
     "prize": "Premio",
     "teams": "Equipos",
     "enter_btn": "Entrar",
+    "create_error": "Error al crear el torneo. Mira la consola.",
+    "create_success": "¡Torneo creado con éxito!",
+    "connection_error": "Error de conexión",
     "filters": {
       "all": "Todos",
       "open_tournaments": "Torneos Open",

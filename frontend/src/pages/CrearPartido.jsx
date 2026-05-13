@@ -222,7 +222,7 @@ const CrearPartido = () => {
   const handleExecuteCreateMatch = async () => {
     const storedUser = localStorage.getItem("user");
     if (!storedUser) {
-      setMessage({ text: "Debes iniciar sesión para crear un partido.", type: "error" });
+      setMessage({ text: t('create_match.error_login'), type: "error" });
       return;
     }
 
@@ -248,7 +248,7 @@ const CrearPartido = () => {
 
       if (response.ok) {
         const data = await response.json();
-        setToast({ show: true, message: "¡Partido creado con éxito! Entrando al partido...", type: "success" });
+        setToast({ show: true, message: t('create_match.success_popup'), type: "success" });
         setTimeout(() => {
           navigate(`/partido/${data.id}`);
         }, 1500);
@@ -258,7 +258,7 @@ const CrearPartido = () => {
       }
     } catch (err) {
       console.error("Error al crear partido:", err);
-      setMessage({ text: "Error de red al crear el partido.", type: "error" });
+      setMessage({ text: t('create_match.error_network'), type: "error" });
     } finally {
       setSubmitting(false);
     }
