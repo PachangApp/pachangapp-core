@@ -193,22 +193,22 @@ const Admin = () => {
         <h1 className="text-3xl font-black text-gray-900 mb-8">{t('admin.panel_title')}</h1>
 
         {/* Tabs */}
-        <div className="flex gap-4 mb-8 bg-gray-200 p-1 rounded-2xl w-fit">
+        <div className="flex flex-wrap gap-2 md:gap-4 mb-8 bg-gray-200 p-1 rounded-2xl w-full md:w-fit">
           <button 
             onClick={() => setActiveTab("campos")}
-            className={`cursor-pointer px-6 py-2 rounded-xl font-bold transition-all ${activeTab === 'campos' ? 'bg-white text-emerald-600 shadow-sm' : 'text-gray-500'}`}
+            className={`flex-1 md:flex-none cursor-pointer px-4 md:px-6 py-2 rounded-xl font-bold transition-all text-sm md:text-base ${activeTab === 'campos' ? 'bg-white text-emerald-600 shadow-sm' : 'text-gray-500'}`}
           >
             {t('admin.tabs.manage_fields')}
           </button>
           <button 
             onClick={() => setActiveTab("usuarios")}
-            className={`cursor-pointer px-6 py-2 rounded-xl font-bold transition-all ${activeTab === 'usuarios' ? 'bg-white text-emerald-600 shadow-sm' : 'text-gray-500'}`}
+            className={`flex-1 md:flex-none cursor-pointer px-4 md:px-6 py-2 rounded-xl font-bold transition-all text-sm md:text-base ${activeTab === 'usuarios' ? 'bg-white text-emerald-600 shadow-sm' : 'text-gray-500'}`}
           >
             {t('admin.tabs.manage_users')}
           </button>
           <button 
             onClick={() => setActiveTab("archivos")}
-            className={`cursor-pointer px-6 py-2 rounded-xl font-bold transition-all ${activeTab === 'archivos' ? 'bg-white text-emerald-600 shadow-sm' : 'text-gray-500'}`}
+            className={`flex-1 md:flex-none cursor-pointer px-4 md:px-6 py-2 rounded-xl font-bold transition-all text-sm md:text-base ${activeTab === 'archivos' ? 'bg-white text-emerald-600 shadow-sm' : 'text-gray-500'}`}
           >
             {t('admin.tabs.manage_files')}
           </button>
@@ -217,7 +217,7 @@ const Admin = () => {
 
         {activeTab === 'campos' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm h-fit">
+            <div className="bg-white p-5 md:p-6 rounded-3xl border border-gray-100 shadow-sm h-fit">
               <h2 className="text-xl font-black text-emerald-600 mb-6">{t('admin.fields.new_field')}</h2>
               <form onSubmit={handleCreateCampo} className="space-y-4">
                 <div>
@@ -306,7 +306,7 @@ const Admin = () => {
 
             <div className="lg:col-span-2 space-y-4">
               {campos.map(campo => (
-                <div key={campo.id} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex justify-between items-center group/item hover:border-emerald-200 transition-colors">
+                <div key={campo.id} className="bg-white p-4 md:p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 group/item hover:border-emerald-200 transition-colors">
                   <div className="flex items-center gap-4">
                     <div className="w-16 h-16 rounded-2xl overflow-hidden bg-gray-50 border border-gray-100">
                         {campo.imagenUrl ? (
@@ -317,7 +317,7 @@ const Admin = () => {
                     </div>
                     <div>
                         <h3 className="font-bold text-gray-900">{campo.nombre}</h3>
-                        <div className="flex gap-2 mt-1">
+                        <div className="flex flex-wrap gap-2 mt-1">
                         <span className="text-[10px] bg-gray-100 px-2 py-0.5 rounded-full font-bold text-gray-500 uppercase tracking-tight">{campo.deporte}</span>
                         <span className="text-[10px] bg-emerald-100 px-2 py-0.5 rounded-full font-bold text-emerald-600 tracking-tight">{campo.precioPorHora}€/h</span>
                         {campo.parentCampoId && (
@@ -350,9 +350,9 @@ const Admin = () => {
         )}
 
         {activeTab === 'usuarios' && (
-          <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-            <table className="w-full text-left">
-              <thead className="bg-gray-50 border-b border-gray-100">
+          <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-x-auto">
+            <table className="min-w-full text-left">
+              <thead className="bg-gray-50 border-b border-gray-100 whitespace-nowrap">
                 <tr>
                   <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase">{t('admin.users.user')}</th>
                   <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase">{t('admin.users.email')}</th>
@@ -360,7 +360,7 @@ const Admin = () => {
                   <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-right">{t('admin.users.actions')}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-gray-50 whitespace-nowrap">
                 {users.map(u => (
                   <tr key={u.id}>
                     <td className="px-6 py-4 font-bold text-gray-900">{u.username}</td>
@@ -387,7 +387,7 @@ const Admin = () => {
         {activeTab === 'archivos' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="space-y-6">
-              <div className="bg-white p-8 rounded-4xl border border-gray-100 shadow-sm">
+              <div className="bg-white p-6 md:p-8 rounded-4xl border border-gray-100 shadow-sm">
                 <div className="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 mb-6">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                 </div>
@@ -401,7 +401,7 @@ const Admin = () => {
                 </button>
               </div>
 
-              <div className="bg-white p-8 rounded-4xl border border-gray-100 shadow-sm text-white bg-linear-to-br from-emerald-600 to-teal-700">
+              <div className="bg-white p-6 md:p-8 rounded-4xl border border-gray-100 shadow-sm text-white bg-linear-to-br from-emerald-600 to-teal-700">
                 <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center text-white mb-6">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                 </div>
@@ -416,7 +416,7 @@ const Admin = () => {
               </div>
             </div>
 
-            <div className="bg-white p-8 rounded-4xl border border-gray-100 shadow-sm h-fit">
+            <div className="bg-white p-6 md:p-8 rounded-4xl border border-gray-100 shadow-sm h-fit">
               <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600 mb-6">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
               </div>
@@ -482,23 +482,25 @@ const Admin = () => {
                     initial={{ scale: 0.9, opacity: 0, y: 20 }}
                     animate={{ scale: 1, opacity: 1, y: 0 }}
                     exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                    className="bg-white rounded-4xl p-8 max-w-xl w-full shadow-2xl relative overflow-hidden"
+                    className="bg-white dark:bg-slate-900 rounded-3xl md:rounded-4xl p-5 md:p-8 max-w-xl w-full shadow-2xl relative flex flex-col max-h-[90vh] border border-gray-100 dark:border-slate-800"
                 >
-                    <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-2xl font-black text-gray-900">Editar <span className="text-emerald-600">{editingCampo.nombre}</span></h2>
-                        <button onClick={() => setShowEditModal(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                    <div className="flex justify-between items-start mb-4 md:mb-6">
+                        <h2 className="text-lg md:text-2xl font-black text-gray-900 dark:text-white pr-8">
+                          Editar <span className="text-emerald-600 block sm:inline">{editingCampo.nombre}</span>
+                        </h2>
+                        <button onClick={() => setShowEditModal(false)} className="absolute top-4 right-4 p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full transition-colors z-10">
                             <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
                         </button>
                     </div>
 
-                    <form onSubmit={handleUpdateCampo} className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <form onSubmit={handleUpdateCampo} className="flex-1 overflow-y-auto pr-1 space-y-4 md:space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                             <div className="space-y-4">
                                 <div>
                                     <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Nombre de la pista</label>
                                     <input 
                                         type="text" required
-                                        className="w-full p-3 bg-gray-50 text-gray-900 font-bold rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"
+                                        className="w-full p-3 bg-gray-50 dark:bg-slate-800 text-gray-900 dark:text-white font-bold rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 border border-transparent dark:border-slate-700"
                                         value={editingCampo.nombre}
                                         onChange={e => setEditingCampo({...editingCampo, nombre: e.target.value})}
                                     />
@@ -527,11 +529,11 @@ const Admin = () => {
                                 <div>
                                     <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Imagen (S3)</label>
                                     <div className="flex flex-col gap-3">
-                                        <div className="w-full h-32 rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 relative group">
+                                        <div className="w-full h-28 md:h-32 rounded-2xl overflow-hidden bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-700 relative group">
                                             {editingCampo.imagenUrl ? (
                                                 <img src={editingCampo.imagenUrl} className="w-full h-full object-cover" alt="preview" />
                                             ) : (
-                                                <div className="w-full h-full flex items-center justify-center text-gray-300 text-xs font-bold uppercase tracking-widest">Sin imagen</div>
+                                                <div className="w-full h-full flex items-center justify-center text-gray-300 dark:text-gray-600 text-xs font-bold uppercase tracking-widest">Sin imagen</div>
                                             )}
                                             <label className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
                                                 <span className="text-white text-xs font-bold uppercase tracking-widest">{uploadingImage ? 'Subiendo...' : 'Cambiar Foto'}</span>
@@ -545,7 +547,7 @@ const Admin = () => {
                                     <input 
                                         type="text"
                                         placeholder="https://maps.app.goo.gl/..."
-                                        className="w-full p-3 bg-gray-50 text-gray-900 font-bold rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 text-xs"
+                                        className="w-full p-3 bg-gray-50 dark:bg-slate-800 text-gray-900 dark:text-white font-bold rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 text-xs border border-transparent dark:border-slate-700"
                                         value={editingCampo.locationUrl || ""}
                                         onChange={e => setEditingCampo({...editingCampo, locationUrl: e.target.value})}
                                     />
@@ -553,18 +555,18 @@ const Admin = () => {
                             </div>
                         </div>
 
-                        <div className="flex gap-4 pt-4 border-t border-gray-50">
+                        <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-50 dark:border-slate-800">
                             <button 
                                 type="button"
                                 onClick={() => setShowEditModal(false)}
-                                className="flex-1 py-4 font-black text-gray-400 hover:text-gray-600 transition-colors uppercase tracking-widest text-xs"
+                                className="flex-1 py-3 md:py-4 font-black text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors uppercase tracking-widest text-xs"
                             >
                                 Cancelar
                             </button>
                             <button 
                                 type="submit"
                                 disabled={uploadingImage}
-                                className="flex-1 bg-emerald-600 text-white font-black py-4 rounded-2xl shadow-xl shadow-emerald-100 uppercase tracking-widest text-xs disabled:opacity-50"
+                                className="flex-1 bg-emerald-600 text-white font-black py-3 md:py-4 rounded-xl md:rounded-2xl shadow-xl shadow-emerald-500/10 uppercase tracking-widest text-xs disabled:opacity-50"
                             >
                                 Guardar Cambios
                             </button>
