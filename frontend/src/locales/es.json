@@ -398,7 +398,11 @@
     "chat": {
       "live_chat": "Live Chat",
       "online": "ONLINE",
-      "cheer_team": "Anima a tu equipo..."
+      "cheer_team": "Anima a tu equipo...",
+      "translate": "Traducir",
+      "translated_by_ai": "Traducido por IA",
+      "translating": "Traduciendo...",
+      "translate_error": "Error al traducir"
     }
   },
   "explore_hub": {
@@ -439,5 +443,13 @@
     "finalize_success": "¡Partido finalizado y estadísticas repartidas! 🏆",
     "finalize_error": "Error al finalizar el partido",
     "view_location": "Ver Ubicación"
+  },
+  "match_chat": {
+    "title": "Chat del Partido 💬",
+    "placeholder": "Escribe un mensaje...",
+    "translate": "Traducir",
+    "translated_by_ai": "Traducido por IA",
+    "translating": "Traduciendo...",
+    "translate_error": "Error al traducir"
   }
 }

@@ -397,7 +397,11 @@
     "chat": {
       "live_chat": "Live Chat",
       "online": "ONLINE",
-      "cheer_team": "Cheer your team..."
+      "cheer_team": "Cheer your team...",
+      "translate": "Translate",
+      "translated_by_ai": "Translated by AI",
+      "translating": "Translating...",
+      "translate_error": "Translation error"
     }
   },
   "explore_hub": {
@@ -437,5 +441,13 @@
   "match_detail": {
     "finalize_success": "Match finalized and stats distributed! 🏆",
     "finalize_error": "Error finalizing match"
+  },
+  "match_chat": {
+    "title": "Match Chat 💬",
+    "placeholder": "Write a message...",
+    "translate": "Translate",
+    "translated_by_ai": "Translated by AI",
+    "translating": "Translating...",
+    "translate_error": "Translation error"
   }
 }
