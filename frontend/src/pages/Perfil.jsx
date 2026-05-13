@@ -285,10 +285,10 @@ const Perfil = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 font-['Inter',sans-serif] pb-32 md:pb-0">
+    <div className="min-h-screen bg-gray-50 flex flex-col font-['Inter',sans-serif]">
       <Navbar />
 
-      <main className="max-w-5xl mx-auto px-4 py-12">
+      <main className="max-w-5xl mx-auto px-4 py-12 pb-32 md:pb-12">
         {/* Cabecera de Perfil */}
         <motion.section 
           initial={{ opacity: 0, y: 30 }}
