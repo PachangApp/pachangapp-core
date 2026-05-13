@@ -11,6 +11,7 @@ import { getFieldImage } from "../utils/fieldMapping";
 import { formatDate } from "../utils/dateFormatter";
 import { useTheme } from "../context/ThemeContext";
 import { useToast } from "../context/ToastContext";
+import { PLAYER_POSITIONS } from "../constants/positions";
 
 const DEFAULT_AVATAR = "https://ui-avatars.com/api/?background=10b981&color=fff";
 
@@ -274,14 +275,12 @@ const Perfil = () => {
     );
   }
 
-  const allPositions = [
-    t('profile.positions.goalkeeper'),
-    t('profile.positions.center_back'),
-    t('profile.positions.fullback'),
-    t('profile.positions.midfielder'),
-    t('profile.positions.winger'),
-    t('profile.positions.striker'),
-    t('profile.positions.versatile')
+  const positionOptions = [
+    { label: t('profile.select'), value: "" },
+    ...PLAYER_POSITIONS.map(pos => ({ 
+      label: t(`profile.positions.${pos.id}`), 
+      value: pos.labelEs 
+    }))
   ];
 
   return (
@@ -510,7 +509,7 @@ const Perfil = () => {
                   <Dropdown
                     key={i}
                     label={t('profile.position_num', { num: i })}
-                    options={[{ label: t('profile.select'), value: "" }, ...allPositions.map(pos => ({ label: pos, value: pos }))]}
+                    options={positionOptions}
                     value={positions[`p${i}`]}
                     onChange={(val) => setPositions({ ...positions, [`p${i}`]: val })}
                     className="w-full"

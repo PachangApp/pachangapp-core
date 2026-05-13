@@ -161,6 +161,7 @@
   },
   "admin": {
     "panel_title": "Admin Panel",
+    "delete": "Delete",
     "tabs": {
       "manage_fields": "Manage Fields",
       "manage_users": "Manage Users",

@@ -538,7 +538,7 @@ const Admin = () => {
         }}
         title={deleteConfirm.type === 'campo' ? t('admin.fields.delete_title') || "Eliminar Pista" : t('admin.users.delete_user')}
         message={deleteConfirm.type === 'campo' ? t('admin.fields.delete_confirm') : t('admin.users.delete_confirm')}
-        confirmText={t('admin.fields.delete_title') || "Confirmar"}
+        confirmText={t('admin.delete')}
         cancelText={t('admin.fields.cancel')}
         type="danger"
       />

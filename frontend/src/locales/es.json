@@ -161,6 +161,7 @@
   },
   "admin": {
     "panel_title": "Panel de Administración",
+    "delete": "Eliminar",
     "tabs": {
       "manage_fields": "Gestionar Campos",
       "manage_users": "Gestionar Usuarios",
