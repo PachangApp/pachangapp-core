@@ -123,12 +123,19 @@ const CrearTorneo = () => {
                 </div>
                 <div className="grow">
                   <input 
+                    id="tournament-image-input"
                     type="file" 
                     accept="image/jpeg, image/png, image/jpg"
                     onChange={handleImageChange}
                     disabled={uploadingImage}
-                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 transition-colors"
+                    className="hidden"
                   />
+                  <label 
+                    htmlFor="tournament-image-input"
+                    className="inline-block px-6 py-2.5 bg-emerald-50 text-emerald-700 font-bold rounded-full cursor-pointer hover:bg-emerald-100 transition-colors text-sm"
+                  >
+                    {t('create_tournament.select_image_btn')}
+                  </label>
                   <p className="mt-2 text-xs text-gray-500">{t('create_tournament.image_hint')}</p>
                 </div>
               </div>

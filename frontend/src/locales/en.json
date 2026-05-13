@@ -500,6 +500,7 @@
     "level_intermediate": "Intermediate",
     "level_advanced": "Advanced",
     "publish_btn": "Publish Tournament",
+    "select_image_btn": "Select Image",
     "error_create": "Error creating. Check console.",
     "error_connection": "Connection error"
   }

@@ -501,6 +501,7 @@
     "level_intermediate": "Intermedio",
     "level_advanced": "Avanzado",
     "publish_btn": "Publicar Torneo",
+    "select_image_btn": "Seleccionar Imagen",
     "error_create": "Error al crear. Mira la consola.",
     "error_connection": "Error de conexión"
   }
