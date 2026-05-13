@@ -150,7 +150,8 @@ const MatchDetail = () => {
 
   if (loading && !match) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center font-sans">
+      <div className="min-h-screen bg-gray-50 flex flex-col pb-32 md:pb-0">
+        <Navbar />
         <LoadingScreen text={t('match_detail.loading')} />
       </div>
     );
