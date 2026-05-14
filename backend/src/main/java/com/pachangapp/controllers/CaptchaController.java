@@ -11,10 +11,10 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/captcha")
+@RequestMapping("/api/security")
 public class CaptchaController {
 
-    @PostMapping("/verify")
+    @PostMapping("/verify-challenge")
     public ResponseEntity<?> verifyCaptcha(@RequestBody Map<String, List<Integer>> payload) {
         List<Integer> selectedPositions = payload.get("selectedPositions");
         List<Integer> targetPositions = payload.get("targetPositions");
