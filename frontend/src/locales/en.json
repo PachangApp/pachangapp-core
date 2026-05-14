@@ -504,5 +504,12 @@
     "select_image_btn": "Select Image",
     "error_create": "Error creating. Check console.",
     "error_connection": "Connection error"
+  },
+  "chatbot": {
+    "welcome": "Hi! I'm PachanBot ⚽. How can I help you today?",
+    "option_reserve": "🏟️ How do I book a pitch?",
+    "option_join": "⚽ How do I join a match?",
+    "option_search": "🔍 Find an open match",
+    "placeholder": "Type a message..."
   }
 }

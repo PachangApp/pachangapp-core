@@ -1,18 +1,20 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import pachanBotImg from "../assets/PachanBot.png";
 
 const ChatBot = () => {
+  const { t, i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     { 
       id: 1, 
-      text: "¡Hola! Soy PachanBot ⚽. ¿En qué puedo ayudarte hoy?", 
+      text: t("chatbot.welcome", "¡Hola! Soy PachanBot ⚽. ¿En qué puedo ayudarte hoy?"), 
       sender: "bot",
       options: [
-        { id: "reservar", text: "🏟️ ¿Cómo reservo pista?", action: "como_reservar" },
-        { id: "unirse", text: "⚽ ¿Cómo me uno a un partido?", action: "como_unirse" },
-        { id: "buscar", text: "🔍 Buscar partido libre", action: "buscar_partido" }
+        { id: "reservar", text: t("chatbot.option_reserve", "🏟️ ¿Cómo reservo pista?"), action: "como_reservar" },
+        { id: "unirse", text: t("chatbot.option_join", "⚽ ¿Cómo me uno a un partido?"), action: "como_unirse" },
+        { id: "buscar", text: t("chatbot.option_search", "🔍 Buscar partido libre"), action: "buscar_partido" }
       ]
     }
   ]);
@@ -40,13 +42,14 @@ const ChatBot = () => {
     
     // Si es una acción, buscamos el texto descriptivo para que la IA tenga contexto
     let chatInput = actionOrText;
-    if (actionOrText === "buscar_partido") chatInput = "Busca partidos libres disponibles para jugar";
+    if (actionOrText === "buscar_partido") chatInput = "Búscame qué partidos hay próximamente";
     if (actionOrText === "como_reservar") chatInput = "¿Cómo puedo reservar una pista?";
     if (actionOrText === "como_unirse") chatInput = "¿Cómo me uno a un partido existente?";
 
     const payload = {
       action: isAction ? actionOrText : "buscar_partido",
       chatInput: chatInput,
+      language: i18n.language || "es",
       sessionId: "sesion-pachangueo" // Identificador para la memoria de n8n
     };
 
@@ -176,7 +179,7 @@ const ChatBot = () => {
             <div className="p-4 bg-white border-t border-gray-100 flex gap-2">
               <input 
                 type="text"
-                placeholder="Escribe un mensaje..."
+                placeholder={t("chatbot.placeholder", "Escribe un mensaje...")}
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleSend()}

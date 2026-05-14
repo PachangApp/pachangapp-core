@@ -505,5 +505,12 @@
     "select_image_btn": "Seleccionar Imagen",
     "error_create": "Error al crear. Mira la consola.",
     "error_connection": "Error de conexión"
+  },
+  "chatbot": {
+    "welcome": "¡Hola! Soy PachanBot ⚽. ¿En qué puedo ayudarte hoy?",
+    "option_reserve": "🏟️ ¿Cómo reservo pista?",
+    "option_join": "⚽ ¿Cómo me uno a un partido?",
+    "option_search": "🔍 Buscar partido libre",
+    "placeholder": "Escribe un mensaje..."
   }
 }
