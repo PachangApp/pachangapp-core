@@ -39,7 +39,7 @@ const TournamentChat = ({ tournamentId }) => {
     }
   }, [tournamentId, storedUser.token]);
 
-  // Initial fetch + polling every 3s (same pattern as MatchDetail)
+  // Initial fetch + polling every 3s
   useEffect(() => {
     fetchMessages();
     const interval = setInterval(fetchMessages, 3000);

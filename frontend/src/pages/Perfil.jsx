@@ -77,7 +77,7 @@ const Perfil = () => {
           p3: userData.posicion3 || ""
         });
 
-        // Cargar Mis Partidos (Primera Página)
+        // Cargar Mis Partidos 
         await fetchMisPartidos(0, false);
         
         // Cargar Historial
