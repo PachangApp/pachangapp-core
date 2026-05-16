@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import Dropdown from "../components/Dropdown";
 import { API_BASE_URL } from "../apiConfig";
 import Navbar from "../components/Navbar";
-import Toast from "../components/Toast";
+import { useToast } from "../context/ToastContext";
+import { PLAYER_POSITIONS } from "../constants/positions";
 
 // Componente para mostrar la información del jugador en cuadrícula
 const PlayerCard = ({ player, onShowProfile, onInvite }) => {
@@ -13,21 +14,9 @@ const PlayerCard = ({ player, onShowProfile, onInvite }) => {
   
   // Función para traducir la posición que viene de la BD
   const getTranslatedPosition = (pos) => {
-    if (!pos) return t("search_players.all_positions");
-    
-    // Mapeo de nombres en BD (español) a claves de traducción
-    const positionMap = {
-      "Portero": "goalkeeper",
-      "Defensa Central": "center_back",
-      "Lateral": "fullback",
-      "Mediocentro": "midfielder",
-      "Extremo": "winger",
-      "Delantero Centro": "striker",
-      "Polivalente": "versatile"
-    };
-    
-    const key = positionMap[pos];
-    return key ? t(`profile.positions.${key}`) : pos;
+    if (!pos) return "";
+    const found = PLAYER_POSITIONS.find(p => p.labelEs === pos);
+    return found ? t(`profile.positions.${found.id}`) : pos;
   };
 
   const mainPosition = getTranslatedPosition(player.posicion1);
@@ -159,41 +148,17 @@ const PlayerProfileModal = ({ player, isOpen, onClose }) => {
                 <div className="flex flex-wrap gap-2">
                   {player.posicion1 && (
                     <span className="bg-gray-100 text-gray-700 px-3 py-1.5 rounded-xl text-sm font-medium border border-gray-200">
-                      {t(`profile.positions.${{
-                        "Portero": "goalkeeper",
-                        "Defensa Central": "center_back",
-                        "Lateral": "fullback",
-                        "Mediocentro": "midfielder",
-                        "Extremo": "winger",
-                        "Delantero Centro": "striker",
-                        "Polivalente": "versatile"
-                      }[player.posicion1] || "versatile"}`)}
+                      {getTranslatedPosition(player.posicion1)}
                     </span>
                   )}
                   {player.posicion2 && (
                     <span className="bg-gray-50 text-gray-600 px-3 py-1.5 rounded-xl text-sm font-medium border border-gray-100">
-                      {t(`profile.positions.${{
-                        "Portero": "goalkeeper",
-                        "Defensa Central": "center_back",
-                        "Lateral": "fullback",
-                        "Mediocentro": "midfielder",
-                        "Extremo": "winger",
-                        "Delantero Centro": "striker",
-                        "Polivalente": "versatile"
-                      }[player.posicion2] || "versatile"}`)}
+                      {getTranslatedPosition(player.posicion2)}
                     </span>
                   )}
                   {player.posicion3 && (
                     <span className="bg-gray-50 text-gray-600 px-3 py-1.5 rounded-xl text-sm font-medium border border-gray-100">
-                      {t(`profile.positions.${{
-                        "Portero": "goalkeeper",
-                        "Defensa Central": "center_back",
-                        "Lateral": "fullback",
-                        "Mediocentro": "midfielder",
-                        "Extremo": "winger",
-                        "Delantero Centro": "striker",
-                        "Polivalente": "versatile"
-                      }[player.posicion3] || "versatile"}`)}
+                      {getTranslatedPosition(player.posicion3)}
                     </span>
                   )}
                   
@@ -290,11 +255,7 @@ const BuscarJugadores = () => {
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [toast, setToast] = useState({ show: false, message: "", type: "success" });
-
-  const showToast = (message, type = "success") => {
-    setToast({ show: true, message, type });
-  };
+  const { showToast } = useToast();
 
   const [selectedPosition, setSelectedPosition] = useState("all");
 
@@ -407,13 +368,10 @@ const BuscarJugadores = () => {
 
   const positionOptions = [
     { value: "all", label: t("search_players.all_positions") },
-    { value: t("profile.positions.goalkeeper"), label: t("profile.positions.goalkeeper") },
-    { value: t("profile.positions.center_back"), label: t("profile.positions.center_back") },
-    { value: t("profile.positions.fullback"), label: t("profile.positions.fullback") },
-    { value: t("profile.positions.midfielder"), label: t("profile.positions.midfielder") },
-    { value: t("profile.positions.winger"), label: t("profile.positions.winger") },
-    { value: t("profile.positions.striker"), label: t("profile.positions.striker") },
-    { value: t("profile.positions.versatile"), label: t("profile.positions.versatile") }
+    ...PLAYER_POSITIONS.map(pos => ({ 
+      value: pos.labelEs, 
+      label: t(`profile.positions.${pos.id}`) 
+    }))
   ];
 
   return (
@@ -504,12 +462,6 @@ const BuscarJugadores = () => {
           onSendInvite={handleSendInvitation}
         />
 
-        <Toast 
-          show={toast.show} 
-          message={toast.message} 
-          type={toast.type} 
-          onClose={() => setToast({ ...toast, show: false })} 
-        />
 
       </div>
     </div>

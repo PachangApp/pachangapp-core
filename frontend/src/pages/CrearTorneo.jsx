@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import Navbar from "../components/Navbar";
 import Dropdown from "../components/Dropdown";
 import DatePicker from "../components/DatePicker";
@@ -8,6 +9,7 @@ import { API_BASE_URL } from '../apiConfig';
 import { uploadImage } from '../services/uploadService';
 
 const CrearTorneo = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -74,11 +76,11 @@ const CrearTorneo = () => {
         const tournament = await res.json();
         navigate(`/torneos/${tournament.id}`);
       } else {
-        alert("Error al crear. Mira la consola.");
+        alert(t('create_tournament.error_create'));
       }
     } catch (error) {
       console.error(error);
-      alert("Error de conexión");
+      alert(t('create_tournament.error_connection'));
     } finally {
       setLoading(false);
     }
@@ -94,8 +96,8 @@ const CrearTorneo = () => {
           className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100"
         >
           <div className="bg-gradient-to-br from-emerald-600 to-emerald-800 p-10 text-white relative">
-            <h1 className="text-4xl font-black mb-3 relative z-10 tracking-tight">Crear Nuevo Torneo</h1>
-            <p className="text-emerald-50 opacity-90 relative z-10 font-medium text-lg">Configura los detalles de tu competición paso a paso.</p>
+            <h1 className="text-4xl font-black mb-3 relative z-10 tracking-tight">{t('create_tournament.title')}</h1>
+            <p className="text-emerald-50 opacity-90 relative z-10 font-medium text-lg">{t('create_tournament.subtitle')}</p>
             <div className="absolute right-0 top-0 w-48 h-48 bg-white opacity-5 rounded-bl-full translate-x-8 -translate-y-8"></div>
           </div>
 
@@ -103,11 +105,11 @@ const CrearTorneo = () => {
             
             {/* Imagen del Torneo */}
             <div className="mb-8">
-              <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Imagen del Torneo</label>
+              <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">{t('create_tournament.image_label')}</label>
               <div className="flex items-center gap-6">
                 <div className="w-32 h-32 rounded-2xl overflow-hidden bg-gray-100 border-2 border-dashed border-gray-300 shrink-0 relative">
                   {formData.imageUrl ? (
-                    <img src={formData.imageUrl} alt="Torneo" className="w-full h-full object-cover" />
+                    <img src={formData.imageUrl} alt={t('create_tournament.image_alt')} className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-400">
                       <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
@@ -121,13 +123,20 @@ const CrearTorneo = () => {
                 </div>
                 <div className="grow">
                   <input 
+                    id="tournament-image-input"
                     type="file" 
                     accept="image/jpeg, image/png, image/jpg"
                     onChange={handleImageChange}
                     disabled={uploadingImage}
-                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 transition-colors"
+                    className="hidden"
                   />
-                  <p className="mt-2 text-xs text-gray-500">JPG, PNG permitidos. Máx 5MB.</p>
+                  <label 
+                    htmlFor="tournament-image-input"
+                    className="inline-block px-6 py-2.5 bg-emerald-50 text-emerald-700 font-bold rounded-full cursor-pointer hover:bg-emerald-100 transition-colors text-sm"
+                  >
+                    {t('create_tournament.select_image_btn')}
+                  </label>
+                  <p className="mt-2 text-xs text-gray-500">{t('create_tournament.image_hint')}</p>
                 </div>
               </div>
             </div>
@@ -135,32 +144,32 @@ const CrearTorneo = () => {
             {/* Row 1 */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
-                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Nombre del Torneo</label>
+                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">{t('create_tournament.name_label')}</label>
                 <input 
                   type="text" required name="name" 
                   value={formData.name} onChange={handleChange}
                   className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all font-bold text-gray-900 placeholder-gray-300 shadow-inner"
-                  placeholder="Ej: Champions League Local" 
+                  placeholder={t('create_tournament.name_placeholder')} 
                 />
               </div>
               <div>
-                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Ubicación</label>
+                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">{t('create_tournament.location_label')}</label>
                 <input 
                   type="text" required name="location" 
                   value={formData.location} onChange={handleChange}
                   className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all font-bold text-gray-900 placeholder-gray-300 shadow-inner"
-                  placeholder="Ej: Polideportivo Centro" 
+                  placeholder={t('create_tournament.location_placeholder')} 
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Descripción</label>
+              <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">{t('create_tournament.description_label')}</label>
               <textarea 
                 required name="description" rows="4"
                 value={formData.description} onChange={handleChange}
                 className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all font-bold text-gray-900 placeholder-gray-300 shadow-inner resize-none"
-                placeholder="Reglas, formato, detalles de la competición..." 
+                placeholder={t('create_tournament.description_placeholder')} 
               ></textarea>
             </div>
 
@@ -168,14 +177,14 @@ const CrearTorneo = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
                 <DatePicker
-                  label="Fecha de Inicio"
+                  label={t('create_tournament.start_date')}
                   value={formData.startDate}
                   onChange={(val) => setFormData({ ...formData, startDate: val })}
                 />
               </div>
               <div>
                 <DatePicker
-                  label="Fecha de Fin"
+                  label={t('create_tournament.end_date')}
                   value={formData.endDate}
                   onChange={(val) => setFormData({ ...formData, endDate: val })}
                 />
@@ -186,11 +195,11 @@ const CrearTorneo = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div>
                 <Dropdown
-                  label="Deporte"
+                  label={t('create_tournament.sport')}
                   options={[
-                    { value: 'FUTBOL_SALA', label: 'Fútbol Sala' },
-                    { value: 'FUTBOL_7', label: 'Fútbol 7' },
-                    { value: 'FUTBOL_11', label: 'Fútbol 11' }
+                    { value: 'FUTBOL_SALA', label: t('create_tournament.sport_futsal') },
+                    { value: 'FUTBOL_7', label: t('create_tournament.sport_f7') },
+                    { value: 'FUTBOL_11', label: t('create_tournament.sport_f11') }
                   ]}
                   value={formData.sportType}
                   onChange={(val) => setFormData({ ...formData, sportType: val })}
@@ -198,10 +207,10 @@ const CrearTorneo = () => {
               </div>
               <div>
                 <Dropdown
-                  label="Formato"
+                  label={t('create_tournament.format')}
                   options={[
-                    { value: 'ELIMINATORIAS', label: 'Eliminatorias' },
-                    { value: 'LIGA', label: 'Liga' }
+                    { value: 'ELIMINATORIAS', label: t('create_tournament.format_brackets') },
+                    { value: 'LIGA', label: t('create_tournament.format_league') }
                   ]}
                   value={formData.type}
                   onChange={(val) => setFormData({ ...formData, type: val })}
@@ -209,11 +218,11 @@ const CrearTorneo = () => {
               </div>
               <div>
                 <Dropdown
-                  label="Max. Equipos"
+                  label={t('create_tournament.max_teams')}
                   options={[
-                    { value: '4', label: '4 Equipos' },
-                    { value: '8', label: '8 Equipos' },
-                    { value: '16', label: '16 Equipos' }
+                    { value: '4', label: t('create_tournament.teams_count', { count: 4 }) },
+                    { value: '8', label: t('create_tournament.teams_count', { count: 8 }) },
+                    { value: '16', label: t('create_tournament.teams_count', { count: 16 }) }
                   ]}
                   value={String(formData.maxTeams)}
                   onChange={(val) => setFormData({ ...formData, maxTeams: val })}
@@ -224,21 +233,21 @@ const CrearTorneo = () => {
             {/* Details */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
-                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Premio</label>
+                <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">{t('create_tournament.prize_label')}</label>
                 <input 
                   type="text" required name="prize" 
                   value={formData.prize} onChange={handleChange}
                   className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 placeholder-gray-300 shadow-inner"
-                  placeholder="Ej: Trofeo + 500€" 
+                  placeholder={t('create_tournament.prize_placeholder')} 
                 />
               </div>
               <div>
                 <Dropdown
-                  label="Nivel"
+                  label={t('create_tournament.level')}
                   options={[
-                    { value: 'BASICO', label: 'Básico' },
-                    { value: 'INTERMEDIO', label: 'Intermedio' },
-                    { value: 'AVANZADO', label: 'Avanzado' }
+                    { value: 'BASICO', label: t('create_tournament.level_basic') },
+                    { value: 'INTERMEDIO', label: t('create_tournament.level_intermediate') },
+                    { value: 'AVANZADO', label: t('create_tournament.level_advanced') }
                   ]}
                   value={formData.level}
                   onChange={(val) => setFormData({ ...formData, level: val })}
@@ -258,7 +267,7 @@ const CrearTorneo = () => {
                   <span className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin"></span>
                 ) : (
                   <>
-                    Publicar Torneo
+                    {t('create_tournament.publish_btn')}
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="w-6 h-6">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                     </svg>

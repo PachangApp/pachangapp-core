@@ -4,12 +4,14 @@ import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import { API_BASE_URL } from "../apiConfig";
 import Navbar from "../components/Navbar";
+import LoadingScreen from "../components/LoadingScreen";
 import StatCard from "../components/StatCard";
 import Dropdown from "../components/Dropdown";
 import { getFieldImage } from "../utils/fieldMapping";
 import { formatDate } from "../utils/dateFormatter";
 import { useTheme } from "../context/ThemeContext";
-import Toast from "../components/Toast";
+import { useToast } from "../context/ToastContext";
+import { PLAYER_POSITIONS } from "../constants/positions";
 
 const DEFAULT_AVATAR = "https://ui-avatars.com/api/?background=10b981&color=fff";
 
@@ -28,12 +30,9 @@ const Perfil = () => {
   const [historial, setHistorial] = useState([]);
   const [showAllHistory, setShowAllHistory] = useState(false);
   const { theme, setTheme } = useTheme();
-  const [toast, setToast] = useState({ show: false, message: "", type: "success" });
+  const { showToast } = useToast();
   const [invitaciones, setInvitaciones] = useState([]);
 
-  const showToast = (message, type = "success") => {
-    setToast({ show: true, message, type });
-  };
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -41,7 +40,7 @@ const Perfil = () => {
         setLoading(true);
         const storedUser = localStorage.getItem("user");
         if (!storedUser) {
-          throw new Error("No hay sesión activa. Por favor, inicia sesión.");
+          throw new Error(t("profile.no_session_error"));
         }
 
         const { id, token } = JSON.parse(storedUser);
@@ -50,7 +49,7 @@ const Perfil = () => {
         const userResp = await fetch(`${API_BASE_URL}/users/${id}`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
-        if (!userResp.ok) throw new Error("Error al obtener perfil.");
+        if (!userResp.ok) throw new Error(t("profile.fetch_profile_error"));
         const userData = await userResp.json();
         
         const userSession = JSON.parse(storedUser);
@@ -78,7 +77,7 @@ const Perfil = () => {
           p3: userData.posicion3 || ""
         });
 
-        // Cargar Mis Partidos (Primera Página)
+        // Cargar Mis Partidos 
         await fetchMisPartidos(0, false);
         
         // Cargar Historial
@@ -167,7 +166,7 @@ const Perfil = () => {
         showToast(msg, "error");
       }
     } catch (err) {
-      showToast("Error al responder invitación", "error");
+      showToast(t("profile.respond_invitation_error"), "error");
     }
   };
 
@@ -177,7 +176,7 @@ const Perfil = () => {
     if (!file) return;
 
     if (file.size > 5 * 1024 * 1024) {
-      showToast("La imagen es demasiado grande. Máximo 5MB.", "error");
+      showToast(t("profile.avatar_too_large"), "error");
       return;
     }
 
@@ -203,14 +202,14 @@ const Perfil = () => {
         
         setUser(prev => ({ ...prev, avatar: updatedUser.avatar }));
         window.dispatchEvent(new Event("storage"));
-        showToast("Avatar actualizado con éxito ✨", "success");
+        showToast(t("profile.avatar_update_success"), "success");
       } else {
         const errorMsg = await resp.text();
-        showToast(errorMsg || "Error al subir la imagen. Verifica el tamaño y formato.", "error");
+        showToast(errorMsg || t("profile.avatar_upload_error"), "error");
       }
     } catch (err) {
       console.error(err);
-      showToast("Error al cambiar avatar.", "error");
+      showToast(t("profile.avatar_change_error"), "error");
     } finally {
       setUploadingAvatar(false);
     }
@@ -221,7 +220,7 @@ const Perfil = () => {
     const selected = [positions.p1, positions.p2, positions.p3].filter(p => p !== "");
     const uniqueSelected = new Set(selected);
     if (selected.length !== uniqueSelected.size) {
-      showToast("No puedes seleccionar la misma posición varias veces. Por favor, elige posiciones diferentes.", "error");
+      showToast(t("profile.duplicate_positions_error"), "error");
       return;
     }
 
@@ -241,13 +240,13 @@ const Perfil = () => {
         })
       });
       if (resp.ok) {
-        showToast("Preferencias guardadas correctamente ⚽", "success");
+        showToast(t("profile.save_preferences_success"), "success");
       } else {
-        showToast("Hubo un problema al guardar tus preferencias.", "error");
+        showToast(t("profile.save_preferences_error"), "error");
       }
     } catch (error) {
       console.error(error);
-      showToast("Error de conexión al guardar preferencias.", "error");
+      showToast(t("profile.connection_error_preferences"), "error");
     } finally {
       setSaving(false);
     }
@@ -257,13 +256,7 @@ const Perfil = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col">
         <Navbar />
-        <div className="grow flex items-center justify-center">
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="w-12 h-12 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin"
-          ></motion.div>
-        </div>
+        <LoadingScreen text={t('search_matches.loading')} />
       </div>
     );
   }
@@ -282,21 +275,19 @@ const Perfil = () => {
     );
   }
 
-  const allPositions = [
-    t('profile.positions.goalkeeper'),
-    t('profile.positions.center_back'),
-    t('profile.positions.fullback'),
-    t('profile.positions.midfielder'),
-    t('profile.positions.winger'),
-    t('profile.positions.striker'),
-    t('profile.positions.versatile')
+  const positionOptions = [
+    { label: t('profile.select'), value: "" },
+    ...PLAYER_POSITIONS.map(pos => ({ 
+      label: t(`profile.positions.${pos.id}`), 
+      value: pos.labelEs 
+    }))
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 font-['Inter',sans-serif] pb-32 md:pb-0">
+    <div className="min-h-screen bg-gray-50 flex flex-col font-['Inter',sans-serif]">
       <Navbar />
 
-      <main className="max-w-5xl mx-auto px-4 py-12">
+      <main className="max-w-5xl mx-auto px-4 py-12 pb-32 md:pb-12">
         {/* Cabecera de Perfil */}
         <motion.section 
           initial={{ opacity: 0, y: 30 }}
@@ -518,7 +509,7 @@ const Perfil = () => {
                   <Dropdown
                     key={i}
                     label={t('profile.position_num', { num: i })}
-                    options={[{ label: t('profile.select'), value: "" }, ...allPositions.map(pos => ({ label: pos, value: pos }))]}
+                    options={positionOptions}
                     value={positions[`p${i}`]}
                     onChange={(val) => setPositions({ ...positions, [`p${i}`]: val })}
                     className="w-full"
@@ -657,15 +648,15 @@ const Perfil = () => {
                                     </div>
                                     
                                     {isDraw ? (
-                                        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500" title="Empate">
+                                        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500" title={t("profile.draw")}>
                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M20 12H4" /></svg>
                                         </div>
                                     ) : isWin ? (
-                                        <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600" title="Victoria">
+                                        <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600" title={t("profile.win")}>
                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
                                         </div>
                                     ) : (
-                                        <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-600" title="Derrota">
+                                        <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-600" title={t("profile.loss")}>
                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12" /></svg>
                                         </div>
                                     )}
@@ -683,12 +674,6 @@ const Perfil = () => {
         </motion.div>
       </main>
 
-      <Toast 
-        show={toast.show} 
-        message={toast.message} 
-        type={toast.type} 
-        onClose={() => setToast({ ...toast, show: false })} 
-      />
     </div>
   );
 };

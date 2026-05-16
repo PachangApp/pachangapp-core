@@ -9,7 +9,7 @@ import Dropdown from "../components/Dropdown";
 import DatePicker from "../components/DatePicker";
 import { getFieldImage } from "../utils/fieldMapping";
 import { formatDate } from "../utils/dateFormatter";
-import Toast from "../components/Toast";
+import { useToast } from "../context/ToastContext";
 
 const SubPistaGrid = ({ campoId, fecha, onSelect, timeSlots, submitting }) => {
   const [bookedSlots, setBookedSlots] = useState([]);
@@ -85,8 +85,8 @@ const SubPistaGrid = ({ campoId, fecha, onSelect, timeSlots, submitting }) => {
 };
 
 const CrearPartido = () => {
-
   const { t } = useTranslation();
+  const { showToast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
   const [step, setStep] = useState(1);
@@ -115,7 +115,6 @@ const CrearPartido = () => {
   const [maxJugadores, setMaxJugadores] = useState(10);
   const [submitting, setSubmitting] = useState(false);
   const [paymentData, setPaymentData] = useState({ cardName: "", cardNumber: "", expiry: "", cvc: "" });
-  const [toast, setToast] = useState({ show: false, message: "", type: "success" });
 
   const timeSlots = [
     "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00",
@@ -253,7 +252,7 @@ const CrearPartido = () => {
   const handleExecuteCreateMatch = async () => {
     const storedUser = localStorage.getItem("user");
     if (!storedUser) {
-      setMessage({ text: "Debes iniciar sesión para crear un partido.", type: "error" });
+      setMessage({ text: t('create_match.error_login'), type: "error" });
       return;
     }
 
@@ -279,7 +278,7 @@ const CrearPartido = () => {
 
       if (response.ok) {
         const data = await response.json();
-        setToast({ show: true, message: "¡Partido creado con éxito! Entrando al partido...", type: "success" });
+        showToast(t('create_match.success_popup'), "success");
         setTimeout(() => {
           navigate(`/partido/${data.id}`);
         }, 1500);
@@ -289,7 +288,7 @@ const CrearPartido = () => {
       }
     } catch (err) {
       console.error("Error al crear partido:", err);
-      setMessage({ text: "Error de red al crear el partido.", type: "error" });
+      setMessage({ text: t('create_match.error_network'), type: "error" });
     } finally {
       setSubmitting(false);
     }
@@ -836,12 +835,6 @@ const CrearPartido = () => {
         </div>
       </main>
 
-      <Toast 
-        show={toast.show} 
-        message={toast.message} 
-        type={toast.type} 
-        onClose={() => setToast({ ...toast, show: false })} 
-      />
     </div>
   );
 };

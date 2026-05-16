@@ -14,3 +14,5 @@ export const API_BASE_URL = isProduction
   : isCapacitor 
     ? `http://${PC_IP}:${PORT}/api` 
     : `http://localhost:${PORT}/api`;
+
+export const N8N_TRANSLATE_URL = 'https://n8n.pachangapp.es/webhook/translate';

@@ -109,7 +109,7 @@ const Navbar = () => {
       <div className="xl:hidden flex justify-between items-center px-4 py-2 relative z-50">
         <Link to="/inicio" className="flex items-center gap-2">
           <img src={logo} alt="PachangApp Logo" className="w-[60px] h-[60px] object-contain" />
-          <span className="text-emerald-600 font-black text-xl tracking-tighter leading-none">PachangApp</span>
+          <span className="text-emerald-600 font-black text-xl tracking-tighter leading-none hidden sm:block">PachangApp</span>
         </Link>
         <div className="flex items-center gap-3">
             <ThemeToggle />

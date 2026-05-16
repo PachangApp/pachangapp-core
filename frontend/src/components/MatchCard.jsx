@@ -75,7 +75,19 @@ const MatchCard = ({ match, onJoin }) => {
           <svg className="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.828a2 2 0 01-2.828 0L6.586 16.657M12 14a3 3 0 110-6 3 3 0 010 6z" />
           </svg>
-          {campo.zona}
+          <span className="font-medium">{campo.zona}</span>
+          
+          {campo.locationUrl && (
+            <a 
+              href={campo.locationUrl} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="ml-auto flex items-center gap-1 px-2 py-1 bg-emerald-50 text-emerald-700 text-[10px] font-black uppercase rounded-lg border border-emerald-100 hover:bg-emerald-100 transition-all"
+            >
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+              {t('match_card.view_map') || "Mapa"}
+            </a>
+          )}
         </div>
 
         {isJoined || match.estado === 'FINALIZADO' ? (

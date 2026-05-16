@@ -215,12 +215,18 @@ public class UserController {
         if (user == null) return org.springframework.http.ResponseEntity.notFound().build();
 
         try {
-            String filename = fileService.saveFile(file);
-            String baseUrl = org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromRequestUri(request)
-                    .replacePath(null)
-                    .build()
-                    .toUriString();
-            String fileUrl = baseUrl + "/uploads/" + filename;
+            String result = fileService.saveFile(file);
+            String fileUrl;
+            
+            if (result.startsWith("http")) {
+                fileUrl = result;
+            } else {
+                String baseUrl = org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromRequestUri(request)
+                        .replacePath(null)
+                        .build()
+                        .toUriString();
+                fileUrl = baseUrl + "/uploads/" + result;
+            }
             
             user.setAvatar(fileUrl);
             userRepository.save(user);

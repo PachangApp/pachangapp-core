@@ -70,7 +70,10 @@
     "checking_availability": "Consultando disponibilidad en tiempo real...",
     "available_schedules": "Horarios Disponibles",
     "occupied": "Ocupado",
-    "field_num": "Campo {{number}}"
+    "field_num": "Campo {{number}}",
+    "success_popup": "¡Partido creado con éxito! Entrando al partido...",
+    "error_login": "Debes iniciar sesión para crear un partido.",
+    "error_network": "Error de red al crear el partido."
   },
   "profile": {
     "member_since": "Miembro desde {{date}}",
@@ -108,7 +111,21 @@
     "theme_preferences": "Preferencia de Tema",
     "theme_light": "Modo Normal",
     "theme_dark": "Modo Noche",
-    "theme_description": "Elige el tema que mejor se adapte a tu vista."
+    "theme_description": "Elige el tema que mejor se adapte a tu vista.",
+    "avatar_too_large": "La imagen es demasiado grande. Máximo 5MB.",
+    "avatar_update_success": "Avatar actualizado con éxito ✨",
+    "avatar_upload_error": "Error al subir la imagen. Verifica el tamaño y formato.",
+    "avatar_change_error": "Error al cambiar avatar.",
+    "duplicate_positions_error": "No puedes seleccionar la misma posición varias veces. Por favor, elige posiciones diferentes.",
+    "save_preferences_success": "Preferencias guardadas correctamente ⚽",
+    "save_preferences_error": "Hubo un problema al guardar tus preferencias.",
+    "connection_error_preferences": "Error de conexión al guardar preferencias.",
+    "win": "Victoria",
+    "draw": "Empate",
+    "loss": "Derrota",
+    "no_session_error": "No hay sesión activa. Por favor, inicia sesión.",
+    "fetch_profile_error": "Error al obtener perfil.",
+    "respond_invitation_error": "Error al responder invitación"
   },
   "search_matches": {
     "find_next": "Encuentra tu próximo",
@@ -121,7 +138,10 @@
     "load_more": "Cargar más partidos",
     "no_matches_found": "No se encontraron partidos",
     "no_matches_desc": "Prueba ajustando los filtros de búsqueda o abriendo tú un partido.",
-    "create_match_btn": "Crear Partido"
+    "create_match_btn": "Crear Partido",
+    "login_required": "Debes iniciar sesión para unirte.",
+    "join_success": "¡Te has unido con éxito!",
+    "network_error": "Error de red"
   },
   "match_card": {
     "no_image": "Sin imagen",
@@ -129,6 +149,7 @@
     "match_at": "Partido en {{campo}}",
     "view_result": "Ver Resultado",
     "enter_match": "Entrar al Partido",
+    "view_map": "Ver mapa",
     "join_match": "Unirse al partido"
   },
   "field_card": {
@@ -145,6 +166,7 @@
   },
   "admin": {
     "panel_title": "Panel de Administración",
+    "delete": "Eliminar",
     "tabs": {
       "manage_fields": "Gestionar Campos",
       "manage_users": "Gestionar Usuarios",
@@ -153,16 +175,31 @@
     "fields": {
       "new_field": "Nuevo Campo",
       "name": "Nombre",
+      "image": "Imagen de la pista",
       "sport": "Deporte",
       "price_per_hour": "Precio/h",
       "parent_field": "Campo Padre (Opcional)",
       "none": "Ninguno",
       "create_field": "Crear Campo",
       "child_of": "Hijo de ID: {{id}}",
+      "delete_title": "Eliminar Pista",
       "delete_confirm": "¿Seguro que quieres borrar este campo? Borrarás también su disponibilidad.",
       "field_created": "Campo creado con éxito",
-      "create_error": "Error al crear campo",
-      "delete_error": "Error al borrar"
+      "field_updated": "Campo actualizado con éxito",
+      "upload_error": "Error al subir la imagen",
+      "location": "Ubicación",
+      "zone": "Zona",
+      "image_ready": "✓ Imagen lista",
+      "click_to_upload": "Hacer clic para subir",
+      "uploading": "Subiendo...",
+      "save_changes": "Guardar Cambios",
+      "cancel": "Cancelar",
+      "edit_title": "Editar",
+      "google_maps_link": "Enlace Google Maps",
+      "create_error": "Error al crear el campo",
+      "update_error": "Error al actualizar el campo",
+      "delete_error": "Error al borrar",
+      "delete_success": "Pista eliminada correctamente"
     },
     "users": {
       "user": "Usuario",
@@ -171,6 +208,10 @@
       "actions": "Acciones",
       "make_admin": "Hacer Admin",
       "make_user": "Hacer User",
+      "delete_user": "Eliminar Usuario",
+      "delete_confirm": "¿Estás seguro de que deseas eliminar este usuario? Esta acción es irreversible y borrará todos sus datos.",
+      "delete_success": "Usuario eliminado con éxito",
+      "delete_error": "Error al eliminar el usuario",
       "role_error": "Error al cambiar rol"
     },
     "files": {
@@ -355,6 +396,9 @@
     "prize": "Premio",
     "teams": "Equipos",
     "enter_btn": "Entrar",
+    "create_error": "Error al crear el torneo. Mira la consola.",
+    "create_success": "¡Torneo creado con éxito!",
+    "connection_error": "Error de conexión",
     "filters": {
       "all": "Todos",
       "open_tournaments": "Torneos Open",
@@ -392,7 +436,11 @@
     "chat": {
       "live_chat": "Live Chat",
       "online": "ONLINE",
-      "cheer_team": "Anima a tu equipo..."
+      "cheer_team": "Anima a tu equipo...",
+      "translate": "Traducir",
+      "translated_by_ai": "Traducido por IA",
+      "translating": "Traduciendo...",
+      "translate_error": "Error al traducir"
     }
   },
   "explore_hub": {
@@ -430,7 +478,76 @@
     "load_more": "Ver más jugadores"
   },
   "match_detail": {
+    "loading": "Cargando...",
+    "not_found": "Partido no encontrado",
+    "match_at": "Partido en",
+    "at_time": "a las",
+    "team_white": "Equipo Blanco",
+    "team_black": "Equipo Negro",
+    "local_team": "Equipo Local",
+    "visitor_team": "Equipo Visitante",
+    "players_count": "{{count}} jugadores",
+    "remove_player": "Quitar",
+    "unassigned_players": "Jugadores por asignar ({{count}})",
+    "finalize_btn": "FINALIZAR PARTIDO",
+    "enter_result": "Introducir Resultado",
+    "white": "Blanco",
+    "black": "Negro",
+    "cancel": "Cancelar",
+    "save": "Guardar",
     "finalize_success": "¡Partido finalizado y estadísticas repartidas! 🏆",
-    "finalize_error": "Error al finalizar el partido"
+    "finalize_error": "Error al finalizar el partido",
+    "view_location": "Ver Ubicación",
+    "status_open": "ABIERTO",
+    "status_finished": "FINALIZADO"
+  },
+  "match_chat": {
+    "title": "Chat del Partido 💬",
+    "placeholder": "Escribe un mensaje...",
+    "translate": "Traducir",
+    "translated_by_ai": "Traducido por IA",
+    "translating": "Traduciendo...",
+    "translate_error": "Error al traducir"
+  },
+  "create_tournament": {
+    "title": "Crear Nuevo Torneo",
+    "subtitle": "Configura los detalles de tu competición paso a paso.",
+    "image_label": "Imagen del Torneo",
+    "image_alt": "Torneo",
+    "image_hint": "JPG, PNG permitidos. Máx 5MB.",
+    "name_label": "Nombre del Torneo",
+    "name_placeholder": "Ej: Champions League Local",
+    "location_label": "Ubicación",
+    "location_placeholder": "Ej: Polideportivo Centro",
+    "description_label": "Descripción",
+    "description_placeholder": "Reglas, formato, detalles de la competición...",
+    "start_date": "Fecha de Inicio",
+    "end_date": "Fecha de Fin",
+    "sport": "Deporte",
+    "sport_futsal": "Fútbol Sala",
+    "sport_f7": "Fútbol 7",
+    "sport_f11": "Fútbol 11",
+    "format": "Formato",
+    "format_brackets": "Eliminatorias",
+    "format_league": "Liga",
+    "max_teams": "Max. Equipos",
+    "teams_count": "{{count}} Equipos",
+    "prize_label": "Premio",
+    "prize_placeholder": "Ej: Trofeo + 500€",
+    "level": "Nivel",
+    "level_basic": "Básico",
+    "level_intermediate": "Intermedio",
+    "level_advanced": "Avanzado",
+    "publish_btn": "Publicar Torneo",
+    "select_image_btn": "Seleccionar Imagen",
+    "error_create": "Error al crear. Mira la consola.",
+    "error_connection": "Error de conexión"
+  },
+  "chatbot": {
+    "welcome": "¡Hola! Soy PachanBot ⚽. ¿En qué puedo ayudarte hoy?",
+    "option_reserve": "🏟️ ¿Cómo reservo pista?",
+    "option_join": "⚽ ¿Cómo me uno a un partido?",
+    "option_search": "🔍 Buscar partido libre",
+    "placeholder": "Escribe un mensaje..."
   }
 }

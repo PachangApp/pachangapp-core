@@ -16,6 +16,8 @@ public class Campo {
     private double precioPorHora;
     private boolean disponible;
     private String imagenUrl; // Será "" por ahora
+    @Column(name = "location_url")
+    private String locationUrl; // Enlace a Google Maps
     private Long parentCampoId; // ID del campo de F11 que contiene este F7 (si aplica)
 
     public Campo() {}
@@ -52,4 +54,7 @@ public class Campo {
 
     public String getImagenUrl() { return imagenUrl; }
     public void setImagenUrl(String imagenUrl) { this.imagenUrl = imagenUrl; }
+
+    public String getLocationUrl() { return locationUrl; }
+    public void setLocationUrl(String locationUrl) { this.locationUrl = locationUrl; }
 }

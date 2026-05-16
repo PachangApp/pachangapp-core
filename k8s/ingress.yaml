@@ -28,6 +28,17 @@ spec:
             port:
               number: 80
 
+  - host: www.pachangapp.es
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend-service
+            port:
+              number: 80
+
   # 2. Backend (API REST)
   - host: api.pachangapp.es
     http:

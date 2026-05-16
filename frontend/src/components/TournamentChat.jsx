@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { API_BASE_URL } from '../apiConfig';
+import { API_BASE_URL, N8N_TRANSLATE_URL } from '../apiConfig';
 
 const TournamentChat = ({ tournamentId }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [messages, setMessages] = useState([]);
   const [inputVal, setInputVal] = useState("");
+  const [translations, setTranslations] = useState({});  // { messageId: "texto traducido" }
+  const [translating, setTranslating] = useState({});     // { messageId: true/false }
 
   const getUser = () => {
     try {
@@ -37,7 +39,7 @@ const TournamentChat = ({ tournamentId }) => {
     }
   }, [tournamentId, storedUser.token]);
 
-  // Initial fetch + polling every 3s (same pattern as MatchDetail)
+  // Initial fetch + polling every 3s
   useEffect(() => {
     fetchMessages();
     const interval = setInterval(fetchMessages, 3000);
@@ -69,6 +71,42 @@ const TournamentChat = ({ tournamentId }) => {
     }
   };
 
+  const handleTranslate = async (messageId, originalText) => {
+    // Si ya está traducido, ocultamos la traducción (toggle)
+    if (translations[messageId]) {
+      setTranslations(prev => {
+        const copy = { ...prev };
+        delete copy[messageId];
+        return copy;
+      });
+      return;
+    }
+
+    // Detectar el idioma actual de la app
+    const currentLang = i18n.language === 'es' ? 'Spanish' : 'English';
+
+    setTranslating(prev => ({ ...prev, [messageId]: true }));
+    try {
+      const resp = await fetch(N8N_TRANSLATE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: originalText,
+          targetLang: currentLang
+        })
+      });
+
+      if (resp.ok) {
+        const data = await resp.json();
+        setTranslations(prev => ({ ...prev, [messageId]: data.translatedText }));
+      }
+    } catch (err) {
+      console.error('Translation error:', err);
+    } finally {
+      setTranslating(prev => ({ ...prev, [messageId]: false }));
+    }
+  };
+
   return (
     <div className="bg-white rounded-[2rem] shadow-xl border border-gray-100 flex flex-col h-[550px] min-h-[500px] text-gray-900 overflow-hidden relative z-0">
       {/* Background glow */}
@@ -95,10 +133,11 @@ const TournamentChat = ({ tournamentId }) => {
             messages.map((msg, i) => {
               const senderUsername = msg.sender?.username || 'User';
               const isMe = senderUsername === currentUsername;
+              const msgId = msg.id || `msg-${i}`;
               return (
                 <motion.div
                   layout
-                  key={msg.id || `msg-${i}`}
+                  key={msgId}
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   className={`flex flex-col max-w-[85%] ${isMe ? 'self-end items-end' : 'self-start items-start'}`}
@@ -115,9 +154,48 @@ const TournamentChat = ({ tournamentId }) => {
                   }`}>
                     {msg.content}
                   </div>
-                  <span className="text-[9px] text-gray-300 mt-1 font-medium italic">
-                    {msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
-                  </span>
+
+                  {/* Traducción mostrada debajo */}
+                  {translations[msgId] && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      className={`mt-1 px-4 py-2 rounded-xl text-xs italic ${
+                        isMe
+                          ? 'bg-emerald-500/20 text-emerald-100 border border-emerald-400/20'
+                          : 'bg-blue-50 text-blue-700 border border-blue-100'
+                      }`}
+                    >
+                      {translations[msgId]}
+                      <span className="block text-[9px] mt-1 opacity-60 not-italic font-bold">
+                        ✨ {t('tournaments.chat.translated_by_ai')}
+                      </span>
+                    </motion.div>
+                  )}
+
+                  {/* Fila de timestamp + botón traducir */}
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-[9px] text-gray-300 font-medium italic">
+                      {msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
+                    </span>
+                    {!isMe && (
+                      <button
+                        onClick={() => handleTranslate(msgId, msg.content)}
+                        disabled={translating[msgId]}
+                        className="text-[9px] text-gray-400 hover:text-blue-500 transition-colors font-bold uppercase tracking-wider flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                        title={t('tournaments.chat.translate')}
+                      >
+                        {translating[msgId] ? (
+                          <span className="w-3 h-3 border border-gray-300 border-t-blue-500 rounded-full animate-spin"></span>
+                        ) : (
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                          </svg>
+                        )}
+                        {translations[msgId] ? '✕' : t('tournaments.chat.translate')}
+                      </button>
+                    )}
+                  </div>
                 </motion.div>
               );
             })
