@@ -202,18 +202,27 @@ const CrearPartido = () => {
   const handleSelectCampo = async (campo, forcedDeporte = null) => {
     window.scrollTo(0, 0);
     console.log("Campo seleccionado:", campo);
-    setSelectedCampo(campo);
     
     const currentDeporte = forcedDeporte || filters.deporte;
 
     // Si es F7, necesitamos la disponibilidad de todos sus hijos
     if (currentDeporte === "Fútbol 7") {
-        const hijos = campos.filter(h => Number(h.parentCampoId) === Number(campo.id));
+        let parentCampo = campo;
+        let hijos = [];
+        
+        // Si el campo seleccionado ya es un hijo (ej. viene desde inicio "Pista 1"), buscamos su padre
+        if (campo.parentCampoId) {
+            parentCampo = campos.find(c => Number(c.id) === Number(campo.parentCampoId)) || campo;
+        }
+        
+        hijos = campos.filter(h => Number(h.parentCampoId) === Number(parentCampo.id));
+        
         console.log("Subpistas encontradas:", hijos);
-        // Guardamos los hijos para usarlos en el paso 3
-        setSelectedCampo({ ...campo, subPistas: hijos });
+        // Guardamos los hijos en el padre para usarlos en el paso 3
+        setSelectedCampo({ ...parentCampo, subPistas: hijos });
         setStep(3);
     } else {
+        setSelectedCampo(campo);
         fetchDisponibilidad(campo.id, filters.fecha);
         setStep(3);
     }
