@@ -323,6 +323,86 @@ const Home = () => {
           </div>
       </section>
 
+      {/* PROMOCIÓN TORNEOS */}
+      <section className="py-12 bg-white relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <motion.div 
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                className="bg-emerald-900 rounded-[3rem] p-8 md:p-16 relative overflow-hidden shadow-2xl flex flex-col md:flex-row items-center justify-between gap-12"
+            >
+                {/* Background effects */}
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-500/20 blur-[100px] rounded-full translate-x-1/3 -translate-y-1/3 pointer-events-none"></div>
+                <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-emerald-400/10 blur-[80px] rounded-full -translate-x-1/4 translate-y-1/4 pointer-events-none"></div>
+
+                <div className="relative z-10 md:w-1/2 text-left">
+                    <span className="inline-block px-3 py-1 bg-emerald-500/20 text-emerald-300 font-bold tracking-widest uppercase text-xs rounded-full mb-6 border border-emerald-500/30">{t('home.promo_tournaments.badge')}</span>
+                    <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-6 leading-tight tracking-tight">
+                        {t('home.promo_tournaments.title_start')} <br /> {t('home.promo_tournaments.title_mid')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-emerald-200">{t('home.promo_tournaments.title_highlight')}</span>{t('home.promo_tournaments.title_end')}
+                    </h2>
+                    <p className="text-lg text-emerald-50/80 mb-8 max-w-lg font-medium leading-relaxed">
+                        {t('home.promo_tournaments.desc')}
+                    </p>
+                    <Link to="/torneos" className="inline-flex items-center gap-3 px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-black text-lg rounded-2xl shadow-xl shadow-emerald-500/20 transition-all hover:scale-105 active:scale-95">
+                        {t('home.promo_tournaments.btn')}
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                    </Link>
+                </div>
+                
+                <div className="relative z-10 md:w-1/2 flex justify-center">
+                    {/* Visual Mockup for Tournament Promo */}
+                    <div className="relative w-full max-w-md">
+                        {/* Fake Bracket Card */}
+                        <motion.div 
+                            animate={{ y: [0, -10, 0] }}
+                            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                            className="bg-white/10 backdrop-blur-md border border-white/20 rounded-[2.5rem] p-8 shadow-[0_20px_50px_rgba(0,0,0,0.3)] relative z-20"
+                        >
+                            <div className="flex items-center justify-between mb-8">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center text-white shadow-inner">
+                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                    </div>
+                                    <div>
+                                        <div className="text-white font-black text-xl tracking-tight">{t('home.promo_tournaments.mock_cup')}</div>
+                                        <div className="text-emerald-400 font-bold text-xs uppercase tracking-wider mt-1">{t('home.promo_tournaments.mock_final')}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="space-y-4">
+                                <div className="bg-white/15 rounded-2xl p-4 border border-emerald-400/30 flex items-center justify-between shadow-lg">
+                                    <span className="text-white font-black text-lg">Los Galácticos</span>
+                                    <span className="text-emerald-300 font-black text-2xl">3</span>
+                                </div>
+                                <div className="text-center text-white/40 text-xs font-black uppercase">{t('home.promo_tournaments.mock_vs')}</div>
+                                <div className="bg-white/5 rounded-2xl p-4 border border-white/10 flex items-center justify-between">
+                                    <span className="text-white/60 font-bold text-lg">Atlético Sur</span>
+                                    <span className="text-white/40 font-black text-2xl">1</span>
+                                </div>
+                            </div>
+                        </motion.div>
+                        
+                        {/* Decorative floating element */}
+                        <motion.div 
+                            animate={{ y: [0, 10, 0] }}
+                            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                            className="absolute -right-4 -bottom-6 bg-gray-900 border border-gray-700 p-4 rounded-2xl shadow-xl z-30 flex items-center gap-4"
+                        >
+                            <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center">
+                                <span className="text-xl">🏆</span>
+                            </div>
+                            <div>
+                                <div className="text-white text-[10px] font-black uppercase tracking-widest">{t('home.promo_tournaments.mock_champion')}</div>
+                                <div className="text-amber-400 text-sm font-bold">{t('home.promo_tournaments.mock_prize')}</div>
+                            </div>
+                        </motion.div>
+                    </div>
+                </div>
+            </motion.div>
+        </div>
+      </section>
+
       {/* COMUNIDAD / SOCIAL SECTION */}
       <section className="py-24 bg-gray-900 text-white overflow-hidden relative">
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20"></div>

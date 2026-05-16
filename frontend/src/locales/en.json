@@ -1,4 +1,9 @@
 {
+  "common": {
+    "save": "Save",
+    "edit": "Edit",
+    "cancel": "Cancel"
+  },
   "navbar": {
     "home": "Home",
     "profile": "Profile",
@@ -279,6 +284,21 @@
     "featured_fields_title": "🏟️ Top Facilities",
     "featured_fields_sub": "The best rated fields in your city",
     "view_map": "View map",
+    "footer_desc": "Developed to organize pickup games fast and easy.<br/> Football lives on the pitch.",
+    "promo_tournaments": {
+      "badge": "NEW COMPETITIVE MODE",
+      "title_start": "Take your team",
+      "title_mid": "to",
+      "title_highlight": "glory",
+      "title_end": ".",
+      "desc": "Discover our new tournaments and leagues platform. Register your team, play playoffs and become the champion of your city.",
+      "btn": "Explore Tournaments",
+      "mock_cup": "Local Final Cup",
+      "mock_final": "Grand Final",
+      "mock_vs": "VS",
+      "mock_champion": "Champion",
+      "mock_prize": "Trophy + 200€"
+    }
     "footer_desc": "Developed to organize pickup games fast and easy.<br/> Football is lived on the court."
   },
   "about": {
@@ -350,6 +370,24 @@
     "title_highlight": "Local Leagues",
     "subtitle": "Sign up your team, follow the brackets in real time and prove who's boss on the court.",
     "create_btn": "Create Tournament",
+    "hero": {
+      "badge": "Tournaments Platform",
+      "title_start": "Compete.",
+      "title_mid": "Organize.",
+      "title_end": "Win.",
+      "subtitle": "Create professional tournaments in seconds, register your team, compete in local leagues and follow the standings and playoffs in real time.",
+      "explore_btn": "Explore tournaments",
+      "stats_active": "Active Tournaments",
+      "stats_teams": "Registered Teams",
+      "stats_matches": "Matches Played",
+      "mock_league": "Local Premier League",
+      "mock_in_progress": "In progress",
+      "mock_pos": "POS",
+      "mock_team": "Team",
+      "mock_pts": "PTS",
+      "mock_new_elim": "New Bracket",
+      "mock_quarter": "Quarterfinals ready"
+    },
     "active_title": "Active Tournaments",
     "active_sub": "Sign up before spots fill up",
     "loading": "Loading tournaments...",

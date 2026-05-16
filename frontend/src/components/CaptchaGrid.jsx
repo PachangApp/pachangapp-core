@@ -39,7 +39,7 @@ const CaptchaGrid = ({ onSuccess }) => {
     if (newSelected.length === 3) {
       setStatus('loading');
       try {
-        const response = await fetch(`${API_BASE_URL}/captcha/verify`, {
+        const response = await fetch(`${API_BASE_URL}/security/verify-challenge`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

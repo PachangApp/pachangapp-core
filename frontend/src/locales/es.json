@@ -1,4 +1,9 @@
 {
+  "common": {
+    "save": "Guardar",
+    "edit": "Editar",
+    "cancel": "Cancelar"
+  },
   "navbar": {
     "home": "Inicio",
     "profile": "Perfil",
@@ -279,7 +284,21 @@
     "featured_fields_title": "🏟️ Instalaciones Top",
     "featured_fields_sub": "Los campos mejor valorados de tu ciudad",
     "view_map": "Ver mapa",
-    "footer_desc": "Desarrollado para organizar pachangas fácil y rápido.<br/> El fútbol se vive en la cancha."
+    "footer_desc": "Desarrollado para organizar pachangas fácil y rápido.<br/> El fútbol se vive en la cancha.",
+    "promo_tournaments": {
+      "badge": "NUEVO MODO COMPETITIVO",
+      "title_start": "Lleva tu equipo",
+      "title_mid": "a la",
+      "title_highlight": "gloria",
+      "title_end": ".",
+      "desc": "Descubre nuestra nueva plataforma de torneos y ligas. Inscribe a tu equipo, juega eliminatorias y conviértete en el campeón de tu ciudad.",
+      "btn": "Explorar Torneos",
+      "mock_cup": "Copa Local Final",
+      "mock_final": "Gran Final",
+      "mock_vs": "VS",
+      "mock_champion": "Campeón",
+      "mock_prize": "Trofeo + 200€"
+    }
   },
   "about": {
     "label": "Nuestra App",
@@ -350,6 +369,24 @@
     "title_highlight": "Ligas Locales",
     "subtitle": "Apunta a tu equipo, sigue los cruces en tiempo real y demuestra quién manda en la pista.",
     "create_btn": "Crear Torneo",
+    "hero": {
+      "badge": "Plataforma de Torneos",
+      "title_start": "Compite.",
+      "title_mid": "Organiza.",
+      "title_end": "Gana.",
+      "subtitle": "Crea torneos profesionales en segundos, inscribe a tu equipo, compite en ligas locales y sigue las clasificaciones y eliminatorias en tiempo real.",
+      "explore_btn": "Explorar torneos",
+      "stats_active": "Torneos Activos",
+      "stats_teams": "Equipos Inscritos",
+      "stats_matches": "Partidos Jugados",
+      "mock_league": "Liga Premier Local",
+      "mock_in_progress": "En curso",
+      "mock_pos": "POS",
+      "mock_team": "Equipo",
+      "mock_pts": "PTS",
+      "mock_new_elim": "Nueva Eliminatoria",
+      "mock_quarter": "Cuartos de final listos"
+    },
     "active_title": "Torneos Activos",
     "active_sub": "Inscríbete antes de que se llenen las plazas",
     "loading": "Cargando torneos...",
