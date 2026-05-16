@@ -3,6 +3,150 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { API_BASE_URL } from '../apiConfig';
 
+const MatchNode = ({ match, index, isAdmin, onMatchUpdate }) => {
+  const { t } = useTranslation();
+  const [editing, setEditing] = React.useState(false);
+  const [scoreA, setScoreA] = React.useState(match.scoreA ?? 0);
+  const [scoreB, setScoreB] = React.useState(match.scoreB ?? 0);
+  const [saving, setSaving] = React.useState(false);
+
+  const isFinished = match.status === 'FINISHED';
+  const teamAWon = isFinished && match.winner?.id === match.teamA?.id;
+  const teamBWon = isFinished && match.winner?.id === match.teamB?.id;
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+      const headers = { 
+        'Content-Type': 'application/json',
+        ...(storedUser.token ? { 'Authorization': `Bearer ${storedUser.token}` } : {})
+      };
+      
+      const res = await fetch(`${API_BASE_URL}/tournaments/matches/${match.id}/result`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ scoreA: parseInt(scoreA), scoreB: parseInt(scoreB) })
+      });
+      if (res.ok) {
+        setEditing(false);
+        onMatchUpdate();
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSaving(false);
+    }
+  };
+  
+  return (
+    <motion.div 
+      layoutId={`match-${match.id}`}
+      initial={{ opacity: 0, scale: 0.8, y: 20 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.8, y: -20 }}
+      transition={{ type: "spring", bounce: 0.4, duration: 0.8, delay: index * 0.1 }}
+      className={`w-64 bg-white border ${isFinished ? 'border-emerald-500/20 shadow-lg shadow-emerald-500/5' : 'border-gray-100 shadow-sm'} rounded-2xl overflow-hidden text-sm mb-6 relative z-10`}
+    >
+      {isAdmin && isFinished && (
+        <div className="bg-gray-50/50 px-3 py-1 flex justify-end border-b border-gray-100">
+           <button 
+             onClick={() => setEditing(!editing)}
+             className="text-[9px] font-black uppercase tracking-widest text-gray-400 hover:text-emerald-600 transition-colors"
+           >
+             {editing ? t('common.cancel') || 'Cancelar' : t('common.edit') || 'Editar'}
+           </button>
+        </div>
+      )}
+
+      <div className={`p-4 flex justify-between items-center border-b border-gray-100/50 transition-colors ${teamAWon ? 'bg-emerald-50' : ''}`}>
+        <div className="flex items-center gap-3 overflow-hidden">
+           <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 font-black text-[10px] ${teamAWon ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/20' : 'bg-gray-100 text-gray-400'}`}>
+              {match.teamA?.name?.substring(0, 2).toUpperCase() || '??'}
+           </div>
+           <span className={`truncate w-32 ${teamAWon ? 'font-black text-emerald-800' : 'font-bold text-gray-700'} ${isFinished && !teamAWon ? 'opacity-40' : ''}`}>
+              {match.teamA ? match.teamA.name : t('tournaments.bracket.tbd')}
+           </span>
+        </div>
+        {editing ? (
+          <input 
+            type="number" min="0"
+            value={scoreA}
+            onChange={(e) => setScoreA(e.target.value)}
+            className="w-10 h-8 bg-gray-50 border border-gray-200 rounded-lg text-center font-black text-emerald-600 focus:outline-none focus:border-emerald-500"
+          />
+        ) : (
+          <span className={`font-mono text-lg font-black ${teamAWon ? 'text-emerald-600' : 'text-gray-400'}`}>
+            {match.scoreA !== null ? match.scoreA : '-'}
+          </span>
+        )}
+      </div>
+
+      <div className={`p-4 flex justify-between items-center transition-colors ${teamBWon ? 'bg-emerald-50' : ''}`}>
+        <div className="flex items-center gap-3 overflow-hidden">
+           <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 font-black text-[10px] ${teamBWon ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/20' : 'bg-gray-100 text-gray-400'}`}>
+              {match.teamB?.name?.substring(0, 2).toUpperCase() || '??'}
+           </div>
+           <span className={`truncate w-32 ${teamBWon ? 'font-black text-emerald-800' : 'font-bold text-gray-700'} ${isFinished && !teamBWon ? 'opacity-40' : ''}`}>
+              {match.teamB ? match.teamB.name : t('tournaments.bracket.tbd')}
+           </span>
+        </div>
+        {editing ? (
+          <input 
+            type="number" min="0"
+            value={scoreB}
+            onChange={(e) => setScoreB(e.target.value)}
+            className="w-10 h-8 bg-gray-50 border border-gray-200 rounded-lg text-center font-black text-emerald-600 focus:outline-none focus:border-emerald-500"
+          />
+        ) : (
+          <span className={`font-mono text-lg font-black ${teamBWon ? 'text-emerald-600' : 'text-gray-400'}`}>
+            {match.scoreB !== null ? match.scoreB : '-'}
+          </span>
+        )}
+      </div>
+      
+      {(isAdmin && (!isFinished || editing) && match.teamA && match.teamB) && (
+        <div className="bg-gray-50 p-3 border-t border-gray-100">
+          {editing ? (
+            <motion.button 
+              whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+              onClick={handleSave}
+              disabled={saving}
+              className="w-full py-2 bg-emerald-600 text-white font-black rounded-xl text-[10px] uppercase tracking-widest shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2"
+            >
+              {saving ? <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : null}
+              {t('common.save') || 'Guardar'}
+            </motion.button>
+          ) : (
+            <div className="flex gap-2">
+              <div className="flex-1 flex gap-1 bg-white p-1 rounded-xl border border-gray-200">
+                <input 
+                  type="number" min="0" placeholder="0"
+                  value={scoreA} onChange={(e) => setScoreA(e.target.value)}
+                  className="w-full text-center font-black text-gray-700 bg-transparent focus:outline-none"
+                />
+                <span className="text-gray-300 font-bold self-center text-[10px]">vs</span>
+                <input 
+                  type="number" min="0" placeholder="0"
+                  value={scoreB} onChange={(e) => setScoreB(e.target.value)}
+                  className="w-full text-center font-black text-gray-700 bg-transparent focus:outline-none"
+                />
+              </div>
+              <motion.button 
+                whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                onClick={() => handleSave()}
+                className="px-4 bg-emerald-600 text-white font-black rounded-xl text-[10px] shadow-md"
+              >
+                OK
+              </motion.button>
+            </div>
+          )}
+        </div>
+      )}
+    </motion.div>
+  );
+};
+
 const TournamentBracket = ({ matches, isAdmin, onMatchUpdate }) => {
   const { t } = useTranslation();
 
@@ -37,90 +181,6 @@ const TournamentBracket = ({ matches, isAdmin, onMatchUpdate }) => {
   if (roundsMap['SEMIFINAL'].length > 0) roundKeys.push('SEMIFINAL');
   if (roundsMap['FINAL'].length > 0) roundKeys.push('FINAL');
 
-  const handleScoreUpdate = async (matchId, scoreA, scoreB) => {
-    if (!isAdmin) return;
-    try {
-      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-      const headers = { 
-        'Content-Type': 'application/json',
-        ...(storedUser.token ? { 'Authorization': `Bearer ${storedUser.token}` } : {})
-      };
-      
-      const res = await fetch(`${API_BASE_URL}/tournaments/matches/${matchId}/result`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ scoreA, scoreB })
-      });
-      if (res.ok) {
-        onMatchUpdate();
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const MatchNode = ({ match, index }) => {
-    const isFinished = match.status === 'FINISHED';
-    const teamAWon = isFinished && match.winner?.id === match.teamA?.id;
-    const teamBWon = isFinished && match.winner?.id === match.teamB?.id;
-    
-    return (
-      <motion.div 
-        layoutId={`match-${match.id}`}
-        initial={{ opacity: 0, scale: 0.8, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.8, y: -20 }}
-        transition={{ type: "spring", bounce: 0.4, duration: 0.8, delay: index * 0.1 }}
-        className={`w-56 bg-white border ${isFinished ? 'border-emerald-500/20 shadow-lg shadow-emerald-500/5' : 'border-gray-100 shadow-sm'} rounded-2xl overflow-hidden text-sm mb-6 relative z-10`}
-      >
-        <div className={`p-3 flex justify-between items-center border-b border-gray-100/50 transition-colors ${teamAWon ? 'bg-emerald-50' : ''}`}>
-          <div className="flex items-center gap-2 overflow-hidden">
-             {teamAWon && <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3 text-emerald-500"><path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" /></svg>}
-             <span className={`truncate w-32 ${teamAWon ? 'font-black text-emerald-700' : 'font-medium text-gray-700'} ${isFinished && !teamAWon ? 'opacity-50 line-through' : ''}`}>{match.teamA ? match.teamA.name : t('tournaments.bracket.tbd')}</span>
-          </div>
-          <span className={`font-mono font-black ${teamAWon ? 'text-emerald-600' : 'text-gray-400'}`}>{match.scoreA !== null ? match.scoreA : '-'}</span>
-        </div>
-        <div className={`p-3 flex justify-between items-center transition-colors ${teamBWon ? 'bg-emerald-50' : ''}`}>
-          <div className="flex items-center gap-2 overflow-hidden">
-             {teamBWon && <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3 text-emerald-500"><path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" /></svg>}
-             <span className={`truncate w-32 ${teamBWon ? 'font-black text-emerald-700' : 'font-medium text-gray-700'} ${isFinished && !teamBWon ? 'opacity-50 line-through' : ''}`}>{match.teamB ? match.teamB.name : t('tournaments.bracket.tbd')}</span>
-          </div>
-          <span className={`font-mono font-black ${teamBWon ? 'text-emerald-600' : 'text-gray-400'}`}>{match.scoreB !== null ? match.scoreB : '-'}</span>
-        </div>
-        
-        {isAdmin && !isFinished && match.teamA && match.teamB && (
-          <div className="bg-gray-50 p-2 flex gap-1.5 border-t border-gray-100">
-            <motion.button 
-              whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-              onClick={() => handleScoreUpdate(match.id, (match.scoreA||0)+1, match.scoreB||0)}
-              className="px-2 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg w-full text-[10px] font-black transition-colors shadow-sm"
-            >
-              +A
-            </motion.button>
-            <motion.button 
-              whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-              onClick={() => handleScoreUpdate(match.id, match.scoreA||0, (match.scoreB||0)+1)}
-              className="px-2 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg w-full text-[10px] font-black transition-colors shadow-sm"
-            >
-              +B
-            </motion.button>
-            <motion.button 
-              whileHover={{ scale: 1.05, boxShadow: "0 0 10px rgba(16,185,129,0.3)" }} whileTap={{ scale: 0.95 }}
-              onClick={() => {
-                if(window.confirm(t('tournaments.detail.finish_confirm'))) {
-                  handleScoreUpdate(match.id, match.scoreA||0, match.scoreB||0);
-                }
-              }}
-              className="px-2 py-1.5 bg-emerald-600 text-white font-black rounded-lg w-full text-[10px] shadow-md"
-            >
-              OK
-            </motion.button>
-          </div>
-        )}
-      </motion.div>
-    );
-  };
-
   const getRoundTitle = (roundName) => {
     switch (roundName) {
       case 'QUARTERFINAL': return t('tournaments.bracket.quarterfinals');
@@ -140,7 +200,12 @@ const TournamentBracket = ({ matches, isAdmin, onMatchUpdate }) => {
             </h4>
             {roundsMap[roundName].map((match, i) => (
               <div key={match.id} className="relative flex items-center">
-                <MatchNode match={match} index={colIndex * 2 + i} />
+                <MatchNode 
+                  match={match} 
+                  index={colIndex * 2 + i} 
+                  isAdmin={isAdmin} 
+                  onMatchUpdate={onMatchUpdate} 
+                />
                 
                 {colIndex < roundKeys.length - 1 && (
                   <motion.div 
