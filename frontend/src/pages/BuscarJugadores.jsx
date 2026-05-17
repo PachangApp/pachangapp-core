@@ -8,18 +8,18 @@ import Navbar from "../components/Navbar";
 import { useToast } from "../context/ToastContext";
 import { PLAYER_POSITIONS } from "../constants/positions";
 
+// Función auxiliar para traducir la posición que viene de la BD
+const getTranslatedPosition = (pos, t) => {
+  if (!pos) return "";
+  const found = PLAYER_POSITIONS.find(p => p.labelEs === pos);
+  return found ? t(`profile.positions.${found.id}`) : pos;
+};
+
 // Componente para mostrar la información del jugador en cuadrícula
 const PlayerCard = ({ player, onShowProfile, onInvite }) => {
   const { t } = useTranslation();
   
-  // Función para traducir la posición que viene de la BD
-  const getTranslatedPosition = (pos) => {
-    if (!pos) return "";
-    const found = PLAYER_POSITIONS.find(p => p.labelEs === pos);
-    return found ? t(`profile.positions.${found.id}`) : pos;
-  };
-
-  const mainPosition = getTranslatedPosition(player.posicion1);
+  const mainPosition = getTranslatedPosition(player.posicion1, t);
   
   return (
     <motion.div
@@ -148,17 +148,17 @@ const PlayerProfileModal = ({ player, isOpen, onClose }) => {
                 <div className="flex flex-wrap gap-2">
                   {player.posicion1 && (
                     <span className="bg-gray-100 text-gray-700 px-3 py-1.5 rounded-xl text-sm font-medium border border-gray-200">
-                      {getTranslatedPosition(player.posicion1)}
+                      {getTranslatedPosition(player.posicion1, t)}
                     </span>
                   )}
                   {player.posicion2 && (
                     <span className="bg-gray-50 text-gray-600 px-3 py-1.5 rounded-xl text-sm font-medium border border-gray-100">
-                      {getTranslatedPosition(player.posicion2)}
+                      {getTranslatedPosition(player.posicion2, t)}
                     </span>
                   )}
                   {player.posicion3 && (
                     <span className="bg-gray-50 text-gray-600 px-3 py-1.5 rounded-xl text-sm font-medium border border-gray-100">
-                      {getTranslatedPosition(player.posicion3)}
+                      {getTranslatedPosition(player.posicion3, t)}
                     </span>
                   )}
                   
