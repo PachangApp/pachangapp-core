@@ -213,10 +213,20 @@ const Admin = () => {
     <div className="min-h-screen bg-gray-50 pb-32 md:pb-0">
       <Navbar />
       <main className="max-w-6xl mx-auto px-4 py-12">
-        <h1 className="text-3xl font-black text-gray-900 mb-8">{t('admin.panel_title')}</h1>
+        <motion.h1 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-3xl font-black text-gray-900 mb-8"
+        >
+          {t('admin.panel_title')}
+        </motion.h1>
 
         {/* Tabs */}
-        <div className="flex flex-wrap gap-2 md:gap-4 mb-8 bg-gray-200 p-1 rounded-2xl w-full md:w-fit">
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-wrap gap-2 md:gap-4 mb-8 bg-gray-200 p-1 rounded-2xl w-full md:w-fit"
+        >
           <button 
             onClick={() => setActiveTab("campos")}
             className={`flex-1 md:flex-none cursor-pointer px-4 md:px-6 py-2 rounded-xl font-bold transition-all text-sm md:text-base ${activeTab === 'campos' ? 'bg-white text-emerald-600 shadow-sm' : 'text-gray-500'}`}
@@ -235,9 +245,17 @@ const Admin = () => {
           >
             {t('admin.tabs.manage_files')}
           </button>
-        </div>
+        </motion.div>
 
 
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+          >
         {activeTab === 'campos' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="bg-white p-5 md:p-6 rounded-3xl border border-gray-100 shadow-sm h-fit">
@@ -340,8 +358,15 @@ const Admin = () => {
 
 
             <div className="lg:col-span-2 space-y-4">
-              {campos.map(campo => (
-                <div key={campo.id} className="bg-white p-4 md:p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 group/item hover:border-emerald-200 transition-colors">
+              {campos.map((campo, index) => (
+                <motion.div 
+                  key={campo.id} 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  whileHover={{ scale: 1.01 }}
+                  className="bg-white p-4 md:p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 group/item hover:border-emerald-200 transition-all duration-200 hover:shadow-md"
+                >
                   <div className="flex items-center gap-4">
                     <div className="w-16 h-16 rounded-2xl overflow-hidden bg-gray-50 border border-gray-100">
                         {campo.imagenUrl ? (
@@ -378,7 +403,7 @@ const Admin = () => {
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                     </button>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>
@@ -396,8 +421,14 @@ const Admin = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50 whitespace-nowrap">
-                {users.map(u => (
-                  <tr key={u.id}>
+                {users.map((u, index) => (
+                  <motion.tr 
+                    key={u.id}
+                    initial={{ opacity: 0, x: -15 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.03 }}
+                    className="hover:bg-gray-50/80 transition-colors duration-150"
+                  >
                     <td className="px-6 py-4 font-bold text-gray-900">{u.username}</td>
                     <td className="px-6 py-4 text-gray-500">{u.email}</td>
                     <td className="px-6 py-4">
@@ -421,7 +452,7 @@ const Admin = () => {
                         </button>
                       </div>
                     </td>
-                  </tr>
+                  </motion.tr>
                 ))}
               </tbody>
             </table>
@@ -429,9 +460,12 @@ const Admin = () => {
         )}
 
         {activeTab === 'archivos' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-6">
-              <div className="bg-white p-6 md:p-8 rounded-4xl border border-gray-100 shadow-sm">
+              <motion.div 
+                whileHover={{ y: -5 }}
+                className="bg-white p-6 md:p-8 rounded-4xl border border-gray-100 shadow-sm transition-all duration-300 hover:shadow-xl"
+              >
                 <div className="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 mb-6">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                 </div>
@@ -443,9 +477,12 @@ const Admin = () => {
                 >
                   {t('admin.files.download_csv')}
                 </button>
-              </div>
+              </motion.div>
 
-              <div className="bg-white p-6 md:p-8 rounded-4xl border border-gray-100 shadow-sm text-white bg-linear-to-br from-emerald-600 to-teal-700">
+              <motion.div 
+                whileHover={{ y: -5 }}
+                className="bg-white p-6 md:p-8 rounded-4xl border border-gray-100 shadow-sm text-white bg-linear-to-br from-emerald-600 to-teal-700 transition-all duration-300 hover:shadow-xl hover:shadow-emerald-900/20"
+              >
                 <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center text-white mb-6">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                 </div>
@@ -457,10 +494,13 @@ const Admin = () => {
                 >
                   {t('admin.files.generate_pdf')}
                 </button>
-              </div>
+              </motion.div>
             </div>
 
-            <div className="bg-white p-6 md:p-8 rounded-4xl border border-gray-100 shadow-sm h-fit">
+            <motion.div 
+              whileHover={{ y: -5 }}
+              className="bg-white p-6 md:p-8 rounded-4xl border border-gray-100 shadow-sm h-fit transition-all duration-300 hover:shadow-xl"
+            >
               <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600 mb-6">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
               </div>
@@ -513,9 +553,11 @@ const Admin = () => {
                   {importLoading ? t('admin.files.importing') : t('admin.files.upload_import')}
                 </button>
               </div>
-            </div>
+            </motion.div>
           </div>
         )}
+          </motion.div>
+        </AnimatePresence>
       </main>
 
       <EditFieldModal 
