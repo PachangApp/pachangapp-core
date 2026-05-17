@@ -217,8 +217,13 @@ const CrearPartido = () => {
         hijos = campos.filter(h => Number(h.parentCampoId) === Number(parentCampo.id));
         
         console.log("Subpistas encontradas:", hijos);
-        // Guardamos los hijos en el padre para usarlos en el paso 3
-        setSelectedCampo({ ...parentCampo, subPistas: hijos });
+        // Guardamos los hijos en el padre para usarlos en el paso 3 y actualizamos el precio y nombre al de F7
+        setSelectedCampo({ 
+            ...parentCampo, 
+            nombreDisplay: campo.nombreDisplay || parentCampo.nombre,
+            precioPorHora: campo.precioPorHora || parentCampo.precioPorHora,
+            subPistas: hijos 
+        });
         setStep(3);
     } else {
         setSelectedCampo(campo);
@@ -302,12 +307,24 @@ const CrearPartido = () => {
     { value: "Fútbol Sala", key: "futbol_sala" }
   ];
   
-  // Si estamos en F7, mostramos solo los "Padres" (F11) para que eligan el recinto
+  // Si estamos en F7, mostramos solo los "Padres" (F11) para que eligan el recinto, pero adaptando el precio y nombre en la tarjeta
   const filteredCampos = campos.filter(c => {
     if (filters.deporte === "Fútbol 7") {
         return c.deporte === "Fútbol 11" && c.zona === filters.zona; 
     }
     return c.zona === filters.zona && c.deporte === filters.deporte;
+  }).map(c => {
+    if (filters.deporte === "Fútbol 7") {
+        const hijo = campos.find(h => Number(h.parentCampoId) === Number(c.id));
+        if (hijo) {
+            return {
+                ...c,
+                precioPorHora: hijo.precioPorHora,
+                nombreDisplay: c.nombre.includes("Fútbol 11") ? c.nombre.replace("Fútbol 11", "Fútbol 7") : `${c.nombre} (Fútbol 7)`
+            };
+        }
+    }
+    return c;
   });
 
 
@@ -500,7 +517,7 @@ const CrearPartido = () => {
                         <div className="space-y-4">
                             <div className="flex justify-between">
                                 <span className="text-xs font-bold text-gray-400">{t("create_match.field")}</span>
-                                <span className="text-xs font-black text-gray-700">{selectedCampo.nombre}</span>
+                                <span className="text-xs font-black text-gray-700">{selectedCampo.nombreDisplay || selectedCampo.nombre}</span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-xs font-bold text-gray-400">{t("create_match.date")}</span>
@@ -671,7 +688,7 @@ const CrearPartido = () => {
                     </div>
                   )}
                   <header className="mb-6">
-                    <h3 className="text-xl font-black text-gray-900 mb-1">{selectedCampo.nombre}</h3>
+                    <h3 className="text-xl font-black text-gray-900 mb-1">{selectedCampo.nombreDisplay || selectedCampo.nombre}</h3>
                     <p className="text-emerald-600 font-bold text-sm uppercase tracking-wider">{selectedCampo.zona}</p>
                     <p className="inline-block mt-2 px-3 py-1 bg-gray-900 text-white text-[10px] font-black rounded-full uppercase tracking-widest">{filters.deporte}</p>
                   </header>

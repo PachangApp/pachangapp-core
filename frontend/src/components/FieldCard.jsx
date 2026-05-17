@@ -3,7 +3,7 @@ import { getFieldImage } from "../utils/fieldMapping";
 
 const FieldCard = ({ campo, onBook }) => {
   const { t } = useTranslation();
-  const { nombre, zona, deporte, precioPorHora, disponible, imagenUrl } = campo;
+  const { nombre, nombreDisplay, zona, deporte, precioPorHora, disponible, imagenUrl } = campo;
   const localImage = getFieldImage(nombre);
 
 
@@ -42,7 +42,7 @@ const FieldCard = ({ campo, onBook }) => {
       {/* Info */}
       <div className="p-6 flex flex-col flex-grow">
         <h3 className="text-xl font-black text-gray-900 mb-1 group-hover:text-emerald-600 transition-colors line-clamp-2 h-14">
-          {nombre}
+          {nombreDisplay || nombre}
         </h3>
         <p className="text-gray-500 text-sm font-medium mb-4 flex items-center gap-1.5">
           <svg className="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
