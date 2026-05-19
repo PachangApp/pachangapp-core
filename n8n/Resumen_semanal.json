@@ -1,0 +1,133 @@
+{
+  "name": "Resumen_semanal",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "0114f2cf-afe0-4542-b778-6749b301a236",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n  id,\n  username,\n  email,\n  victorias,\n  derrotas,\n  partidos_jugados,\n  ranking,\n  posicion1,\n  posicion2,\n  posicion3\nFROM users\nWHERE email IS NOT NULL\nAND enabled = 1;",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        208,
+        0
+      ],
+      "id": "960b6a1e-80f4-48ce-94e4-3f64599af444",
+      "name": "Execute a SQL query",
+      "credentials": {
+        "mySql": {
+          "id": "rBkkc4c4BuQjSyH0",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "for (const item of $input.all()) {\n\n  const partidos = Number(item.json.partidos_jugados || 0);\n  const victorias = Number(item.json.victorias || 0);\n\n  let porcentaje = 0;\n\n  if (partidos > 0) {\n    porcentaje = (victorias / partidos) * 100;\n  }\n\n  item.json.porcentaje = porcentaje.toFixed(1);\n}\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "2a18a652-d19e-420f-94f8-d8660cc6a25e",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "=📊 Resumen Semanal PachangApp: ¡Tu desempeño como {{ $json.ranking }}!",
+        "message": "=<div style=\"font-family: sans-serif; color: #333; max-width: 600px; border: 1px solid #eee; padding: 20px; border-radius: 10px;\">\n  <h2 style=\"color: #2c3e50;\">¡Hola, {{ $json.username }}! ⚽</h2>\n  <p>Aquí tienes el resumen de tu actividad de esta semana. Has estado dándolo todo en la pista.</p>\n  \n  <div style=\"background-color: #f9f9f9; padding: 15px; border-radius: 8px; margin: 20px 0;\">\n    <h3 style=\"margin-top: 0;\">Resumen de Estadísticas</h3>\n    <table style=\"width: 100%;\">\n      <tr>\n        <td><strong>Partidos jugados:</strong></td>\n        <td>{{ $json.partidos_jugados }}</td>\n      </tr>\n      <tr>\n        <td><strong>Victorias:</strong></td>\n        <td style=\"color: green;\">{{ $json.victorias }} ✅</td>\n      </tr>\n      <tr>\n        <td><strong>Derrotas:</strong></td>\n        <td style=\"color: red;\">{{ $json.derrotas }} ❌</td>\n      </tr>\n      <tr>\n        <td><strong>Efectividad:</strong></td>\n        <td><strong>{{ $json.porcentaje }}%</strong></td>\n      </tr>\n    </table>\n  </div>\n\n  <div style=\"border-left: 4px solid #3498db; padding-left: 15px; margin: 20px 0;\">\n    <p><strong>Tu Ranking actual:</strong> <span style=\"font-size: 1.2em; color: #3498db;\">{{ $json.ranking }}</span></p>\n    <p>Tus posiciones más jugadas han sido:</p>\n    <ul>\n      <li>{{ $json.posicion1 }}</li>\n      <li>{{ $json.posicion2 }}</li>\n      <li>{{ $json.posicion3 }}</li>\n    </ul>\n  </div>\n\n  <p style=\"font-size: 0.9em; color: #7f8c8d; border-top: 1px solid #eee; pt-10px;\">\n    ¡Sigue así! Nos vemos en el próximo partido. <br>\n    <strong>Equipo de PachangApp</strong>\n  </p>\n</div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        624,
+        0
+      ],
+      "id": "eb68a893-0ff4-4332-b434-8714a428ed82",
+      "name": "Send a message",
+      "webhookId": "7ec7aabb-c009-4c8e-a15b-35c316b1e0a5",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "RPRlapk88CZOylGR",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "1b88fbe5-282f-4fb3-bff8-e904ce585444",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6c951a20fbd89639bdc0495720f5643a317cc4afc353b5591c95079a265efc13"
+  },
+  "id": "K7kNBBKzyYTZkPcA",
+  "tags": []
+}

@@ -1,0 +1,412 @@
+{
+  "name": "PACHANBOT",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "pachanbot-chat",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -240,
+        464
+      ],
+      "id": "89d30346-4823-45b9-8880-c8241d895f94",
+      "name": "Webhook",
+      "webhookId": "d2fa6d66-7f0d-4f43-ac83-88896fca5de5"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.action }}",
+                    "rightValue": "buscar_partido",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "e5abb826-8b78-49e4-90bc-d8dda3966852"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "0"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "80214e48-6dc9-4c7e-8110-8efa15e957ec",
+                    "leftValue": "={{ $json.body.action }}",
+                    "rightValue": "como_reservar",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "1"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "3a2588c7-2b39-4cdc-846f-05fb7d8bb31f",
+                    "leftValue": "={{ $json.body.action }}",
+                    "rightValue": "como_unirse",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "2"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -32,
+        432
+      ],
+      "id": "801fec97-857c-4f18-b175-c101f6254b83",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4931120e-e881-44f8-849c-89e026ab011b",
+              "name": "respuesta",
+              "value": "={{ $json.body.language === 'en' ? '🏟️ BOOKING A PITCH IS EASY! 🏟️\\n\\nFollow these simple steps:\\n\\n1️⃣ Go to \"Create Match\" from the main menu.\\n2️⃣ Select your preferred sports field.\\n3️⃣ Choose the date and time (gray ones are already taken).\\n4️⃣ Enter the maximum number of players.\\n5️⃣ Confirm and... you\\'re all set! ✅' : '🏟️ ¡RESERVAR PISTA ES MUY FÁCIL! 🏟️\\n\\nSigue estos sencillos pasos:\\n\\n1️⃣ Entra en \"Crear Partido\" desde el menú principal.\\n2️⃣ Selecciona el campo deportivo que prefieras.\\n3️⃣ Elige la fecha y hora (las grises ya están ocupadas).\\n4️⃣ Indica el número máximo de jugadores.\\n5️⃣ Confirma y... ¡listo! ✅' }}\n\n",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        448,
+        464
+      ],
+      "id": "c0dd6144-8d4f-4bda-a360-5fa7a3a3e4f9",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ddf643b3-e328-4c29-9afb-c426ab2f937b",
+              "name": "respuesta",
+              "value": "={{ $json.body.language === 'en' ? '⚽ Joining a match is super easy!\\n\\n1️⃣ Go to \"Explore\" in the main menu\\n2️⃣ Click on \"Find Matches\" in the dropdown\\n3️⃣ You\\'ll see all open matches with free spots\\n4️⃣ You can filter by location or date to find the one you like best\\n5️⃣ Click on the match you\\'re interested in to see the details\\n6️⃣ Hit \"Join\" and you\\'re in! 🎉 Once inside, you\\'ll be able to see the other players and choose your team (white or black).\\n\\nSee you on the pitch! 🏃‍♂️' : '⚽ ¡Unirte a un partido es súper sencillo!\\n\\n1️⃣ Ve a \"Explorar\" en el menú principal \\n2️⃣ Haz Click en \"Buscar Partidos\" en el desplegable\\n3️⃣ Verás todos los partidos abiertos con plazas libres \\n4️⃣ Puedes filtrar por lugar o fecha para encontrar el que más te guste \\n5️⃣ Pulsa en el partido que te interese para ver los detalles \\n6️⃣ Dale a \"Unirme\" y ya estás dentro 🎉 Una vez dentro, podrás ver a los demás jugadores y elegir tu equipo (blanco o negro).\\n\\n¡Nos vemos en la cancha! 🏃‍♂️' }}\n",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        448,
+        656
+      ],
+      "id": "50778ef2-58d0-432f-8bca-ac4fe61cd014",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "promptType": "=define",
+        "text": "=Eres PachanBot, el colega futbolero y asistente amigable de PachangApp. Tu misión es animar a la gente a jugar al fútbol y ayudarles a encontrar partido.\n\n### CONTEXTO TEMPORAL Y DE USUARIO\n- FECHA DE HOY: {{ $now.toFormat('yyyy-MM-dd') }} (Usa esto para saber cuándo es \"hoy\", \"mañana\" o los próximos días).\n- HORA ACTUAL: {{ $now.toFormat('HH:mm') }}\n- MENSAJE DEL USUARIO: \"{{ $('Webhook').first().json.body.chatInput }}\"\n- IDIOMA DEL USUARIO: {{ $('Webhook').first().json.body.language || 'es' }}\n\n\n### DATOS DISPONIBLES EN LA APP (Formato JSON):\n{{ JSON.stringify($json.partidos_encontrados) }}\n\n### REGLAS DE COMPORTAMIENTO Y RESPUESTA (ESTRICTAS):\n\n1. LA REGLA DE ORO (SIEMPRE MUESTRA PARTIDOS): Si el usuario saluda, dice \"busca partido\", o pide información general SIN especificar filtros, NUNCA digas que te faltan datos. Asume que quiere ver la cartelera y muéstrale con entusiasmo los partidos disponibles en el JSON.\n\n2. BÚSQUEDAS ESPECÍFICAS (FILTRO INTELIGENTE): Si el usuario menciona un lugar (ej: \"Cartuja\", \"Fuentenueva\"), busca en el JSON si el campo 'lugar' contiene esa palabra. Si coincide, muéstrale esos partidos. Haz lo mismo si menciona un deporte (\"Fútbol Sala\", \"Fútbol 11\").\n\n3. EL PLAN B (NUNCA DEJES LA PANTALLA VACÍA): Si el usuario pide un sitio o fecha que NO está en el JSON, dile: \"No he encontrado partidos exactamente ahí, ¡pero no te quedes sin jugar! Mira estas planazos que tenemos:\" y muéstrale otros partidos disponibles del JSON. \n\n4. FORMATO Y TRADUCCIÓN HUMANA:\n- NUNCA uses fechas en formato base de datos (\"YYYY-MM-DD\"). Tradúcelas SIEMPRE a lenguaje natural (ej: \"hoy a las 18:00\", \"el martes 11 de mayo\", \"mañana\").\n- Lista los partidos de forma atractiva usando emojis (🏟️, ⚽, 💶, 🎟️), mencionando: Deporte, Lugar, Fecha natural, Hora, Precio y Plazas Libres.\n- NUNCA respondas con código JSON ni llaves {}. Escribe natural, como si chatearas por WhatsApp.\n\n5. REGLA DE IDIOMA (ESTRICTA): Responde SIEMPRE en el idioma indicado en 'IDIOMA DEL USUARIO'. Si es 'en', genera toda la respuesta en inglés. Si es 'es', responde en español. Mantén tu personalidad de \"colega futbolero\" adaptada al idioma (ej: usa \"mate\" o \"buddy\" en inglés si encaja con tu estilo).\n\n\n5. CIERRE MOTIVADOR: Al final de tu mensaje, anima SIEMPRE al usuario a ir a la sección 'Explorar' de la app para unirse a los partidos.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        800,
+        144
+      ],
+      "id": "0390c182-a0c6-4ebb-88ee-9485f4d1ca05",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1408,
+        448
+      ],
+      "id": "21d58081-172f-4671-b078-d21a6c8ae3b1",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Webhook').first().json.body.sessionId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        848,
+        368
+      ],
+      "id": "0c1f213e-ba46-40b8-b7b2-c084a2bb77bf",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "partidos_encontrados",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        448,
+        208
+      ],
+      "id": "c0694e03-fd54-425b-a4da-3da19f0fd515",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        752,
+        368
+      ],
+      "id": "0dd3e682-ab81-448d-99ea-70817e3873a6",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "M8iR0SInVZYKRHKp",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api.pachangapp.es/api/partidos/search",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        176,
+        256
+      ],
+      "id": "2be011a5-f0bd-4e80-956b-ce2889c56fcf",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4931120e-e881-44f8-849c-89e026ab011b",
+              "name": "respuesta",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1168,
+        192
+      ],
+      "id": "ddeac5d9-e1ef-4250-b366-02b8abe38957",
+      "name": "Edit Fields2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "bf5a73b8-07fb-460e-84a0-8d7cd46b7cfa",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6c951a20fbd89639bdc0495720f5643a317cc4afc353b5591c95079a265efc13"
+  },
+  "id": "vMG4kC5SblsAdOz0",
+  "tags": []
+}

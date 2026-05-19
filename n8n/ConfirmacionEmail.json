@@ -1,0 +1,71 @@
+{
+  "name": "ConfirmacionEmail",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "pachangapp-emails",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -304,
+        32
+      ],
+      "id": "d7f01cfb-3786-403f-9d06-830052c08ff1",
+      "name": "Webhook",
+      "webhookId": "17a072a2-088d-417a-a806-dd645c74002c"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.body.email }}",
+        "subject": "Verifica tu cuenta en PachangApp ⚽",
+        "message": "=<!DOCTYPE html>\n<html>\n<head>\n    <style>\n        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }\n        .container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }\n        .header { background: linear-gradient(135deg, #1db954 0%, #191414 100%); padding: 30px; text-align: center; color: white; }\n        .content { padding: 40px; text-align: center; color: #333333; }\n        .button { display: inline-block; padding: 15px 30px; background-color: #1db954; color: white !important; text-decoration: none; border-radius: 30px; font-weight: bold; margin-top: 25px; transition: transform 0.2s; }\n        .footer { padding: 20px; text-align: center; font-size: 12px; color: #888888; background-color: #fafafa; }\n    </style>\n</head>\n<body>\n    <div class=\"container\">\n        <div class=\"header\">\n            <h1>PachangApp ⚽</h1>\n        </div>\n        <div class=\"content\">\n            <h2>¡Hola!</h2>\n            <p>Estás a un paso de unirte a las mejores pachangas de tu zona.</p>\n            <p>Haz clic en el botón de abajo para activar tu cuenta y empezar a jugar:</p>\n            <a href=\"{{ $json.body.url }}\" class=\"button\">Verificar mi cuenta</a>\n            <p style=\"margin-top: 30px; font-size: 0.9em; color: #666;\">Si el botón no funciona, copia y pega este enlace:<br>{{ $json.body.url }}</p>\n        </div>\n        <div class=\"footer\">\n            &copy; 2024 PachangApp - ¡Nos vemos en el campo!\n        </div>\n    </div>\n</body>\n</html>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        32
+      ],
+      "id": "fff288d3-76e2-4e29-8ecf-ccc7c5c6b757",
+      "name": "Send a message",
+      "webhookId": "2db468ae-6bc8-485c-9581-4b3731c438aa",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "RPRlapk88CZOylGR",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "1466c73a-4293-4d9b-9f7b-3b34a0f5526f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6c951a20fbd89639bdc0495720f5643a317cc4afc353b5591c95079a265efc13"
+  },
+  "id": "yWyZTqeUlG7RvJeT",
+  "tags": []
+}

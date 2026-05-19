@@ -1,0 +1,122 @@
+{
+  "name": "PachangaPP - Traductor Chat",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "translate",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "836e7d3f-39b7-41ba-af08-6f589b185475",
+      "name": "Webhook",
+      "webhookId": "9494a3de-1a13-47b3-8fa8-c0aa65325a68"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Traduce el siguiente texto al {{ $json.body.targetLang }}: {{ $json.body.text }}\n\nEres un traductor experto. Tu ÚNICA tarea es traducir el texto del usuario al idioma indicado. Mantén el tono informal y futbolero. Devuelve SOLO el texto traducido, sin explicaciones, sin comillas, sin prefijos.",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        240,
+        0
+      ],
+      "id": "b87ef949-48e0-4bfd-a03f-9a6b97bf2b85",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.1-8b-instant",
+        "options": {
+          "temperature": 0.1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        240,
+        192
+      ],
+      "id": "72c4d79a-2a2c-4464-8d69-c23802c5f5a9",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "M8iR0SInVZYKRHKp",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"translatedText\": \"{{ $node[\"Basic LLM Chain\"].json[\"text\"] }}\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        512,
+        0
+      ],
+      "id": "dc546d66-eb62-4036-b158-c788af848457",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "66fec0d9-2d6f-47e7-b13c-19fc64d3c0e9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6c951a20fbd89639bdc0495720f5643a317cc4afc353b5591c95079a265efc13"
+  },
+  "id": "skntWa246Dx5I4cA",
+  "tags": []
+}
