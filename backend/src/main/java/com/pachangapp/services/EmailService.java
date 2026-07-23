@@ -29,18 +29,22 @@ public class EmailService {
 
     @Async
     public void sendVerificationEmail(String to, String token) {
+        String subject = "Verifica tu cuenta en PachangApp";
         String confirmationUrl = baseUrl + "/api/users/verify?token=" + token;
-        
-        Map<String, Object> payload = new HashMap<>();
-        payload.put("type", "verification");
-        payload.put("email", to);
-        payload.put("token", token);
-        payload.put("url", confirmationUrl);
+        String message = "¡Bienvenido a PachangApp!\n\n"
+                + "Por favor, haz clic en el siguiente enlace para verificar tu cuenta y activar tu perfil:\n"
+                + confirmationUrl + "\n\n"
+                + "¡Nos vemos en la cancha!\n"
+                + "El equipo de PachangApp";
 
         try {
-            restTemplate.postForEntity(n8nWebhookUrl, payload, String.class);
+            SimpleMailMessage email = new SimpleMailMessage();
+            email.setTo(to);
+            email.setSubject(subject);
+            email.setText(message);
+            mailSender.send(email);
         } catch (Exception e) {
-            System.err.println("Error enviando email a n8n: " + e.getMessage());
+            System.err.println("Error enviando email de verificación directa: " + e.getMessage());
         }
     }
 

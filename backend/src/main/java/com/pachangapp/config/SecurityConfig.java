@@ -63,7 +63,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/campos").permitAll()
                 .requestMatchers("/api/partidos", "/api/partidos/search").permitAll()
                 .requestMatchers("/api/campos", "/api/partidos", "/api/partidos/search").permitAll()
-                .requestMatchers("/api/files/**", "/uploads/**").permitAll()
+                .requestMatchers("/api/files/**", "/uploads/**", "/api/ai/**").permitAll()
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll()
             );

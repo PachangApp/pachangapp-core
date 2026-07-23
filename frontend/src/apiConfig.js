@@ -16,6 +16,6 @@ export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (isProduction
     ? `http://${PC_IP}:${PORT}/api` 
     : `http://localhost:${PORT}/api`);
 
-export const N8N_TRANSLATE_URL = import.meta.env.VITE_N8N_TRANSLATE_URL || 'https://n8n.pachangapp.es/webhook/translate';
+export const N8N_TRANSLATE_URL = import.meta.env.VITE_N8N_TRANSLATE_URL || `${API_BASE_URL}/ai/translate`;
 
-export const N8N_WEBHOOK_URL = import.meta.env.VITE_N8N_WEBHOOK_URL || 'https://n8n.pachangapp.es/webhook/pachanbot-chat';
+export const N8N_WEBHOOK_URL = import.meta.env.VITE_N8N_WEBHOOK_URL || `${API_BASE_URL}/ai/chatbot`;
