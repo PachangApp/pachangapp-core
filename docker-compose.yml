@@ -28,6 +28,9 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/pachangapp
       SPRING_DATASOURCE_USERNAME: pachangapp_user
       SPRING_DATASOURCE_PASSWORD: pachangapp_pass
+      PACHANGAPP_AI_KEY: ${PACHANGAPP_AI_KEY:-}
+      PACHANGAPP_AI_URL: ${PACHANGAPP_AI_URL:-https://api.openai.com/v1/chat/completions}
+      PACHANGAPP_AI_MODEL: ${PACHANGAPP_AI_MODEL:-gpt-4o-mini}
     depends_on:
       - db
     networks:

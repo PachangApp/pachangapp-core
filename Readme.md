@@ -55,51 +55,91 @@ PachangApp es una plataforma integral para la gestión y organización de partid
 
 ---
 
-## ⚙️ Configuración y Ejecución
+## ⚙️ Configuración y Ejecución (Local)
 
-### Requisitos Previos
--   **JDK 17** y **Node.js 18+**.
--   **MySQL Server** (Puerto 3306).
--   **Docker** (Opcional, para despliegue simplificado).
+Sigue esta guía paso a paso para configurar y levantar el proyecto en un ordenador nuevo desde cero.
 
-### Despliegue con Docker (Recomendado)
-Para levantar todo el entorno (DB + Backend + Frontend):
-```bash
-docker-compose up -d
-```
-
-### Ejecución en Desarrollo
-
-#### 1. Backend
-```bash
-cd backend
-.\mvnw spring-boot:run
-```
-El servidor arrancará en `http://localhost:8091`.
-
-#### 2. Frontend
-```bash
-cd frontend
-npm install
-npm run dev
-```
-La aplicación estará disponible en `http://localhost:5173`.
-
-#### 3. Traducciones
-Si añades nuevas claves de traducción, puedes sincronizarlas usando el script:
-```bash
-node updateTranslate.js
-```
+### 📋 Requisitos Previos
+1. **Java Development Kit (JDK) 17** (ej. Eclipse Temurin).
+2. **Node.js** v18 o superior.
+3. **MySQL Server** (Puerto 3306).
+4. **Docker** (Opcional, si prefieres usar contenedores).
 
 ---
 
-## 🌐 Integración con IA (n8n)
-<img src="frontend/src/assets/PachanBot.png" alt="PachanBot" width="100%" align="center">
+### 💻 Opción A: Ejecución Manual en Desarrollo (Recomendado)
 
-PachangApp utiliza un webhook para conectar el chatbot con un flujo de n8n.
--   **Endpoint:** `https://n8n.pachangapp.es/webhook/pachanbot-chat`
--   **Payload:** `{ "chatInput": "mensaje", "language": "es", "sessionId": "id" }`
+#### 1. Preparar la Base de Datos
+- Entra a tu cliente MySQL (HeidiSQL, DBeaver o la consola).
+- Crea una base de datos vacía para el proyecto:
+  ```sql
+  CREATE DATABASE pachangapp_db;
+  ```
+
+#### 2. Configurar el Backend
+- Por defecto, el archivo `backend/src/main/resources/application.properties` viene preconfigurado para conectarse a `localhost:3306/pachangapp_db` con el usuario `root` y contraseña vacía. Si usas credenciales distintas, ajusta dicho archivo.
+- **Configurar IA (PachanBot y Traductor)**: Debes definir las variables de entorno de tu proveedor de IA (ej. Groq).
+  - En Windows (PowerShell):
+    ```powershell
+    $env:PACHANGAPP_AI_KEY="gsk_tuClaveDeGroqAQUI..."
+    $env:PACHANGAPP_AI_URL="https://api.groq.com/openai/v1/chat/completions"
+    $env:PACHANGAPP_AI_MODEL="llama-3.3-70b-versatile"
+    ```
+  - En Windows (CMD):
+    ```cmd
+    set PACHANGAPP_AI_KEY=gsk_tuClaveDeGroqAQUI...
+    set PACHANGAPP_AI_URL=https://api.groq.com/openai/v1/chat/completions
+    set PACHANGAPP_AI_MODEL=llama-3.3-70b-versatile
+    ```
+  - En Linux/macOS:
+    ```bash
+    export PACHANGAPP_AI_KEY="gsk_tuClaveDeGroqAQUI..."
+    export PACHANGAPP_AI_URL="https://api.groq.com/openai/v1/chat/completions"
+    export PACHANGAPP_AI_MODEL="llama-3.3-70b-versatile"
+    ```
+
+#### 3. Arrancar el Backend
+- En la terminal, entra a la carpeta `backend` y levanta Spring Boot usando el wrapper de Maven:
+  ```bash
+  cd backend
+  ./mvnw spring-boot:run
+  ```
+  *(En Windows usa `.\mvnw spring-boot:run`)*.
+  El servidor arrancará en `http://localhost:8091`.
+
+#### 4. Arrancar el Frontend
+- Abre otra terminal en la raíz del proyecto y ejecuta:
+  ```bash
+  cd frontend
+  npm install
+  npm run dev
+  ```
+  La aplicación estará disponible en `http://localhost:5173`. Se conectará automáticamente al backend local.
 
 ---
+
+### 🐳 Opción B: Despliegue con Docker Compose (Contenedores)
+
+Si prefieres no instalar Java o MySQL en tu máquina local, puedes usar Docker Compose:
+
+1. Crea un archivo `.env` en la raíz del proyecto para definir las variables de la IA:
+   ```env
+   PACHANGAPP_AI_KEY=gsk_tuClaveDeGroqAQUI...
+   PACHANGAPP_AI_URL=https://api.groq.com/openai/v1/chat/completions
+   PACHANGAPP_AI_MODEL=llama-3.3-70b-versatile
+   ```
+2. Levanta todo el entorno (MySQL + Backend + Frontend):
+   ```bash
+   docker-compose up -d --build
+   ```
+3. El frontend estará disponible en el puerto `80` (`http://localhost`) y el backend en `http://localhost:8091`.
+
+---
+
+## 🤖 Integración con Inteligencia Artificial (PachanBot y Traductor)
+
+PachangApp tiene un sistema de IA nativo integrado directamente en el backend de Spring Boot, lo que evita la necesidad de usar servicios externos complejos como n8n:
+- **Chatbot (PachanBot)**: Endpoint local `/api/ai/chatbot`. Resuelve dudas sobre la aplicación de forma amigable e integra información en vivo de los partidos activos de la base de datos MySQL.
+- **Traducción**: Endpoint local `/api/ai/translate`. Traduce las conversaciones del chat de torneos manteniendo un lenguaje deportivo e informal.
 
 ¡Disfruta del juego! ⚽
