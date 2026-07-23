@@ -6,7 +6,7 @@ RUN mkdir -p /frontend/dist
 
 COPY pom.xml .
 COPY src ./src
-RUN mvn clean package -DskipTests -Dfrontend.skip=true -B
+RUN mvn clean package -DskipTests -Dskip.frontend=true -B
 
 # Etapa 2: Ejecución
 FROM eclipse-temurin:17-jre-alpine
