@@ -6,26 +6,17 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-import java.util.HashMap;
-import java.util.Map;
-
 @Service
 public class EmailService {
 
     @Autowired
     private JavaMailSender mailSender;
 
-    private final RestTemplate restTemplate = new RestTemplate();
-
     @Value("${pachangapp.app.baseUrl}")
     private String baseUrl;
 
     @Value("${pachangapp.app.frontendUrl:https://pachangapp.es}")
     private String frontendUrl;
-
-    @Value("${pachangapp.n8n.webhookUrl}")
-    private String n8nWebhookUrl;
 
     @Async
     public void sendVerificationEmail(String to, String token) {
