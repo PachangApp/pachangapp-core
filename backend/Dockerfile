@@ -1,5 +1,13 @@
-FROM eclipse-temurin:17-jdk-alpine
+# Etapa 1: Construcción (Maven)
+FROM maven:3.8.8-eclipse-temurin-17-alpine AS build
 WORKDIR /app
-COPY target/*.jar app.jar
+COPY pom.xml .
+COPY src ./src
+RUN mvn clean package -DskipTests -B
+
+# Etapa 2: Ejecución
+FROM eclipse-temurin:17-jre-alpine
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8091
-ENTRYPOINT ["java","-jar","app.jar"]
+ENTRYPOINT ["java", "-XX:+UseSerialGC", "-Xss256k", "-XX:MaxRAMPercentage=70.0", "-jar", "app.jar"]
