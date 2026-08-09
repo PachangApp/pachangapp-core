@@ -34,8 +34,10 @@ public class EmailService {
             email.setSubject(subject);
             email.setText(message);
             mailSender.send(email);
+            System.out.println("Email de verificación enviado correctamente a: " + to);
         } catch (Exception e) {
-            System.err.println("Error enviando email de verificación directa: " + e.getMessage());
+            System.err.println("Error enviando email de verificación directa a " + to + ": " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
