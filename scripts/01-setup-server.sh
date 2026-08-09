@@ -12,9 +12,17 @@ echo "=================================================="
 echo "  PachangApp - Configuración del Servidor AWS"
 echo "=================================================="
 
-# --- PASO 1: Actualizar el sistema ---
-echo "[1/7] Actualizando el sistema..."
+# --- PASO 1: Actualizar el sistema e iptables para Cloud (Oracle/AWS) ---
+echo "[1/7] Actualizando el sistema y abriendo puertos del Firewall (iptables)..."
 sudo apt-get update -y && sudo apt-get upgrade -y
+sudo apt-get install -y iptables-persistent net-tools
+
+# Abrir puertos HTTP(80), HTTPS(443), K3s API(6443) y Backend(8091) en iptables
+sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 80 -j ACCEPT 2>/dev/null || true
+sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 443 -j ACCEPT 2>/dev/null || true
+sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 6443 -j ACCEPT 2>/dev/null || true
+sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 8091 -j ACCEPT 2>/dev/null || true
+sudo netfilter-persistent save 2>/dev/null || true
 
 # --- PASO 2: Instalar k3s (Kubernetes ligero) ---
 echo "[2/7] Instalando k3s (Kubernetes)..."
@@ -43,9 +51,8 @@ echo "  ✅ cert-manager instalado."
 
 # --- PASO 5: Clonar el repositorio ---
 echo "[5/7] Clonando el repositorio..."
-# IMPORTANTE: Cambia esta URL por la de tu repositorio si cambia
 REPO_URL="https://github.com/PachangApp/pachangapp-core.git"
-BRANCH="feature-despliegue"
+BRANCH="main"
 
 if [ -d "/home/ubuntu/pachangapp-core" ]; then
     echo "  El repositorio ya existe. Actualizando..."

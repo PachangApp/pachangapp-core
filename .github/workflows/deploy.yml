@@ -26,29 +26,36 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Login en DockerHub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Build & Push Backend
+
+      - name: Build & Push Backend (Multi-Arch AMD64/ARM64)
         run: |
           cd backend && mvn package -DskipTests
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/pachangapp-backend:latest .
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/pachangapp-backend:latest
-      - name: Build & Push Frontend
+          docker buildx build --platform linux/amd64,linux/arm64 -t ${{ secrets.DOCKERHUB_USERNAME }}/pachangapp-backend:latest --push .
+
+      - name: Build & Push Frontend (Multi-Arch AMD64/ARM64)
         run: |
           cd frontend
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/pachangapp-frontend:latest .
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/pachangapp-frontend:latest
+          docker buildx build --platform linux/amd64,linux/arm64 -t ${{ secrets.DOCKERHUB_USERNAME }}/pachangapp-frontend:latest --push .
 
-  deploy-to-aws:
-    name: Desplegar en AWS (Kubernetes)
+  deploy-to-server:
+    name: Desplegar en Servidor (Kubernetes)
     needs: build-and-push-images
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Desplegar en el servidor de AWS via SSH
+      - name: Desplegar en el servidor via SSH
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.AWS_EC2_IP }}
@@ -57,8 +64,9 @@ jobs:
           script: |
             cd /home/ubuntu/pachangapp-core
             git fetch origin
-            git checkout ${{ github.ref_name }}
-            git pull origin ${{ github.ref_name }}
+            git checkout main
+            git pull origin main
             sudo kubectl apply -f k8s/
             sudo kubectl rollout restart deployment/backend
             sudo kubectl rollout restart deployment/frontend
+

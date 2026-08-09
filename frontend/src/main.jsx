@@ -8,7 +8,7 @@ import { ThemeProvider } from './context/ThemeContext'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <GoogleOAuthProvider clientId="922573748283-18kdun9e7vnjf8s3lnpdidbu13qmipt7.apps.googleusercontent.com">
+    <GoogleOAuthProvider clientId="122743154815-a3671tmi1m6cg41mg0if37kqujnk3a1k.apps.googleusercontent.com">
       <ThemeProvider>
         <App />
       </ThemeProvider>
