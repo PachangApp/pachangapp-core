@@ -1,0 +1,8 @@
+# Robots.txt de PachangApp.es
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/
+
+# Ubicación del Sitemap XML
+Sitemap: https://pachangapp.es/sitemap.xml

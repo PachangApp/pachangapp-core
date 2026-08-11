@@ -1,14 +1,73 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/logo_pachangapp.png" />
+    <link rel="apple-touch-icon" href="/logo_pachangapp.png" />
+    <link rel="manifest" href="/site.webmanifest" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>PachangApp</title>
+    <meta name="theme-color" content="#059669" />
+
+    <!-- SEO Principal -->
+    <title>PachangApp | Organiza y Reserva Partidos de Fútbol, Pádel y Torneos en España</title>
+    <meta name="description" content="PachangApp es la plataforma nº1 para organizar partidos de fútbol, torneos de pádel y conectar con jugadores cerca de ti. Reserva pistas, encuentra rivales y juega hoy mismo." />
+    <meta name="keywords" content="PachangApp, pachangapp.es, organizar pachanga, partidos de futbol, torneos de padel, reservar pista de futbol, buscar jugadores de futbol, pachanga madrid, pachanga barcelona, pachanga valencia" />
+    <meta name="author" content="PachangApp" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow" />
+    <link rel="canonical" href="https://pachangapp.es/" />
+
+    <!-- Open Graph / Facebook / WhatsApp -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://pachangapp.es/" />
+    <meta property="og:title" content="PachangApp | Tu App para Organizar Pachangas y Torneos" />
+    <meta property="og:description" content="Encuentra partidos cerca de ti, crea torneos y únete a la mayor comunidad de pachangas de fútbol y pádel." />
+    <meta property="og:image" content="https://pachangapp.es/logo_pachangapp.png" />
+    <meta property="og:site_name" content="PachangApp" />
+    <meta property="og:locale" content="es_ES" />
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://pachangapp.es/" />
+    <meta name="twitter:title" content="PachangApp | Organiza y Reserva Partidos de Fútbol y Pádel" />
+    <meta name="twitter:description" content="La forma más fácil de organizar partidos, encontrar jugadores y jugar pachangas en España." />
+    <meta name="twitter:image" content="https://pachangapp.es/logo_pachangapp.png" />
+
+    <!-- Google Search Console Verificación -->
+    <meta name="google-site-verification" content="google43bb67a0fcf19f02" />
+
+    <!-- Datos Estructurados Schema.org (JSON-LD) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "PachangApp",
+        "url": "https://pachangapp.es/",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://pachangapp.es/#/buscar-partidos?q={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SportsActivityLocation",
+        "name": "PachangApp",
+        "url": "https://pachangapp.es/",
+        "logo": "https://pachangapp.es/logo_pachangapp.png",
+        "description": "Plataforma de organización de pachangas de fútbol, torneos de pádel y gestión deportiva.",
+        "sameAs": [
+          "https://pachangapp.es"
+        ]
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
+

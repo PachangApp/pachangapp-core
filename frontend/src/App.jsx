@@ -16,7 +16,13 @@ import ChatBot from "./components/ChatBot";
 import MatchDetail from "./pages/MatchDetail";
 import Admin from "./pages/Admin";
 import VerifyEmail from "./pages/VerifyEmail";
+import PoliticaPrivacidad from "./pages/PoliticaPrivacidad";
+import TerminosCondiciones from "./pages/TerminosCondiciones";
+import PoliticaCookies from "./pages/PoliticaCookies";
 import BottomNav from "./components/home/BottomNav";
+import SEOHead from "./components/SEOHead";
+import CookieBanner from "./components/CookieBanner";
+import Footer from "./components/Footer";
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { ToastProvider } from "./context/ToastContext";
@@ -38,14 +44,19 @@ const AppContent = () => {
   const storedUser = localStorage.getItem("user");
   
   // No mostrar BottomNav en estas rutas
-  const hideNavPaths = ["/", "/login", "/register", "/forgot-password", "/reset-password", "/verify"];
+  const hideNavPaths = ["/", "/login", "/register", "/forgot-password", "/reset-password", "/verify", "/politica-privacidad", "/terminos-condiciones", "/politica-cookies"];
   const shouldShowNav = !hideNavPaths.includes(location.pathname) && storedUser;
 
   // No mostrar PachanBot en login/register o hero antes de entrar
   const shouldShowBot = storedUser && !["/login", "/register", "/", "/forgot-password", "/reset-password", "/verify"].includes(location.pathname);
 
+  // Determinar si mostrar Footer global (no mostrar en login/register/verify/admin)
+  const hideFooterPaths = ["/login", "/register", "/forgot-password", "/reset-password", "/verify", "/admin"];
+  const shouldShowFooter = !hideFooterPaths.includes(location.pathname);
+
   return (
     <>
+      <SEOHead />
       <ScrollToTop />
       <Routes>
         <Route path="/" element={<Inicio />} />
@@ -66,12 +77,18 @@ const AppContent = () => {
         <Route path="/conocenos" element={<Conocenos />} />
         <Route path="/partido/:id" element={<MatchDetail />} />
         <Route path="/admin" element={<Admin />} />
+        <Route path="/politica-privacidad" element={<PoliticaPrivacidad />} />
+        <Route path="/terminos-condiciones" element={<TerminosCondiciones />} />
+        <Route path="/politica-cookies" element={<PoliticaCookies />} />
       </Routes>
       {shouldShowBot && <ChatBot />}
       {shouldShowNav && <BottomNav />}
+      {shouldShowFooter && <Footer />}
+      <CookieBanner />
     </>
   );
 };
+
 function App() {
   return (
     <ThemeProvider>
@@ -84,4 +101,4 @@ function App() {
   );
 }
 
-export default App;
+export default App;
